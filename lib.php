@@ -2,7 +2,7 @@
 /**
  * Library of functions, constants and classes for Target Grade distribution
  *
- * @package block_mtgdistribute
+ * @package report_targetgrades
  * @author Mark Johnson <johnsom@tauntons.ac.uk>
  * @copyright Taunton's College, Southampton, UK 2010
  */
@@ -541,11 +541,11 @@ function mtgdistribute_print_tabs($selected) {
     $tabs = array();
     $tabs[] = new tabobject(1,
             $CFG->wwwroot.'/blocks/mtgdistribute/alisdata.php',
-            get_string('alisdata', 'block_mtgdistribute'));
+            get_string('alisdata', 'report_targetgrades'));
     if(get_records('mtgdistribute_alisdata')) {
         $tabs[] = new tabobject(2,
                 $CFG->wwwroot.'/blocks/mtgdistribute/distribute.php',
-                get_string('mtgdistribute', 'block_mtgdistribute'));
+                get_string('mtgdistribute', 'report_targetgrades'));
     }
     print_tabs(array($tabs), $selected);
 }
@@ -625,7 +625,7 @@ class mtg_item_avgcse extends mtg_item_grade {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_avgcse', 'block_mtgdistribute');
+        $this->itemname = get_string('item_avgcse', 'report_targetgrades');
         $this->gradetype = 1;
         $this->grademax = 10;
         $this->grademin = 0;
@@ -652,7 +652,7 @@ class mtg_item_alisnum extends mtg_item_grade {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_alisnum', 'block_mtgdistribute');
+        $this->itemname = get_string('item_alisnum', 'report_targetgrades');
         $this->gradetype = 1;
         $this->grademax = 360;
         $this->grademin = 0;
@@ -680,7 +680,7 @@ class mtg_item_alis extends mtg_item_grade {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_alis', 'block_mtgdistribute');
+        $this->itemname = get_string('item_alis', 'report_targetgrades');
         $this->hidden = 1;
         $this->locked = time();
         $this->gradetype = 0;
@@ -724,7 +724,7 @@ class mtg_item_mtg extends mtg_item_alis {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_mtg', 'block_mtgdistribute');
+        $this->itemname = get_string('item_mtg', 'report_targetgrades');
         $this->hidden = 0;
         $this->locked = 0;
         $this->idnumber = 'alis_mtg';
@@ -745,7 +745,7 @@ class mtg_item_cpg extends mtg_item_alis {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_cpg', 'block_mtgdistribute');
+        $this->itemname = get_string('item_cpg', 'report_targetgrades');
         $this->hidden = 0;
         $this->locked = 0;
         $this->idnumber = 'alis_cpg';

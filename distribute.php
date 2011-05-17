@@ -9,7 +9,7 @@
  * calculated and entered. The gradebook is then re-sorted to move the target 
  * grade items to the front.
  *
- * @package block_mtgdistribute
+ * @package report_targetgrades
  * @author Mark Johnson <johnsom@tauntons.ac.uk>
  * @copyright Taunton's College, Southampton, UK 2010
  */
@@ -21,7 +21,7 @@ set_time_limit(0); // This could take a while, so disable max execution time
 
 $context = get_context_instance(CONTEXT_SYSTEM);
 if (!has_capability('block/mtgdistribute:distribute', $context)){
-    print_error('noperms', 'block_mtgdistribute');
+    print_error('noperms', 'report_targetgrades');
 }
 
 $defaultscale = optional_param('defaultscale', null, PARAM_INT);
@@ -32,7 +32,7 @@ if (!empty($defaultscale)) {
 $config = get_config('block/mtgdistribute'); // Get the raw config data for the block
 
 if(preg_match('/(.+?\.?[*+].*?)[*+]/', $config->exclude_regex)) {
-    print_error('unsaferegex', 'block_mtgdistribute');
+    print_error('unsaferegex', 'report_targetgrades');
 }
 
 $config->selected = explode(',', $config->selected); // Get the list of selected programmes
@@ -45,10 +45,10 @@ if(empty($config->selected[0])) {
                 %1$scourse AS c,
                 %1$sgrade_items AS g ', $CFG->prefix);
 
-    $args = array(get_string('item_avgcse', 'block_mtgdistribute'),
-                get_string('item_alisnum', 'block_mtgdistribute'),
-                get_string('item_alis', 'block_mtgdistribute'),
-                get_string('item_mtg', 'block_mtgdistribute'));
+    $args = array(get_string('item_avgcse', 'report_targetgrades'),
+                get_string('item_alisnum', 'report_targetgrades'),
+                get_string('item_alis', 'report_targetgrades'),
+                get_string('item_mtg', 'report_targetgrades'));
     $where = vsprintf('WHERE c.id = g.courseid
                 AND itemname IN ("%1$s", "%2$s", "%3$s", "%4$s")', $args);
 
@@ -70,11 +70,11 @@ $distribute = optional_param('distribute', null, PARAM_TEXT);
 if (!empty($distribute)) { // If the distribute button has been clicked,    
     $output = '';
 
-    $itemnames = array('mtg'   =>  get_string('item_mtg', 'block_mtgdistribute'),
-                        'alis'  =>  get_string('item_alis', 'block_mtgdistribute'),
-                        'alisnum' =>    get_string('item_alisnum', 'block_mtgdistribute'),
-                        'avgcse' => get_string('item_avgcse', 'block_mtgdistribute'),
-                        'cpg' => get_string('item_cpg', 'block_mtgdistribute'));
+    $itemnames = array('mtg'   =>  get_string('item_mtg', 'report_targetgrades'),
+                        'alis'  =>  get_string('item_alis', 'report_targetgrades'),
+                        'alisnum' =>    get_string('item_alisnum', 'report_targetgrades'),
+                        'avgcse' => get_string('item_avgcse', 'report_targetgrades'),
+                        'cpg' => get_string('item_cpg', 'report_targetgrades'));
     $empty_courses = array();
     $unconfigured_courses = array();
     $empty_students = array();
@@ -112,7 +112,7 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
                             $itemdata->set_scale($course->qualtype, $defaultscale);
                         } catch (Exception $e) {
                             $failed_grade_calcs++;
-                            $errors .= get_string('nogradescale', 'block_mtgdistribute', $e->getMessage()).'<br />';
+                            $errors .= get_string('nogradescale', 'report_targetgrades', $e->getMessage()).'<br />';
                         }
                     }
 
@@ -241,15 +241,15 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
     }
 
     $output = '<p>'.
-    get_string('distribute_success', 'block_mtgdistribute', count($config->selected)-count($empty_courses)-count($unconfigured_courses)).
+    get_string('distribute_success', 'report_targetgrades', count($config->selected)-count($empty_courses)-count($unconfigured_courses)).
     '<br />'.
-    get_string('distribute_empty', 'block_mtgdistribute', count($empty_courses)).
+    get_string('distribute_empty', 'report_targetgrades', count($empty_courses)).
     '<br />'.
-    get_string('distribute_unconfigured', 'block_mtgdistribute', count($unconfigured_courses)).
+    get_string('distribute_unconfigured', 'report_targetgrades', count($unconfigured_courses)).
     '<br />'.
-    get_string('distribute_noavgcse', 'block_mtgdistribute', count(array_unique($empty_students))).
+    get_string('distribute_noavgcse', 'report_targetgrades', count(array_unique($empty_students))).
     '<br />'.
-    get_string('distribute_failedcalc', 'block_mtgdistribute', count($failed_grade_calcs)).
+    get_string('distribute_failedcalc', 'report_targetgrades', count($failed_grade_calcs)).
     '<br />'.$errors.
     '</p>';
 
@@ -302,18 +302,18 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
 }
 
 $navlinks = array();
-$navlinks[] = array('name' => get_string('mtgs', 'block_mtgdistribute'),
+$navlinks[] = array('name' => get_string('mtgs', 'report_targetgrades'),
                     'type' => 'misc');
-$navlinks[] = array('name' => get_string('mtgdistribute', 'block_mtgdistribute'),
+$navlinks[] = array('name' => get_string('mtgdistribute', 'report_targetgrades'),
                     'type' => 'misc');
 $nav = build_navigation($navlinks);
-print_header_simple(get_string('mtgdistribute', 'block_mtgdistribute'), get_string('mtgdistribute', 'block_mtgdistribute'), $nav);
+print_header_simple(get_string('mtgdistribute', 'report_targetgrades'), get_string('mtgdistribute', 'report_targetgrades'), $nav);
 mtgdistribute_print_tabs(2);
 ?>
 
-<h2><?php get_string('mtgdistribute', 'block_mtgdistribute') ?></h2>
+<h2><?php get_string('mtgdistribute', 'report_targetgrades') ?></h2>
 <form id="distributeform" method="post" action="distribute.php">
-    <label for="defaultscale"><?php echo get_string('defaultscale', 'block_mtgdistribute'); ?></label>
+    <label for="defaultscale"><?php echo get_string('defaultscale', 'report_targetgrades'); ?></label>
     <?php
         $scales = get_records('scale');
     ?>
@@ -332,7 +332,7 @@ mtgdistribute_print_tabs(2);
         ?>
     </select><br />
     <?php
-        print_string('defaultscaledesc', 'block_mtgdistribute');
+        print_string('defaultscaledesc', 'report_targetgrades');
     ?>
 <div style="text-align:center;">
 
@@ -356,7 +356,7 @@ mtgdistribute_print_tabs(2);
 
           </select><br>
             <input type="text" id="removeselect_search" onkeyup="removesearch()"><br>
-            <input type="submit" name="distribute" value="<?php print_string('distributegrades','block_mtgdistribute');?>" />
+            <input type="submit" name="distribute" value="<?php print_string('distributegrades','report_targetgrades');?>" />
 
           </td>
       <td valign="top">
@@ -382,7 +382,7 @@ mtgdistribute_print_tabs(2);
           ?>
             </select><br>
             <input type="text" id="addselect_search" onkeyup="addsearch()"><br />
-            <?php print_string('noalis', 'block_mtgdistribute'); ?>
+            <?php print_string('noalis', 'report_targetgrades'); ?>
        </td>
     </tr>
   </table>

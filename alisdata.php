@@ -7,7 +7,7 @@
  * displayed, allowing patterns to be defined for each set of statistics to be
  * applied to when grades are distributed.
  *
- * @package block_mtgdistribute
+ * @package report_targetgrades
  * @author Mark Johnson <johnsom@tauntons.ac.uk>
  * @copyright Taunton's College, Southampton, UK 2010
  */
@@ -104,7 +104,7 @@ if ($uploaddata = $uploadform->get_data()) {
                 }
             }
         }
-        $output = '<p>'.get_string('importoutput', 'block_mtgdistribute', $import).'</p>';
+        $output = '<p>'.get_string('importoutput', 'report_targetgrades', $import).'</p>';
     }
 }
 
@@ -118,17 +118,17 @@ if($alis_data = get_records_sql($select.$from.$order)) {
     $table = new flexible_table('alisdatatable');
 
     $table->define_columns(array('qualtype', 'name', 'pattern', 'gradient', 'intercept'));
-    $table->define_headers(array(get_string('col_qualtype', 'block_mtgdistribute'),
-            get_string('col_name', 'block_mtgdistribute'),
-            get_string('col_pattern', 'block_mtgdistribute'),
-            get_string('col_gradient', 'block_mtgdistribute'),
-            get_string('col_intercept', 'block_mtgdistribute')));
+    $table->define_headers(array(get_string('col_qualtype', 'report_targetgrades'),
+            get_string('col_name', 'report_targetgrades'),
+            get_string('col_pattern', 'report_targetgrades'),
+            get_string('col_gradient', 'report_targetgrades'),
+            get_string('col_intercept', 'report_targetgrades')));
     $table->setup();
 
     try {
         $options = mtgdistribute_build_pattern_options();
     } catch (unsafe_regex_exception $e) {
-        print_error($e->getMessage(), 'block_mtgdistribute');
+        print_error($e->getMessage(), 'report_targetgrades');
     }
     foreach($alis_data as $alis) {
         $form = '';
@@ -140,7 +140,7 @@ if($alis_data = get_records_sql($select.$from.$order)) {
                 try {
                     $extraoptions = mtgdistribute_build_pattern_options($pattern->pattern);
                 } catch (unsafe_regex_exception $e) {
-                    print_error($e->getMessage(), 'block_mtgdistribute');
+                    print_error($e->getMessage(), 'report_targetgrades');
                 }
 
                 $form .= '<select name="alispatterns['.$alis->id.']['.$pattern->id.']">'.$extraoptions.'</select>';
@@ -172,22 +172,22 @@ if($alis_data = get_records_sql($select.$from.$order)) {
 }
 
 $navlinks = array();
-$navlinks[] = array('name' => get_string('mtgs', 'block_mtgdistribute'),
+$navlinks[] = array('name' => get_string('mtgs', 'report_targetgrades'),
                     'type' => 'misc');
-$navlinks[] = array('name' => get_string('alisdata', 'block_mtgdistribute'),
+$navlinks[] = array('name' => get_string('alisdata', 'report_targetgrades'),
                     'type' => 'misc');
 $nav = build_navigation($navlinks);
-print_header_simple(get_string('alisdata', 'block_mtgdistribute'), get_string('alisdata', 'block_mtgdistribute'), $nav);
+print_header_simple(get_string('alisdata', 'report_targetgrades'), get_string('alisdata', 'report_targetgrades'), $nav);
 mtgdistribute_print_tabs(1);
 
-echo '<h2>'.get_string('alisdata', 'block_mtgdistribute').'</h2>';
-echo '<p>'.get_string('configalis', 'block_mtgdistribute').'</p>';
+echo '<h2>'.get_string('alisdata', 'report_targetgrades').'</h2>';
+echo '<p>'.get_string('configalis', 'report_targetgrades').'</p>';
 if(isset($output)) {
     echo $output;
 }
 $uploadform->display();
 if(isset($table)) {
-    echo '<p>'.get_string('explainpatterns', 'block_mtgdistribute', $config).'</p>';
+    echo '<p>'.get_string('explainpatterns', 'report_targetgrades', $config).'</p>';
     echo '<form action="'.$CFG->wwwroot.'/blocks/mtgdistribute/alisdata.php" method="post">';
     $table->print_html();
     echo '<input type="submit" name="savepatterns" value="'.get_string('savechanges').'" />

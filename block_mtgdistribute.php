@@ -2,7 +2,7 @@
 /**
  * Defines the class for displaying the block itself.
  *
- * @package block_mtgdistribute
+ * @package report_targetgrades
  * @author Mark Johnson <johnsom@tauntons.ac.uk>
  * @copyright Taunton's College, Southampton, UK 2010
  */
@@ -12,13 +12,13 @@ require_once($CFG->dirroot.'/blocks/mtgdistribute/lib.php');
 /**
  * The block's class definition
  */
-class block_mtgdistribute extends block_base {
+class report_targetgrades extends block_base {
 
     /**
      * Define the block's title and version number
      */
     function init() {
-        $this->title = get_string('mtgdistribute', 'block_mtgdistribute');
+        $this->title = get_string('mtgdistribute', 'report_targetgrades');
         $this->version = 2010102700;
     }
 
@@ -45,19 +45,19 @@ class block_mtgdistribute extends block_base {
             $categories = explode(',', $this->config->categories);
             if(!empty($this->config->gcse_field) && !empty($roles) && !empty($categories)) {
 
-                $this->content->text = '<a href="'.$CFG->wwwroot.'/blocks/mtgdistribute/alisdata.php">'.get_string('uploadalis', 'block_mtgdistribute').'</a><br />';
+                $this->content->text = '<a href="'.$CFG->wwwroot.'/blocks/mtgdistribute/alisdata.php">'.get_string('uploadalis', 'report_targetgrades').'</a><br />';
                 if(get_records('mtgdistribute_alisdata')) {
-                    $this->content->text .= '<a href="'.$CFG->wwwroot.'/blocks/mtgdistribute/distribute.php">'.get_string('mtgdistribute', 'block_mtgdistribute').'</a>';
+                    $this->content->text .= '<a href="'.$CFG->wwwroot.'/blocks/mtgdistribute/distribute.php">'.get_string('mtgdistribute', 'report_targetgrades').'</a>';
                 } else {
-                    $this->content->text .= get_string('needsalis', 'block_mtgdistribute');
+                    $this->content->text .= get_string('needsalis', 'report_targetgrades');
                 }
 
             } else {
-                $this->content->text = get_string('needsconfig', 'block_mtgdistribute');
+                $this->content->text = get_string('needsconfig', 'report_targetgrades');
             }
 
         } else {
-            $this->content->text = get_string('needsconfig', 'block_mtgdistribute');
+            $this->content->text = get_string('needsconfig', 'report_targetgrades');
         }
 
         return $this->content;

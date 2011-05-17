@@ -2,7 +2,7 @@
 /**
  * Defines the form for uploading ALIS data
  *
- * @package block_mtgdistribute
+ * @package report_targetgrades
  * @author Mark Johnson <johnsom@tauntons.ac.uk>
  * @copyright Taunton's College, Southampton, UK 2010
  */
@@ -16,8 +16,8 @@ class alisdata_upload_form extends moodleform {
 
     public function definition() {
         $mform    =& $this->_form;
-        $mform->addElement('file', 'equationsfile', get_string('equationsfile', 'block_mtgdistribute'));
-        $mform->addElement('static', 'filedesc', '', get_string('equationsfiledesc', 'block_mtgdistribute'));
+        $mform->addElement('file', 'equationsfile', get_string('equationsfile', 'report_targetgrades'));
+        $mform->addElement('static', 'filedesc', '', get_string('equationsfiledesc', 'report_targetgrades'));
         $mform->addElement('submit', 'upload', get_string('upload'));
     }
 }
