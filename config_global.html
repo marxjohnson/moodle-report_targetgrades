@@ -1,0 +1,131 @@
+<?php
+
+    
+    global $CFG;
+    $config = get_config('block/mtgdistribute');
+    $conditions = array();
+    if(!isset($config->exclude_field)) {
+        $config->exclude_field = '';
+    } else {
+        $conditions[0] = $config->exclude_field.' NOT REGEXP ';
+    }
+    if(!isset($config->exclude_regex)) {
+        $config->exclude_regex = '';
+    } else if (!empty($config->exclude_field)) {
+        $conditions[0] .= '"'.$config->exclude_regex.'"';
+    }
+    if(!isset($config->category)) {
+        $config->category = '';
+    } else {
+        $conditions[] = 'c.category = '.$config->category;
+    }
+    if(!isset($config->group_field)) {
+        $config->group_field = '';
+    }
+    if(!isset($config->group_length)) {
+        $config->group_length = '';
+    }
+
+    $sql = 'SELECT ';
+    if(!empty($config->group_field) && !empty($config->group_length)) {
+        $sql .= 'LEFT('.$config->group_field.', '.$config->group_length.') AS programme,';
+    } else {
+        $sql .= 'shortname AS programme,';
+    }
+    $sql .= 'fullname
+            FROM '.$CFG->prefix.'course AS c ';
+    foreach ($conditions as $key => $condition) {
+        if ($key == 0) {
+            $sql .= 'WHERE ';
+        } else {
+            $sql .= 'AND ';
+        }
+        $sql .= $condition.' ';
+    }
+    if(!empty($config->group_field) && !empty($config->group_length)) {
+        $sql .= 'GROUP BY '.$config->group_field.' ';
+    }
+    $sql .= 'ORDER BY programme';
+    $courses = get_records_sql($sql);
+    $courses = array_filter($courses, 'mtgdistribute_isalis');
+    $categories = get_records('course_categories');
+
+?>
+<table cellpadding="9" cellspacing="0" class="blockconfigtable">
+    <tr><th colspan="2"><?php print_string('configtitle', 'block_mtgdistribute'); ?></th></tr>
+    <tr>
+        <td>Exclude courses where:</td>
+        <td><select name="block_mtgdistribute_exclude_field">
+            <option value=""></option>
+            <option value="fullname" <?php if($config->exclude_field == 'fullname') echo 'selected="selected"' ?>>Full Name</option>
+            <option value="shortname" <?php if($config->exclude_field == 'shortname') echo 'selected="selected"' ?>>Short name</option>
+        </select>
+         Matches <input type="text" name="block_mtgdistribute_exclude_regex" value="<?php if(isset($config->exclude_regex)) echo stripslashes($config->exclude_regex); ?>" /> (regular expression)
+        </td>
+    </tr>
+    <tr>
+        <td>Use only courses in:</td>
+        <td><select name="block_mtgdistribute_category">
+        <option value=""></option>
+        <?php foreach ($categories as $category) {
+                $option = '<option value="'.$category->id.'" ';
+                if($config->category == $category->id) {
+                    $option .= 'selected="selected"'; 
+                }
+                $option .= '>'.$category->name.'</option>';
+                echo $option;
+            }
+        ?>
+       
+        </select></td>
+    </tr>
+    <tr>
+        <td>Group courses by first:</td>
+        <td><input type="text" name="block_mtgdistribute_group_length" value="<?php echo $config->group_length; ?>" />
+             Characters of 
+            <select name="block_mtgdistribute_group_field">
+            <option value=""></option>
+            <option value="fullname" <?php if($config->group_field == 'fullname') echo 'selected="selected"' ?>>Full Name</option>
+            <option value="shortname" <?php if($config->group_field == 'shortname') echo 'selected="selected"' ?>>Short name</option>
+        </select>         
+        </td>
+    </tr>
+    <tr><td colspan="2"><input type="submit" value="<?php print_string('savechanges') ?>" /></td></tr>
+    
+    <tr><td colspan="2"><?php print_string('configalis', 'block_mtgdistribute'); ?></td></tr>
+    
+<?php
+    foreach($courses as $course){
+
+        $gradientname = 'g'.$course->programme;
+        $interceptname =  'i'.$course->programme;
+        $prog = $course->programme;
+        if (!empty($config->$prog)) {
+            $values = explode(',', $config->$prog);
+            $gradientvalue = $values[0];
+            $interceptvalue = $values[1];
+        } else {
+            $gradientvalue = '';
+            $interceptvalue = '';
+        }
+    ?>
+    <tr valign="top">
+        <th colspan="2" align="left"><?php echo $course->programme.': '.$course->fullname; ?></th>
+    </tr>
+    <tr>
+        <td><?php print_string('configgradient', 'block_mtgdistribute') ?>:</td>
+        <td><input type="text" name="block_mtgdistribute_<?php echo $gradientname; ?>" value="<?php echo $gradientvalue; ?>" /></td>
+    </tr>
+        <td><?php print_string('configintercept', 'block_mtgdistribute') ?>:</td>
+        <td><input type="text" name="block_mtgdistribute_<?php echo $interceptname; ?>" value="<?php echo $interceptvalue; ?>" /></td>
+    </tr>
+    <?php
+    }
+
+?>
+
+<tr>
+    <td colspan="3" align="center">
+    <input type="submit" value="<?php print_string('savechanges') ?>" /></td>
+</tr>
+</table>
