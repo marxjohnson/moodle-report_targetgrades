@@ -41,18 +41,20 @@ if(empty($config->selected[0])) {
     // If there are no selected programmes, get the programmes where there are already MTG fields distributed
     $select = 'SELECT c.* ';
     
-    $from = sprintf('FROM
-                %1$scourse AS c,
-                %1$sgrade_items AS g ', $CFG->prefix);
+    $from = 'FROM
+                {course} AS c,
+                {grade_items} AS g ';
 
-    $args = array(get_string('item_avgcse', 'report_targetgrades'),
+	$itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
                 get_string('item_alisnum', 'report_targetgrades'),
                 get_string('item_alis', 'report_targetgrades'),
                 get_string('item_mtg', 'report_targetgrades'));
-    $where = vsprintf('WHERE c.id = g.courseid
-                AND itemname IN ("%1$s", "%2$s", "%3$s", "%4$s")', $args);
+	list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);    
+	
+    $where = 'WHERE c.id = g.courseid
+                AND itemname '.$in_sql;
 
-    if($distributed = get_records_sql($select.$from.$where)) {
+    if($distributed = $DB->get_records_sql($select.$from.$where, $in_params)) {
         $config->selected = array();
         foreach ($distributed as $record) {
             $config->selected[] = $record->id;
@@ -80,7 +82,7 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
     $empty_students = array();
     $failed_grade_calcs = array();
     $errors = '';
-    $infofield = get_record('user_info_field', 'shortname', $config->gcse_field);
+    $infofield = $DB->get_record('user_info_field', array('shortname' => $config->gcse_field));
 
     foreach($config->selected as $courseid) {
         if($course = mtgdistribute_get_course_with_qualtype($courseid)) {
@@ -133,17 +135,19 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
 
             $select = 'SELECT u.id AS id ';
 
-            $from = sprintf('FROM %1$suser as u
-                    JOIN %1$srole_assignments as ra
-                        ON u.id = ra.userid ', $CFG->prefix);
-
-            $args = array($config->roles, $coursecontext->id);
-            $where = vsprintf('WHERE u.deleted = 0
-                        AND ra.roleid IN (%1$s)
-                        AND ra.contextid = %2$s', $args);
+            $from = 'FROM {user} as u
+                    JOIN {role_assignments} as ra
+                        ON u.id = ra.userid ';
+			$roles = explode(',', $config->roles);
+			
+			list($in_sql, $in_params) = $DB->get_in_or_equal($roles);
+            $params = array_merge($in_params, array($coursecontext->id));
+            $where = 'WHERE u.deleted = 0
+                        AND ra.roleid '.$in_sql.'
+                        AND ra.contextid = ?';
 
             try {
-                $students = get_records_sql($select.$from.$where);
+                $students = $DB->get_records_sql($select.$from.$where, $params);
 
                 if(!$students) {
                     throw new no_students_exception($course->id);
@@ -156,7 +160,7 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
                 // If there are some students in the class
                 foreach($students as $student) {
 
-                    if($data = get_record('user_info_data', 'fieldid', $infofield->id, 'userid', $student->id)) {
+                    if($data = $DB->get_record('user_info_data', array('fieldid' => $infofield->id, 'userid' => $student->id))) {
                         $student->{$config->gcse_field} = $data->data;
                     } else {
                         $student->{$config->gcse_field} = '';
@@ -315,7 +319,7 @@ mtgdistribute_print_tabs(2);
 <form id="distributeform" method="post" action="distribute.php">
     <label for="defaultscale"><?php echo get_string('defaultscale', 'report_targetgrades'); ?></label>
     <?php
-        $scales = get_records('scale');
+        $scales = $DB->get_records('scale');
     ?>
     <select name="defaultscale">
         <option value=""></option>

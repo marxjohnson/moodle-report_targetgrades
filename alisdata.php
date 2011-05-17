@@ -26,19 +26,19 @@ $addfield = optional_param('addfield', null, PARAM_INT);
 if ($savepatterns || !empty($addpattern)) {
     foreach($alispatterns as $alisid => $patterns) {
         foreach($patterns as $id => $pattern) {
-            if ($alisdata = get_record('mtgdistribute_alisdata', 'id', $alisid)) {                
-                if($patternrecord = get_record('mtgdistribute_patterns', 'id', $id)) {
+            if ($alisdata = $DB->get_record('mtgdistribute_alisdata', array('id' => $alisid))) {                
+                if($patternrecord = $DB->get_record('mtgdistribute_patterns', array('id' => $id))) {
                     if(empty($pattern)) {                        
-                        delete_records('mtgdistribute_patterns', 'id', $id);
+                        $DB->delete_records('mtgdistribute_patterns', array('id' => $id));
                     } else {
                         $patternrecord->pattern = $pattern;
-                        update_record('mtgdistribute_patterns', $patternrecord);
+                        $DB->update_record('mtgdistribute_patterns', $patternrecord);
                     }
                 } else if (!empty($pattern)) {
                     $patternrecord = new stdClass;
                     $patternrecord->alisdataid = $alisid;
                     $patternrecord->pattern = $pattern;
-                    $patternrecord->id = insert_record('mtgdistribute_patterns', $patternrecord);
+                    $patternrecord->id = $DB->insert_record('mtgdistribute_patterns', $patternrecord);
                 }
             }            
         }
@@ -62,15 +62,15 @@ if ($uploaddata = $uploadform->get_data()) {
             // If there's only one column on this line, then it's a qualification heading
             if (count($line) == 1) {
                 // Create a new qualtype record if there isn't one already.
-                if(!$qualtype = get_record('mtgdistribute_qualtype', 'name', $line[0])) {
+                if(!$qualtype = $DB->get_record('mtgdistribute_qualtype', array('name' => $line[0]))) {
 
-                    if(!$qualscale = get_record('scale', 'name', $line[0].' MTG')) {
+                    if(!$qualscale = $DB->get_record('scale', array('name' => $line[0].' MTG'))) {
 
                         if($scale = mtgdistribute_get_scale($line[0])) {
                             $qualscale = new stdClass;
                             $qualscale->name = $line[0].' MTG';
                             $qualscale->scale = $scale;
-                            $qualscale->id = insert_record('scale', $qualscale);
+                            $qualscale->id = $DB->insert_record('scale', $qualscale);
                         }
 
                     }
@@ -79,7 +79,7 @@ if ($uploaddata = $uploadform->get_data()) {
                         $qualtype = new stdClass;
                         $qualtype->name = $line[0];
                         $qualtype->scaleid = $qualscale->id;
-                        $qualtype->id = insert_record('mtgdistribute_qualtype', $qualtype);
+                        $qualtype->id = $DB->insert_record('mtgdistribute_qualtype', $qualtype);
                         $import->qualcount++;
                     }
                 }
@@ -87,10 +87,10 @@ if ($uploaddata = $uploadform->get_data()) {
             } else {
                 // If we have a record for this course's qualtype
                 if ($qualtype) {
-                    if($subject = get_record('mtgdistribute_alisdata', 'name', $line[0], 'qualtypeid', $qualtype->id)) {
+                    if($subject = $DB->get_record('mtgdistribute_alisdata', array('name' => $line[0], 'qualtypeid' => $qualtype->id))) {
                         $subject->gradient = $line[2];
                         $subject->intercept = $line[3];
-                        update_record('mtgdistribute_alisdata', $subject);
+                        $DB->update_record('mtgdistribute_alisdata', $subject);
                         $import->updatecount++;
                     } else {
                         $subject = new stdClass;
@@ -98,7 +98,7 @@ if ($uploaddata = $uploadform->get_data()) {
                         $subject->gradient = $line[2];
                         $subject->intercept = $line[3];
                         $subject->qualtypeid = $qualtype->id;
-                        insert_record('mtgdistribute_alisdata', $subject);
+                        $DB->insert_record('mtgdistribute_alisdata', $subject);
                         $import->subjectcount++;
                     }
                 }
@@ -109,11 +109,11 @@ if ($uploaddata = $uploadform->get_data()) {
 }
 
 $select = 'SELECT a.id, a.name AS subject, q.name AS qualification, a.gradient, a.intercept ';
-$from = sprintf('FROM %1$salisdata AS a
-    JOIN %1$squaltype AS q ON a.qualtypeid = q.id ', $CFG->prefix.'mtgdistribute_');
+$from = 'FROM {mtgdistribute_alisdata} AS a
+    JOIN {mtgdistribute_qualtype} AS q ON a.qualtypeid = q.id ';
 $order = 'ORDER BY q.name, a.name ASC';
 
-if($alis_data = get_records_sql($select.$from.$order)) {
+if($alis_data = $DB->get_records_sql($select.$from.$order)) {
 
     $table = new flexible_table('alisdatatable');
 
@@ -132,7 +132,7 @@ if($alis_data = get_records_sql($select.$from.$order)) {
     }
     foreach($alis_data as $alis) {
         $form = '';
-        if($patterns = get_records('mtgdistribute_patterns', 'alisdataid', $alis->id)) {
+        if($patterns = $DB->get_records('mtgdistribute_patterns', array('alisdataid' => $alis->id))) {
             $break = 1;
             
             foreach ($patterns as $pattern) {

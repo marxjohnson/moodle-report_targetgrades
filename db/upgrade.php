@@ -31,17 +31,17 @@ function xmldb_block_mtgdistribute_upgrade($oldversion=0) {
 
     if ($result && $oldversion < 2010102700) {
         // You can now get A* in A-levels, so update the scales to reflect that.
-        if ($scale = get_record('scale', 'name', ALIS_ADVANCED_GCE.' MTG')) {
-            $result = $result && set_field('scale', 'scale', MTG_SCALE_ADVANCED_GCE, 'name', ALIS_ADVANCED_GCE.' MTG');
+        if ($scale = $DB->get_record('scale', array('name' => ALIS_ADVANCED_GCE.' MTG'))) {
+            $result = $result && $DB->set_field('scale', array('scale' => MTG_SCALE_ADVANCED_GCE, 'name' => ALIS_ADVANCED_GCE.' MTG'));
         }
-        if ($scale = get_record('scale', 'name', ALIS_ADVANCED_SUBSIDIARY_GCE.' MTG')) {
-            $result = $result && set_field('scale', 'scale', MTG_SCALE_ADVANCED_SUBSIDIARY_GCE, 'name', ALIS_ADVANCED_SUBSIDIARY_GCE.' MTG');
+        if ($scale = $DB->get_record('scale', array('name' => ALIS_ADVANCED_SUBSIDIARY_GCE.' MTG'))) {
+            $result = $result && $DB->set_field('scale', array('scale' => MTG_SCALE_ADVANCED_SUBSIDIARY_GCE, 'name' => ALIS_ADVANCED_SUBSIDIARY_GCE.' MTG'));
         }
-        if ($scale = get_record('scale', 'name', ALIS_ADVANCED_GCE_DOUBLE.' MTG')) {
-            $result = $result && set_field('scale', 'scale', MTG_SCALE_ADVANCED_GCE_DOUBLE, 'name', ALIS_ADVANCED_GCE_DOUBLE.' MTG');
+        if ($scale = $DB->get_record('scale', array('name' => ALIS_ADVANCED_GCE_DOUBLE.' MTG'))) {
+            $result = $result && $DB->set_field('scale', array('scale' => MTG_SCALE_ADVANCED_GCE_DOUBLE, 'name' => ALIS_ADVANCED_GCE_DOUBLE.' MTG'));
         }
-        if ($scale = get_record('scale', 'name', ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE.' MTG')) {
-            $result = $result && set_field('scale', 'scale', MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE, 'name', ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE.' MTG');
+        if ($scale = $DB->get_record('scale', array('name' => ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE.' MTG'))) {
+            $result = $result && $DB->set_field('scale', array('scale' => MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE, 'name' => ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE.' MTG'));
         }
 
         return $result;

@@ -12,17 +12,17 @@ $fields = array('',
     'fullname' => get_string('fullname'),
     'idnumber' => get_string('idnumber'));
 
-$roles = get_records('role');
+$roles = $DB->get_records('role');
 foreach($roles as $key => $role) {
     $roles[$key] = $role->name;
 }
 
-$categories = get_records('course_categories');
+$categories = $DB->get_records('course_categories');
 foreach ($categories as $key => $category) {
     $categories[$key] = $category->name;
 }
 
-$infofields = get_records('user_info_field');
+$infofields = $DB->get_records('user_info_field');
 $userfields = array('');
 foreach($infofields as $infofield) {
     $userfields[$infofield->shortname] = $infofield->name;

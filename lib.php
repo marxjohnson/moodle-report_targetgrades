@@ -125,7 +125,7 @@ function mtgdistribute_get_scale($qualtype) {
  * @return bool
  */
 function mtgdistribute_isalis($course){
-    global $CFG;
+    global $CFG, $DB;
     $types = array(ALIS_GCSE,
         ALIS_ADVANCED_GCE,
         ALIS_ADVANCED_GCE_DOUBLE,
@@ -143,10 +143,11 @@ function mtgdistribute_isalis($course){
     if(in_array($course->qualtype, $types)) {
         // If it is, do we have ALIS data for this particular subject?
         $select = 'SELECT * ';
-        $from = sprintf('FROM %1$smtgdistribute_patterns AS p
-            JOIN %1$smtgdistribute_alisdata AS d ON p.alisdataid = d.id ', $CFG->prefix);
-        $where = sprintf('WHERE p.pattern = "%s"', $course->pattern);
-        if(get_record_sql($select.$from.$where)) {
+        $from = 'FROM {report_targetgrades_patterns} AS p
+            JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
+        $where = 'WHERE p.pattern = ?';
+		$params = array($course->pattern);
+        if($DB->get_record_sql($select.$from.$where, $params)) {
             return true;
         } else {
             return false;
@@ -168,12 +169,13 @@ function mtgdistribute_isalis($course){
  * @return bool true if the course has ALIS config
  */
 function mtgdistribute_hasconfig(&$course){
-    global $CFG;
+    global $CFG, $DB;
     $select = 'SELECT * ';
-    $from = sprintf('FROM %1$smtgdistribute_patterns AS p
-        JOIN %1$smtgdistribute_alisdata AS d ON p.alisdataid = d.id ', $CFG->prefix);
-    $where = sprintf('WHERE p.pattern = "%s"', $course->pattern);
-    if(get_record_sql($select.$from.$where)) {
+    $from = 'FROM {report_targetgrades_patterns} AS p
+        JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
+    $where = 'WHERE p.pattern = ?';
+	$params = array($course->pattern);
+    if($DB->get_record_sql($select.$from.$where, $params)) {
         return true;
     } else {
         $course->fullname .= '*';
@@ -224,45 +226,45 @@ function mtgdistribute_clearselected() {
  * @param array $extraconditions any extra conditions to add to the where clause
  * @return array of course records
  */
-function mtgdistribute_get_courses_with_qualtype($extraconditions = array()) {
-    global $config, $CFG;
-    $conditions = array();
-    if(!empty($config->exclude_field) && !empty($config->exclude_regex)) {
+function mtgdistribute_get_courses_with_qualtype($wherefields = array(), $wherevalues = array()) {
+    global $config, $CFG, $DB;
+	
+    /*if(!empty($config->exclude_field) && !empty($config->exclude_regex)) {
         $args = array($config->exclude_field, $config->exclude_regex);
         $conditions[] = vsprintf('c.%1$s NOT REGEXP "%2$s"', $args);
-    }
+    }*/
 
     if(!empty($config->category)) {
-        $conditions[] = sprintf('c.category = %s', $config->category);
+        $wherefields[] = 'c.category';
+		$wherevalues[] = $config->category;
     }
-    $conditions = array_merge($conditions, $extraconditions);
 
      $select = 'SELECT c.id, ';
     if(!empty($config->group_field) && !empty($config->group_length)) {
-        $args = array($config->group_field, $config->group_length, $CFG->prefix);
+        $args = array($config->group_field, $config->group_length);
         $select .= vsprintf('LEFT(c.%1$s, %2$d) AS pattern, ', $args);
-        $from = vsprintf('FROM %3$scourse AS c
-                    LEFT JOIN %3$smtgdistribute_patterns AS p
+        $from = vsprintf('FROM {course} AS c
+                    LEFT JOIN {report_targetgrades_patterns} AS p
                         ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
-                    LEFT JOIN %3$smtgdistribute_alisdata AS d ON p.alisdataid = d.id
-                    LEFT JOIN %3$smtgdistribute_qualtype AS q ON d.qualtypeid = q.id ', $args);
+                    LEFT JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id
+                    LEFT JOIN {report_targetgrades_qualtype} AS q ON d.qualtypeid = q.id ', $args);
     } else {
         $select .= 'c.shortname AS pattern, ';
-        $from = sprintf('FROM %scourse AS c
-                    LEFT JOIN %smtgdistribute_alisdata AS d ON p.alisdataid = d.id
-                    LEFT JOIN %smtgdistribute_qualtype AS q ON d.qualtypeid = q.id ', $CFG->prefix);
+        $from = 'FROM {course} AS c
+                    LEFT JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id
+                    LEFT JOIN {reprot_targetgrades_alisdata} AS q ON d.qualtypeid = q.id ';
     }
     $select .= 'c.shortname, c.fullname, q.name AS qualtype ';
     $where = '';
 
-    foreach ($conditions as $key => $condition) {
+    foreach ($wherefields as $key => $field) {
         if ($key == 0) {
-            $where .= sprintf('WHERE %s ', $condition);
+            $where .=('WHERE '.$field.' = ? ');
         } else {
-            $where .= sprintf('AND %s ', $condition);
+            $where .= ('AND '.$field.' = ?');
         }
     }
-    return get_records_sql($select.$from.$where); // Get a list of all courses matching the preferences
+    return $DB->get_records_sql($select.$from.$where, $wherevalues); // Get a list of all courses matching the preferences
 }
 
 /**
@@ -275,7 +277,7 @@ function mtgdistribute_get_courses_with_qualtype($extraconditions = array()) {
  * @return object the record for the course matching the ID
  */
 function mtgdistribute_get_course_with_qualtype($id) {
-    $results = mtgdistribute_get_courses_with_qualtype(array('c.id = '.$id));
+    $results = mtgdistribute_get_courses_with_qualtype(array('c.id'), array($id));
     return $results[$id];
 }
 
@@ -292,11 +294,12 @@ function mtgdistribute_get_course_with_qualtype($id) {
 function mtgdistribute_calculate_mtg($student, $course){
     global $CFG;
     $select = 'SELECT name, gradient, intercept ';
-    $from = sprintf('FROM %1$smtgdistribute_patterns AS p
-        JOIN %1$smtgdistribute_alisdata AS d ON p.alisdataid = d.id ', $CFG->prefix);
-    $where = sprintf('WHERE p.pattern = "%s"', $course->pattern);
-
-    if($alis = get_record_sql($select.$from.$where)) {
+    $from = 'FROM {mtgdistribute_patterns} AS p
+        JOIN {mtgdistribute_alisdata} AS d ON p.alisdataid = d.id ';
+    $where = 'WHERE p.pattern = ?';
+	$params = array($course->pattern);
+	
+    if($alis = $DB->get_record_sql($select.$from.$where, $params)) {
         $points = ($student->avgcse * $alis->gradient)+$alis->intercept;
 
         // Calculate UCAS points using ALIS formula
@@ -436,7 +439,7 @@ function mtgdistribute_build_pattern_options($default = '') {
         $select .= 'shortname AS pattern ';
     }
 
-    $from = 'FROM '.$CFG->prefix.'course AS c ';
+    $from = 'FROM {course} AS c ';
 
     $where = '';
     foreach ($conditions as $key => $condition) {
@@ -451,7 +454,7 @@ function mtgdistribute_build_pattern_options($default = '') {
     $order = 'ORDER BY pattern';
 
     $options = '<option value=""></option>';
-    if($patterns = get_records_sql($select.$from.$where.$order)) {
+    if($patterns = $DB->get_records_sql($select.$from.$where.$order)) {
         foreach($patterns as $pattern) {
             $options .= '<option value="'.$pattern->pattern.'" ';
             if ($pattern->pattern == $default) {
@@ -475,21 +478,18 @@ function mtgdistribute_build_pattern_options($default = '') {
  */
 function mtgdistribute_sort_gradebook($course) {
 
-    global $CFG;
+    global $CFG, $DB;
     require_once $CFG->dirroot.'/grade/lib.php';
     require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
     $gtree = new grade_tree($course->id, false, false);
-
-    $where = sprintf('courseid = %1$d
-        AND idnumber IN ("%2$s", "%3$s", "%4$s", "%5$s", "%6$s")',
-            $course->id,
-            'alis_avgcse', 
-            'alis_alisnum',
-            'alis_alis',
-            'alis_mtg',
-            'alis_cpg');
-    $gradeitems = get_records_select('grade_items', $where, 'itemnumber DESC');
-    $courseitem = get_record('grade_items', 'courseid', $course->id, 'itemtype', 'course');
+	
+	$fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');	
+	$params = array($course->id);
+	list($in_params, $in_sql) = $DB->get_in_or_equal($params);
+	$params = array_merge($params, $in_params);
+    $where = 'courseid = ? AND idnumber '.$in_sql;
+    $gradeitems = $DB->get_records_select('grade_items', $where, $params, 'itemnumber DESC');
+    $courseitem = $DB->get_record('grade_items', array('courseid' => $course->id, 'itemtype' => 'course'));
     //$mtgitems = count_records_select('grade_items', $where);
 
     // First, move the MTG grade items to the front
@@ -536,13 +536,13 @@ function mtgdistribute_sort_gradebook($course) {
  * @param int $selected The ID of the tab to select
  */
 function mtgdistribute_print_tabs($selected) {
-    global $CFG;
+    global $CFG, $DB;
 
     $tabs = array();
     $tabs[] = new tabobject(1,
             $CFG->wwwroot.'/blocks/mtgdistribute/alisdata.php',
             get_string('alisdata', 'report_targetgrades'));
-    if(get_records('mtgdistribute_alisdata')) {
+    if($DB->get_records('mtgdistribute_alisdata')) {
         $tabs[] = new tabobject(2,
                 $CFG->wwwroot.'/blocks/mtgdistribute/distribute.php',
                 get_string('mtgdistribute', 'report_targetgrades'));
@@ -697,10 +697,11 @@ class mtg_item_alis extends mtg_item_grade {
      * @param int $default The ID of the default scale to use
      */
     public function set_scale($qualtype, $default = null) {
-        $scale = get_record('scale', 'name', $qualtype.' MTG');
+    	global $DB;
+        $scale = $DB->get_record('scale', 'name', $qualtype.' MTG');
         if(!$scale) {
             if(!empty($default)) {
-                $scale = get_record('scale', 'id', $default);
+                $scale = $DB->get_record('scale', 'id', $default);
             } else {
                 throw new Exception($qualtype);
             }
