@@ -1,2 +1,8 @@
 {
+    "*.html|jinja" : {
+	"allinputs": true
+    },
+    "*.sh|bash" : {},
+    "*.sh|pyg" : {},
+    "*.css|dexy" : {}
 }
