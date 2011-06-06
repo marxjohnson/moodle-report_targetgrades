@@ -1,31 +1,51 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+
 /**
- * Library of functions, constants and classes for Target Grade distribution
+ * Library of functions, classes and constants for Target Grade distribution
  *
- * @package report_targetgrades
- * @author Mark Johnson <johnsom@tauntons.ac.uk>
- * @copyright Taunton's College, Southampton, UK 2010
- */
+ * @package report
+ * @subpackage targetgrades
+ * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
+ * @copyright   2011 Tauntons College, UK
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */ 
+ 
+namespace report\targetgrades;
 
 /**
  * These constants store the strings used by ALIS to describe each type of
  * qualification that statistics are available for.
  */
-define('ALIS_GCSE', 'GCSE');
-define('ALIS_ADVANCED_GCE', 'Advanced GCE');
-define('ALIS_ADVANCED_GCE_DOUBLE', 'Advanced GCE (Double Award)');
-define('ALIS_ADVANCED_SUBSIDIARY_GCE', 'Advanced Subsidiary GCE');
-define('ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE', 'Advanced Subsidiary GCE (Double Award)');
-define('ALIS_INTERMEDIATE_GNVQ', 'Intermediate GNVQ');
-define('ALIS_IB_STANDARD', 'IB Standard');
-define('ALIS_IB_HIGHER', 'IB Higher');
-define('ALIS_CACHE_L3_DIPLOMA', 'CACHE Level 3 Diploma');
-define('ALIS_OCR_NATIONAL_CERTIFICATE', 'OCR National Certificate');
-define('ALIS_OCR_NATIONAL_DIPLOMA', 'OCR National Diploma');
-define('ALIS_BTEC_NATIONAL_AWARD', 'BTEC National Award');
-define('ALIS_BTEC_NATIONAL_CERTIFICATE', 'BTEC National Certificate');
-define('ALIS_BTEC_NATIONAL_DIPLOMA', 'BTEC National Diploma');
-define('ALIS_BTEC_FIRST_DIPLOMA', 'BTEC First Diploma');
+const ALIS_GCSE = 'GCSE';
+const ALIS_ADVANCED_GCE = 'Advanced GCE';
+const ALIS_ADVANCED_GCE_DOUBLE = 'Advanced GCE (Double Award)';
+const ALIS_ADVANCED_SUBSIDIARY_GCE = 'Advanced Subsidiary GCE';
+const ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE = 'Advanced Subsidiary GCE (Double Award)';
+const ALIS_INTERMEDIATE_GNVQ = 'Intermediate GNVQ';
+const ALIS_IB_STANDARD = 'IB Standard';
+const ALIS_IB_HIGHER = 'IB Higher';
+const ALIS_CACHE_L3_DIPLOMA = 'CACHE Level 3 Diploma';
+const ALIS_OCR_NATIONAL_CERTIFICATE = 'OCR National Certificate';
+const ALIS_OCR_NATIONAL_DIPLOMA = 'OCR National Diploma';
+const ALIS_BTEC_NATIONAL_AWARD = 'BTEC National Award';
+const ALIS_BTEC_NATIONAL_CERTIFICATE = 'BTEC National Certificate';
+const ALIS_BTEC_NATIONAL_DIPLOMA = 'BTEC National Diploma';
+const ALIS_BTEC_FIRST_DIPLOMA = 'BTEC First Diploma';
 
 
 /**
@@ -33,22 +53,28 @@ define('ALIS_BTEC_FIRST_DIPLOMA', 'BTEC First Diploma');
  * qualifications. Only unique scales are stored here, e.g. the CACHE L3 diploma
  * can use MTG_SCALE_ADVANCED_SUBSIDIARY_GCE as they are the same.
  */
-define('MTG_SCALE_GCSE', 'U,G,F,E,D,C,B,A,A*');
-define('MTG_SCALE_ADVANCED_GCE', 'U,E,D,C,B,A,A*');
-define('MTG_SCALE_ADVANCED_SUBSIDIARY_GCE', 'U,E,D,C,B,A,A*');
-define('MTG_SCALE_BTEC_AWARD', 'Fail,Pass,Merit,Distinction');
-define('MTG_SCALE_BTEC_CERTIFICATE', 'Fail,PP,MP,MM,DM,DD');
-define('MTG_SCALE_BTEC_DIPLOMA', 'Fail,PPP,MPP,MMP,MMM,DMM,DDM,DDD');
-define('MTG_SCALE_ADVANCED_GCE_DOUBLE', 'U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*');
-define('MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE', 'U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*');
-define('MTG_SCALE_IB', '1,2,3,4,5,6,7');
+const MTG_SCALE_GCSE = 'U,G,F,E,D,C,B,A,A*';
+const MTG_SCALE_ADVANCED_GCE = 'U,E,D,C,B,A,A*';
+const MTG_SCALE_ADVANCED_SUBSIDIARY_GCE = 'U,E,D,C,B,A,A*';
+const MTG_SCALE_BTEC_AWARD = 'Fail,Pass,Merit,Distinction';
+const MTG_SCALE_BTEC_CERTIFICATE = 'Fail,PP,MP,MM,DM,DD';
+const MTG_SCALE_BTEC_DIPLOMA = 'Fail,PPP,MPP,MMP,MMM,DMM,DDM,DDD';
+const MTG_SCALE_ADVANCED_GCE_DOUBLE = 'U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*';
+const MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE = 'U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*';
+const MTG_SCALE_IB = '1,2,3,4,5,6,7';
+
+/**
+ * The threshold under which to mark stats has having low correlations
+ * @var float
+ */
+const CORRELATION_THRESHOLD = 0.3;
 
 /**
  * Returns the grade scale for the provided qualification type.
  * 
  * @param string $qualtype 
  */
-function mtgdistribute_get_scale($qualtype) {
+function get_scale($qualtype) {
     switch ($qualtype) {
         case ALIS_GCSE:
             return MTG_SCALE_GCSE;
@@ -113,189 +139,65 @@ function mtgdistribute_get_scale($qualtype) {
     }
 }
 
+
 /**
- * Work out if a provided course (fetched using {@link mtgdistribute_get_courses_with_qualtype()})
- * is an ALIS course.
- *
- * Checks that the qualtype is one of the qualtype constants, then checks that
- * there is ALIS data linked to the course.
- *
- * @global object $CFG Global config object
- * @param object $course a course fetched with mtgdistribute_get_courses_with_qualtype
- * @return bool
+ * Gets the config data for the plugin with arrays unserialized.
+ * 
+ * Will normally only query the database the first time it's run, subsequent requests
+ * will just return the static $config. However, this behaviour can be overridden using
+ * the $force parameter, to ensure the data is fresh. 
+ * 
+ * @param $force bool Force a fresh query on the database (defaults to false)
+ * @return object The config data.
  */
-function mtgdistribute_isalis($course){
-    global $CFG, $DB;
-    $types = array(ALIS_GCSE,
-        ALIS_ADVANCED_GCE,
-        ALIS_ADVANCED_GCE_DOUBLE,
-        ALIS_ADVANCED_SUBSIDIARY_GCE,
-        ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE,
-        ALIS_INTERMEDIATE_GNVQ,
-        ALIS_IB_STANDARD,
-        ALIS_IB_HIGHER,
-        ALIS_CACHE_L3_DIPLOMA,
-        ALIS_OCR_NATIONAL_CERTIFICATE,
-        ALIS_OCR_NATIONAL_DIPLOMA,
-        ALIS_BTEC_NATIONAL_AWARD,
-        ALIS_BTEC_NATIONAL_CERTIFICATE);
-    // Firstly, is the qualtype one of the current ALIS qualtypes?
-    if(in_array($course->qualtype, $types)) {
-        // If it is, do we have ALIS data for this particular subject?
-        $select = 'SELECT * ';
-        $from = 'FROM {report_targetgrades_patterns} AS p
-            JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
-        $where = 'WHERE p.pattern = ?';
-		$params = array($course->pattern);
-        if($DB->get_record_sql($select.$from.$where, $params)) {
-            return true;
-        } else {
-            return false;
-        }
-    } else {
-        return false;
+function get_config($force = false) {
+    static $config;
+    if (empty($config) || $force) {
+        $config = \get_config('report_targetgrades');
+        $config->categories = isset($config->categories) ? unserialize($config->categories) : array();
+        $config->roles = isset($config->roles) ? unserialize($config->roles) : array();
     }
+    return $config;
 }
 
 /**
- * Append an asterisk to the course's fullname if it doesn't have ALIS data
+ * Append an asterisk to the course's name if it doesn't have ALIS data
  *
- * Used as a callback for array_walk to iterate over an array of courses fetched
- * with {@link mtgdistribute_get_courses_with_qualtype()}, check if each one has
- * ALIS data linked to it, and appends and asterisk if it's not.
- *
- * @global object $CFG Global config object
- * @param object $course A course fetched with mtgdistribute_get_courses_with_qualtype
- * @return bool true if the course has ALIS config
+ * @global object $DB Global database object
+ * @param array $options the courses being used as options for the select list
+ * @return array The options with asterisks added where appropriate
  */
-function mtgdistribute_hasconfig(&$course){
-    global $CFG, $DB;
-    $select = 'SELECT * ';
-    $from = 'FROM {report_targetgrades_patterns} AS p
-        JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
-    $where = 'WHERE p.pattern = ?';
-	$params = array($course->pattern);
-    if($DB->get_record_sql($select.$from.$where, $params)) {
-        return true;
-    } else {
-        $course->fullname .= '*';
-    }    
-}
-
-/**
- * Add or remove an array of course IDs from the blocks configuration
- *
- * Takes an array of course IDs and adds or removes them from the "selected"
- * config property as appropriate
- *
- * @param array $selected array of ids to add or remove
- * @param string $op 'add' or 'remove'
- */
-function mtgdistribute_saveselected($selected, $op) {
-    $config_selected = get_config('block/mtgdistribute', 'selected');
-    if(!empty($config_selected)) {
-        $config_selected = explode(',', $config_selected);
-        if($op == 'add') {
-            $config_selected = array_merge($config_selected, $selected);
-        } else if ($op == 'remove') {
-            $config_selected = array_diff($config_selected, $selected);
-        }
-    } else {
-        $config_selected = $selected;
-    }
-    $config_selected = implode(',', $config_selected);
-    set_config('selected', $config_selected, 'block/mtgdistribute');
-}
-
-/**
- * Clear the selected config attribute
- */
-function mtgdistribute_clearselected() {
-    set_config('selected', '', 'block/mtgdistribute');
-}
-
-/**
- * Get records for all the courses in the database with ALIS qualtypes and patterns
- *
- * Fetches the course ID, the pattern as defined in the block's configuration,
- * and the ALIS qualifcation type the course belongs to if this has been
- * configured.
- *
- * @global object $config The block's config object
- * @global object $CFG The global config object
- * @param array $extraconditions any extra conditions to add to the where clause
- * @return array of course records
- */
-function mtgdistribute_get_courses_with_qualtype($wherefields = array(), $wherevalues = array()) {
-    global $config, $CFG, $DB;
-	
-    /*if(!empty($config->exclude_field) && !empty($config->exclude_regex)) {
-        $args = array($config->exclude_field, $config->exclude_regex);
-        $conditions[] = vsprintf('c.%1$s NOT REGEXP "%2$s"', $args);
-    }*/
-
-    if(!empty($config->category)) {
-        $wherefields[] = 'c.category';
-		$wherevalues[] = $config->category;
-    }
-
-     $select = 'SELECT c.id, ';
-    if(!empty($config->group_field) && !empty($config->group_length)) {
-        $args = array($config->group_field, $config->group_length);
-        $select .= vsprintf('LEFT(c.%1$s, %2$d) AS pattern, ', $args);
-        $from = vsprintf('FROM {course} AS c
-                    LEFT JOIN {report_targetgrades_patterns} AS p
-                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
-                    LEFT JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id
-                    LEFT JOIN {report_targetgrades_qualtype} AS q ON d.qualtypeid = q.id ', $args);
-    } else {
-        $select .= 'c.shortname AS pattern, ';
-        $from = 'FROM {course} AS c
-                    LEFT JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id
-                    LEFT JOIN {reprot_targetgrades_alisdata} AS q ON d.qualtypeid = q.id ';
-    }
-    $select .= 'c.shortname, c.fullname, q.name AS qualtype ';
-    $where = '';
-
-    foreach ($wherefields as $key => $field) {
-        if ($key == 0) {
-            $where .=('WHERE '.$field.' = ? ');
-        } else {
-            $where .= ('AND '.$field.' = ?');
-        }
-    }
-    return $DB->get_records_sql($select.$from.$where, $wherevalues); // Get a list of all courses matching the preferences
-}
-
-/**
- * Returns the record for a single course with pattern and qualtype
- *
- * Calls {@link mtgdistribute_get_courses_with_qualtype()} with an extra
- * condition to return the record for one specific course.
- *
- * @param int $id ID of the course
- * @return object the record for the course matching the ID
- */
-function mtgdistribute_get_course_with_qualtype($id) {
-    $results = mtgdistribute_get_courses_with_qualtype(array('c.id'), array($id));
-    return $results[$id];
+function hasconfig($options){    
+     array_walk($options, function ($option){ // Mark all courses that don't have any ALIS data
+	    global $DB;
+	    $select = 'SELECT * ';
+	    $from = 'FROM {report_targetgrades_patterns} p
+	        JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id ';
+	    $where = 'WHERE p.pattern = ?';
+		$params = array($option->pattern);
+	    if($DB->get_record_sql($select.$from.$where, $params)) {
+	        return true;
+	    } else {
+	        $option->firstname = '*';
+	    }    
+	});
+	return $options;
 }
 
 /**
  * Calculates a minimum target grade for a particular course based on
  * an average GCSE score
  *
- * @param $course text either a full classcode or just the first 5 characters
- * (will take the first 5 characters anyway)
+ * @param $course text either a full classcode or just the first 5 characters (will take the first 5 characters anyway)
  * @param $avgcse int student's average gcse score
  *
  * @return integer relating to the grade on a scale or false if fails
  */
-function mtgdistribute_calculate_mtg($student, $course){
-    global $CFG;
+function calculate_mtg($student, $course){
+    global $DB;
     $select = 'SELECT name, gradient, intercept ';
-    $from = 'FROM {mtgdistribute_patterns} AS p
-        JOIN {mtgdistribute_alisdata} AS d ON p.alisdataid = d.id ';
+    $from = 'FROM {report_targetgrades_patterns} AS p
+        JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
     $where = 'WHERE p.pattern = ?';
 	$params = array($course->pattern);
 	
@@ -311,7 +213,7 @@ function mtgdistribute_calculate_mtg($student, $course){
                 // Divide points score by 2
                 // Divide by 10
                 // Round Up
-                $mtg = ceil((($points/2))/10);
+                $mtg = \ceil((($points/2))/10);
                 break;
 
             case ALIS_ADVANCED_GCE_DOUBLE: // A2 Double Award
@@ -319,21 +221,21 @@ function mtgdistribute_calculate_mtg($student, $course){
                 // Minus 20
                 // Divide by 10
                 // Round Up
-                $mtg = ceil((($points/2)-20)/10);
+                $mtg = \ceil((($points/2)-20)/10);
                 break;
 
             case ALIS_ADVANCED_SUBSIDIARY_GCE: // AS
                 // Minus 20
                 // Divide by 10
                 // Round Up
-                $mtg = ceil($points/10);
+                $mtg = \ceil($points/10);
 
                 break;           
 
             case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE: // AS Double Award
                 // Divide by 10
                 // Round Up
-                $mtg = ceil(($points-20)/10);
+                $mtg = \ceil(($points-20)/10);
                 break;
 
             case ALIS_BTEC_NATIONAL_DIPLOMA: // BTEC Diploma
@@ -342,11 +244,11 @@ function mtgdistribute_calculate_mtg($student, $course){
                 // Divide by 40
                 // Round up
                 // Add 1 (scale includes Fail)
-                $mtg = ceil((($points+20)-100)/40)+1;
+                $mtg = \ceil((($points+20)-100)/40)+1;
                 break;
 
             case ALIS_BTEC_NATIONAL_CERTIFICATE: // BTEC Certificate
-                $mtg = ceil($points/40);
+                $mtg = \ceil($points/40);
                 break;
 
             case ALIS_BTEC_NATIONAL_AWARD: // BTEC Award            
@@ -354,14 +256,14 @@ function mtgdistribute_calculate_mtg($student, $course){
                 // Divide by 40
                 // Round up
                 // Add 1 (scale includes Fail)
-                $mtg = ceil($points/40)+1;
+                $mtg = \ceil($points/40)+1;
                 if($mtg > 4) {
                    $mtg = 4;
                 }
                 break;
 
             case ALIS_CACHE_L3_DIPLOMA: // CACHE L3 Diploma
-                $mtg = ceil($points/60);
+                $mtg = \ceil($points/60);
                 break;
 
              // These all provide a raw number on the scale, rather than UCAS
@@ -373,7 +275,7 @@ function mtgdistribute_calculate_mtg($student, $course){
             case ALIS_OCR_NATIONAL_CERTIFICATE: // OCR Certificate
                 // Add 0.5
                 // Round up
-                $mtg = ceil($points+0.5);
+                $mtg = \ceil($points+0.5);
                 if ($course->qualtype == ALIS_BTEC_FIRST_DIPLOMA
                         || $course->qualtype == ALIS_OCR_NATIONAL_DIPLOMA
                         ||  $course->qualtype == ALIS_OCR_NATIONAL_CERTIFICATE) {
@@ -410,59 +312,50 @@ function mtgdistribute_calculate_mtg($student, $course){
 /**
  * Builds a set of options to select pattens to apply ALIS stats to
  *
- * @global object $CFG The global config object
- * @global object $config The block's config object
- * @param string $default Optional, The pattern to select by default
- * @return string the options as HTML elements
+ * @global object $DB The global config object
+ * @return array The array of options for the menu
  * @throws Exception if the exclusion regex shows a risk of ReDOS
  */
-function mtgdistribute_build_pattern_options($default = '') {
+function build_pattern_options() {
 
-    global $CFG, $config;
-    $conditions = array();
-    if(preg_match('/(.+?\.?[*+].*?)[*+]/', $config->exclude_regex)) {
+    global $DB;
+    $config = get_config();
+    if(\preg_match('/(.+?\.?[*+].*?)[*+]/', $config->exclude_regex)) {
         throw new unsafe_regex_exception();
-    } else {
-        if(!empty($config->exclude_field) && !empty($config->exclude_regex)) {
-            $conditions[] = $config->exclude_field.' NOT REGEXP "'.$config->exclude_regex.'"';
-        }
     }
 
-    if(!empty($config->categories)) {
-        $conditions[] = 'c.category IN ('.$config->categories.')';
-    }
-
+    list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
+ 
     $select = 'SELECT DISTINCT ';
-    if(!empty($config->group_field) && !empty($config->group_length)) {
-        $select .= 'LEFT('.$config->group_field.', '.$config->group_length.') AS pattern ';
+	if(!empty($config->group_field) && !empty($config->group_length)) {
+	    $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'), LEFT('.$config->group_field.', '.$config->group_length.') as pattern ';
+	} else {
+	    $select .= 'shortname, shortname AS pattern ';
+	}
+	
+	$from = 'FROM {course} ';
+	
+	$order = 'ORDER BY pattern';
+	    
+    if ($DB->sql_regex_supported()) {
+        $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
+        $params = array_merge($params, array($config->exclude_regex));        
     } else {
-        $select .= 'shortname AS pattern ';
-    }
+	    $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
+	    
+		\array_filter($courses, function($course, $config) {				    
+		    $field = $config->exclude_field;
+		    return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
+		});	    
+		
+		list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));		
+	    $where = 'WHERE id '.$in_sql.' ';
+	}
+	
+	$where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN (SELECT pattern FROM {report_targetgrades_patterns} tp) ';
+	
+    $options = $DB->get_records_sql_menu($select.$from.$where.$order, $params);
 
-    $from = 'FROM {course} AS c ';
-
-    $where = '';
-    foreach ($conditions as $key => $condition) {
-        if ($key == 0) {
-            $where .= 'WHERE ';
-        } else {
-            $where .= 'AND ';
-        }
-        $where .= $condition.' ';
-    }
-
-    $order = 'ORDER BY pattern';
-
-    $options = '<option value=""></option>';
-    if($patterns = $DB->get_records_sql($select.$from.$where.$order)) {
-        foreach($patterns as $pattern) {
-            $options .= '<option value="'.$pattern->pattern.'" ';
-            if ($pattern->pattern == $default) {
-                $options .= 'selected="selected" ';
-            }
-            $options .= '>'.$pattern->pattern.'</option>';
-        }
-    }
     return $options;
 }
 
@@ -476,17 +369,17 @@ function mtgdistribute_build_pattern_options($default = '') {
  *
  * @param object $course Database record for course, containing the id.
  */
-function mtgdistribute_sort_gradebook($course) {
+function sort_gradebook($course) {
 
     global $CFG, $DB;
     require_once $CFG->dirroot.'/grade/lib.php';
     require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
-    $gtree = new grade_tree($course->id, false, false);
+    $gtree = new \grade_tree($course->id, false, false);
 	
 	$fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');	
 	$params = array($course->id);
-	list($in_params, $in_sql) = $DB->get_in_or_equal($params);
-	$params = array_merge($params, $in_params);
+	list($in_sql, $in_params) = $DB->get_in_or_equal($params);
+	$params = \array_merge($params, $in_params);
     $where = 'courseid = ? AND idnumber '.$in_sql;
     $gradeitems = $DB->get_records_select('grade_items', $where, $params, 'itemnumber DESC');
     $courseitem = $DB->get_record('grade_items', array('courseid' => $course->id, 'itemtype' => 'course'));
@@ -497,7 +390,7 @@ function mtgdistribute_sort_gradebook($course) {
     foreach($gradeitems as $item) {
 
         if (!$element = $gtree->locate_element('i'.$item->id)) {
-            print_error('invalidelementid');
+            \print_error('invalidelementid');
         }
         $object = $element['object'];
 
@@ -505,7 +398,7 @@ function mtgdistribute_sort_gradebook($course) {
         $first = 1; // If First is set to 1, it means the target is the first child of the category $moveafter
 
         if(!$after_el = $gtree->locate_element($moveafter)) {
-            print_error('invalidelementid');
+            \print_error('invalidelementid');
         }
 
         $after = $after_el['object'];
@@ -532,28 +425,33 @@ function mtgdistribute_sort_gradebook($course) {
  * If ALIS data hasn't been uploaded yet, the link to distribute.php will not
  * be displayed.
  *
- * @global object $CFG Global config object
+ * @global $DB The global Database object
+ * @global $OUTPUT the output renderer.
  * @param int $selected The ID of the tab to select
  */
-function mtgdistribute_print_tabs($selected) {
-    global $CFG, $DB;
+function print_tabs($selected) {
+    global $DB, $OUTPUT;
 
     $tabs = array();
-    $tabs[] = new tabobject(1,
-            $CFG->wwwroot.'/blocks/mtgdistribute/alisdata.php',
-            get_string('alisdata', 'report_targetgrades'));
-    if($DB->get_records('mtgdistribute_alisdata')) {
-        $tabs[] = new tabobject(2,
-                $CFG->wwwroot.'/blocks/mtgdistribute/distribute.php',
-                get_string('mtgdistribute', 'report_targetgrades'));
+    $tabs[] = new \tabobject(1,
+            new \moodle_url('/admin/report/targetgrades/alisdata.php'),
+            \get_string('alisdata', 'report_targetgrades'));
+    if($DB->get_records('report_targetgrades_alisdata')) {
+        $tabs[] = new \tabobject(2,
+                new \moodle_url('/admin/report/targetgrades/distribute.php'),
+                \get_string('mtgdistribute', 'report_targetgrades'));
     }
-    print_tabs(array($tabs), $selected);
+    $tabs[] = new \tabobject(3,
+            new \moodle_url('/'.$CFG->admin.'/report/targetgrades/settingsform.php'),
+            \get_string('settings'));
+    echo $OUTPUT->heading(get_string('mtgdistribute', 'report_targetgrades'));
+    \print_tabs(array($tabs), $selected);
 }
 
 /**
  * A skeleton grade record
  */
-abstract class mtg_item_grade {
+abstract class item_grade {
 
     public   $courseid;
     public   $categoryid;
@@ -578,15 +476,15 @@ abstract class mtg_item_grade {
         $this->hidden = 0;
         $this->grademin = 0;
         $this->idnumber = '';
-        $this->timecreated = time();
-        $this->timemodified = time();
+        $this->timecreated = \time();
+        $this->timemodified = \time();
     }
 }
 
 /**
  * A course gradeitem
  */
-class mtg_item_course extends mtg_item_grade {
+class item_course extends item_grade {
     public $timecreated;
     public $timemodified;
     public $sortorder;
@@ -603,18 +501,17 @@ class mtg_item_course extends mtg_item_grade {
         $this->itemtype = 'course';
         $this->locked = 0;
         $this->hidden = 0;
-        $this->gradetype = 0;
+        $this->gradetype = GRADE_TYPE_SCALE;
         $this->grademax = 0;
         $this->grademin = 0;
         $this->sortorder = 1;
-        $this->idnumber = 'alis_mtg';
     }
 }
 
 /**
  * An average GCSE grade item
  */
-class mtg_item_avgcse extends mtg_item_grade {
+class item_avgcse extends item_grade {
     public $decimals = 2;
 
     /**
@@ -625,12 +522,12 @@ class mtg_item_avgcse extends mtg_item_grade {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_avgcse', 'report_targetgrades');
-        $this->gradetype = 1;
+        $this->itemname = \get_string('item_avgcse', 'report_targetgrades');
+        $this->gradetype = GRADE_TYPE_VALUE;
         $this->grademax = 10;
         $this->grademin = 0;
-        $this->locked = time();
-        $this->idnumber = 'alis_avgcse';
+        $this->locked = \time();
+        $this->idnumber = 'targetgrades_avgcse';
         $this->itemnumber = 1;
 
     }
@@ -640,7 +537,7 @@ class mtg_item_avgcse extends mtg_item_grade {
 /**
  * An ALIS number grade item
  */
-class mtg_item_alisnum extends mtg_item_grade {
+class item_alisnum extends item_grade {
 
     public $decimals;
 
@@ -652,14 +549,14 @@ class mtg_item_alisnum extends mtg_item_grade {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_alisnum', 'report_targetgrades');
-        $this->gradetype = 1;
+        $this->itemname = \get_string('item_alisnum', 'report_targetgrades');
+        $this->gradetype = GRADE_TYPE_VALUE;
         $this->grademax = 360;
         $this->grademin = 0;
         $this->decimals = 0;
         $this->hidden = 1;
-        $this->locked = time();
-        $this->idnumber = 'alis_alisnum';
+        $this->locked = \time();
+        $this->idnumber = 'targetgrades_alisnum';
         $this->itemnumber = 2;
     }
 
@@ -668,7 +565,7 @@ class mtg_item_alisnum extends mtg_item_grade {
 /**
  * An ALIS grade item
  */
-class mtg_item_alis extends mtg_item_grade {
+class item_min extends item_grade {
 
     public   $scaleid;
 
@@ -680,13 +577,13 @@ class mtg_item_alis extends mtg_item_grade {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_alis', 'report_targetgrades');
+        $this->itemname = \get_string('item_alis', 'report_targetgrades');
         $this->hidden = 1;
-        $this->locked = time();
-        $this->gradetype = 0;
+        $this->locked = \time();
+        $this->gradetype = GRADE_TYPE_SCALE;
         $this->grademax = 0;
         $this->scaleid = 0;
-        $this->idnumber = 'alis_alis';
+        $this->idnumber = 'targetgrades_min';
         $this->itemnumber = 3;
     }
 
@@ -698,16 +595,16 @@ class mtg_item_alis extends mtg_item_grade {
      */
     public function set_scale($qualtype, $default = null) {
     	global $DB;
-        $scale = $DB->get_record('scale', 'name', $qualtype.' MTG');
+        $scale = $DB->get_record('scale', array('name' => $qualtype.' MTG'));
         if(!$scale) {
             if(!empty($default)) {
-                $scale = $DB->get_record('scale', 'id', $default);
+                $scale = $DB->get_record('scale', array('id' => $default));
             } else {
-                throw new Exception($qualtype);
+                throw new \Exception($qualtype);
             }
         }
         $this->gradetype = 2;
-        $this->grademax = count($scale->scale);
+        $this->grademax = \count($scale->scale);
         $this->scaleid = $scale->id;        
     }
 }
@@ -715,7 +612,7 @@ class mtg_item_alis extends mtg_item_grade {
 /**
  * A Minimum Target Grade item
  */
-class mtg_item_mtg extends mtg_item_alis {
+class item_target extends item_min {
 
     /**
      * Sets the attributes to those of an MTG grade item
@@ -725,10 +622,10 @@ class mtg_item_mtg extends mtg_item_alis {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_mtg', 'report_targetgrades');
+        $this->itemname = \get_string('item_mtg', 'report_targetgrades');
         $this->hidden = 0;
         $this->locked = 0;
-        $this->idnumber = 'alis_mtg';
+        $this->idnumber = 'targetgrades_target';
         $this->itemnumber = 4;
     }
 }
@@ -736,7 +633,7 @@ class mtg_item_mtg extends mtg_item_alis {
 /**
  * A Minimum Target Grade item
  */
-class mtg_item_cpg extends mtg_item_alis {
+class item_cpg extends item_min {
 
     /**
      * Sets the attributes to those of an MTG grade item
@@ -746,68 +643,419 @@ class mtg_item_cpg extends mtg_item_alis {
      */
     public function __construct($courseid, $categoryid) {
         parent::__construct($courseid, $categoryid);
-        $this->itemname = get_string('item_cpg', 'report_targetgrades');
+        $this->itemname = \get_string('item_cpg', 'report_targetgrades');
         $this->hidden = 0;
         $this->locked = 0;
-        $this->idnumber = 'alis_cpg';
+        $this->idnumber = 'targetgrades_cpg';
         $this->itemnumber = 5;
     }
 }
 
 /**
- * A grade record
+ * Validates and processes files for the tutorlink block
  */
-class mtg_grade {
-    public $itemid;
-    public $userid;
-    public $rawgrade;
-    public $finalgrade;
-    public $timecreated;
-    public $timemodified;
-
+class csvhandler {
 
     /**
-     * Creates a record for the grade item
+     * The ID of the file uploaded through the form
      *
-     * @param int $itemid The ID of the item the grade is for
-     * @param int $user The ID of the user the grade is for
-     * @param int $grade The grade as an index on the grade scale
+     * @var string
      */
-    public function __construct($itemid, $user, $grade) {
-        $this->itemid = $itemid;
-        $this->userid = $user->id;
-        $this->rawgrade = $grade;
-        $this->finalgrade = $grade;
-        $this->timecreated = time();
-        $this->timemodified = time();
+    private $filename;
+
+    /**
+     * Constructor, sets the filename
+     *
+     * @param string $filename
+     */
+    public function __construct($filename) {
+        $this->filename = $filename;
+    }
+
+    /**
+     * Attempts to open the file
+     *
+     * Open the file using the File API.
+     * Return the file handler.
+     *
+     * @throws moodle_exception if the file can't be opened for reading
+     * @global object $USER
+     * @return object File handler
+     */
+    private function open_file() {
+        global $USER;
+        
+        $fs = \get_file_storage();
+        $context = \get_context_instance(CONTEXT_USER, $USER->id);
+        if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $this->filename, 'id DESC', false)) {
+            throw new \moodle_exception('cantreadcsv', 'report_targetgrades');
+        }
+        $file = \reset($files);
+        if (!$file = $file->get_content_file_handle()) {
+            throw new \moodle_exception('cantreadcsv', 'report_targetgrades');
+        }
+        
+        return $file;
+    }
+
+    /**
+     * Checks that the file is valid CSV in the expected format
+     *
+     * Opens the file, then checks each row contains 3 either 1 or 6 comma-separated values
+     *
+     * @see open_file()
+     * @throws moodle_exeption if there are the wrong number of columns
+     * @return true on success
+     */
+    public function validate() {
+        $line = 0;
+        $file = $this->open_file();
+        while ($csvrow = \fgetcsv($file, 0, '|')) {
+            $line++;
+            if (count($csvrow) != 1 && count($csvrow) != 6) {
+                throw new \moodle_exception('wrongcolcsv', 'report_targetgrades', '', $line);                
+            }
+        }
+        \fclose($file);
+        return true;
+    }
+
+    /**
+     * Processes the file to import the ALIS data
+     *
+     * Opens the file, loops through each row. Cleans the values in each column,
+     * and inserts or updates the statistics for each subject, then loops over 
+     * the records in the table and flags any quality issues.
+     *
+     * Returns a report of successess and failures.
+     *
+     * @see open_file()
+     * @global object $DB Database interface
+     * @return string A report of successes and failures.
+     */
+    public function process() {
+        global $DB;
+        
+        $file = $this->open_file();
+        $qualtype = false;
+        $import->qualcount = 0;
+        $import->subjectcount = 0;
+        $import->updatecount = 0;
+        while ($line = \fgetcsv($file, 0, '|')) {
+
+            // If there's only one column on this line, then it's a qualification heading
+            if (\count($line) == 1) {
+                $qualname = param_clean($line[0], \PARAM_ALPHANUM);
+                // Create a new qualtype record if there isn't one already.
+                if(!$qualtype = $DB->get_record_select('report_targetgrades_qualtype', $DB->sql_compare_text('name').' = ?', array($qualname))) {
+
+                    if(!$qualscale = $DB->get_record('scale', array('name' => $qualname.' MTG'))) {
+
+                        if($scale = get_scale($qualname)) {
+                            $qualscale = new \stdClass;
+                            $qualscale->name = $qualname.' MTG';
+                            $qualscale->scale = $scale;
+                            $qualscale->description = $qualname.' Minimum/Target Grades';
+                            $qualscale->id = $DB->insert_record('scale', $qualscale);
+                        }
+
+                    }
+
+                    if($qualscale) {
+                        $qualtype = new \stdClass;
+                        $qualtype->name = $qualname;
+                        $qualtype->scaleid = $qualscale->id;
+                        $qualtype->id = $DB->insert_record('report_targetgrades_qualtype', $qualtype);
+                        $import->qualcount++;
+                    }
+                }
+                
+            } else {
+                // If we have a record for this course's qualtype
+                if ($qualtype) {
+                    $name = \clean_param($line[0], \PARAM_TEXT);
+                    $samplesize = \clean_param(str_replace(',', '', $line[1]), \PARAM_INT);
+                    $gradient = \clean_param($line[2], \PARAM_FLOAT);
+                    $intercept = \clean_param($line[3], \PARAM_FLOAT);
+                    $correlation = \clean_param($line[4], \PARAM_FLOAT);
+                    $standarddeviation = \clean_param($line[5], \PARAM_FLOAT);
+                    if($subject = $DB->get_record_select('report_targetgrades_alisdata', $DB->sql_compare_text('name').' = ? AND qualtypeid = ?', array($name, $qualtype->id))) {
+                        $subject->samplesize = $samplesize;
+                        $subject->gradient = $gradient;
+                        $subject->intercept = $intercept;
+                        $subject->correlation = $correlation;
+                        $subject->standarddeviation = $standarddeviation;
+                        $DB->update_record('report_targetgrades_alisdata', $subject);
+                        $import->updatecount++;
+                    } else {
+                        $subject = new \stdClass;
+                        $subject->name= $name;
+                        $subject->samplesize = $samplesize;
+                        $subject->gradient = $gradient;
+                        $subject->intercept = $intercept;
+                        $subject->correlation = $correlation;
+                        $subject->standarddeviation = $standarddeviation;                        
+                        $subject->qualtypeid = $qualtype->id;
+                        $DB->insert_record('report_targetgrades_alisdata', $subject);
+                        $import->subjectcount++;
+                    }
+                }
+            }
+        }
+                
+        \fclose($file);
+        
+        // All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data
+        
+	    $averagesize = round($DB->get_record_sql('SELECT AVG(samplesize) as avg FROM {report_targetgrades_alisdata}')->avg);
+	    $select = 'SELECT ta.*, tq.name as qualification ';
+	    $from = 'FROM {report_targetgrades_alisdata} ta 
+	    	JOIN {report_targetgrades_qualtype} tq ON ta.qualtypeid = tq.id';
+        $alisdata = $DB->get_records_sql($select.$from);
+        
+        foreach ($alisdata as $alis) {
+	        if ($alis->samplesize < $averagesize) {
+	            if ($alis->samplesize < $averagesize/2) {
+	                if ($alis->samplesize < $averagesize/4) {
+	                    $alis->quality_samplesize = 3;
+	                } else {
+	                    $alis->quality_samplesize = 2;
+	                }
+	            } else {
+	                $alis->quality_samplesize = 1;
+	            }
+	        } else {
+	            $alis->quality_samplesize = 0;
+	        }
+	        
+	        if ($alis->correlation < CORRELATION_THRESHOLD) {
+	            $alis->quality_correlation = 1;
+	        } else {
+	            $alis->quality_correlation = 0;
+	        }
+	        
+	        switch ($alis->qualification) {
+	            case ALIS_GCSE:
+	            case ALIS_BTEC_FIRST_DIPLOMA:
+	            case ALIS_IB_STANDARD:
+	            case ALIS_IB_HIGHER:
+	            case ALIS_OCR_NATIONAL_CERTIFICATE:
+	            case ALIS_OCR_NATIONAL_DIPLOMA:
+	                $boundary = 1;
+	                break;
+	                
+	            case ALIS_ADVANCED_GCE:
+	            case ALIS_ADVANCED_GCE_DOUBLE:
+	                $boundary = 20;
+	                break;
+	                
+	            case ALIS_ADVANCED_SUBSIDIARY_GCE:
+	            case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE:
+	                $boundary = 10;
+	                break;
+	                
+	            case ALIS_BTEC_NATIONAL_AWARD:
+	            case ALIS_BTEC_NATIONAL_DIPLOMA:
+	            case ALIS_BTEC_NATIONAL_CERTIFICATE:
+	                $boundary = 40;
+	                break;
+	                
+	            case ALIS_CACHE_L3_DIPLOMA:
+	                $boundary = 60;
+	                break;                
+	        }
+	        
+	        if ($alis->standarddeviation > $boundary) {
+	            if ($alis->standarddeviation > $boundary*2) {
+	                $alis->quality_deviation = 2;
+	            } else {
+	                $alis->quality_deviation = 1;
+	            }
+	        } else {
+	            $alis->quality_deviation = 0;
+	        }       
+	        
+	        $DB->update_record('report_targetgrades_alisdata', $alis);
+        }
+        
+        return $import;
     }
 }
 
+
+// We need these class definitions here so that we can get all the functions we need when doing 
+// AJAX searching in the big select list. However, we don't want to have \user_selector_base
+// as a dependency on every page where we include this lib, so only define the select list classes
+// on pages where the user selector lib has already been included.
+if (class_exists('\user_selector_base')) {
+    
+    /**
+     * Select list for courses without Target Grade items
+     */
+	class potential_course_selector extends \user_selector_base {
+	    
+	    /**
+	     * Add the file name to the $options array to make AJAX searching work
+	     * @return array
+	     */
+	    protected function get_options() {
+	        $options = parent::get_options();
+	        $options['file'] = 'admin/report/targetgrades/lib.php';
+	        return $options;
+	    }
+	            
+	    /**
+	     * Get list of courses for potential distribution
+	     * 
+	     * Get all the courses that are in the categories selected in $config->categories,
+	     * and aren't filtered out by $config->exclude_regex, and don't already have the grade
+	     * items.  This function uses odd names for the fields to avoid having to override 
+	     * additional methods from the parent class.
+	     * 
+	     * @param $search Optional string to search for in shortname and fullname
+	     * @return array Matching course records
+	     */
+	    public function find_users($search) {
+		    global $DB;
+		    $config = get_config();
+		   
+		    list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
+		 
+		    $select = 'SELECT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
+			if(!empty($config->group_field) && !empty($config->group_length)) {
+		        $args = array($config->group_field, $config->group_length);
+			    $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
+		        $from = \vsprintf('FROM {course} c
+		                    LEFT JOIN {report_targetgrades_patterns} p
+		                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
+		                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ', $args);
+			} else {
+			    $select .= 'shortname AS pattern ';
+				$from = 'FROM {course} c
+		                    LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern 
+		                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';		
+			}
+			
+			$order = 'ORDER BY pattern';
+			    
+		    if ($DB->sql_regex_supported()) {
+		        $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
+		        $params = array_merge($params, array($config->exclude_regex));        
+		    } else {
+			    $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
+			    
+			    \array_filter($courses, function($course, $config) {				    
+				    $field = $config->exclude_field;
+				    return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
+				});
+			    
+			    list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));
+			    $where = 'WHERE id '.$in_sql.' ';
+			}
+			
+			$optgroupname = get_string('courseswithoutgrades', 'report_targetgrades');		
+			
+			if (!empty($search)) {
+			    $shortnamelike = $DB->sql_like('shortname', '?');
+			    $fullnamelike = $DB->sql_like('fullname', '?');		   
+			    $where .= 'AND ('.$shortnamelike.' OR '.$fullnamelike.') ';
+				$params = array_merge($params, array('%'.$search.'%', '%'.$search.'%'));
+				$optgroupname .= ' - '.get_string('searchresults', 'report_targetgrades'); 
+			}
+			
+			if (!empty($this->exclude)) {
+			    list($not_in_sql, $not_in_params) = $DB->get_in_or_equal($this->exclude, SQL_PARAMS_QM, '', false);
+			    $where .= 'AND c.id '.$not_in_sql.' ';
+			    $params = array_merge($params, $not_in_params);
+			}
+			
+			$options = $DB->get_records_sql($select.$from.$where.$order, $params);
+		    	    
+			$options = hasconfig($options);
+	       
+		    return array($optgroupname => $options);
+	    }
+	
+	};
+	
+	/**
+	 * Select list for courses with target grade items.
+	 */
+	class distributed_course_selector extends potential_course_selector {
+
+	    /**
+	     * Get a list of courses that have Target Grade grade items on.
+	     * 
+	     * Gets all the courses with one or more grade items match the ones
+	     * added by the distribution script.
+	     * 
+	     * @param $search Compulsory arugment due to abstract parent method. Defaults to empty string, doesn't do anything
+	     * @return array All the matching courses
+	     */
+	    function find_users($search = '') {
+	        global $DB;
+	        $config = get_config();
+		    $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
+		        
+		    $from = 'FROM {course} c
+		                JOIN {grade_items} g ON c.id = g.courseid ';
+		
+			if(!empty($config->group_field) && !empty($config->group_length)) {
+		        $args = array($config->group_field, $config->group_length);
+			    $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
+		        $from .= \vsprintf('LEFT JOIN {report_targetgrades_patterns} p
+				                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
+				                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+				                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ', $args);
+			} else {
+			    $select .= 'shortname AS pattern ';
+				$from .= 'LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern
+							LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';		
+			}
+			
+			$itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
+            get_string('item_alisnum', 'report_targetgrades'),
+            get_string('item_alis', 'report_targetgrades'),
+            get_string('item_mtg', 'report_targetgrades'));
+			list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);    
+			
+		    $where = 'WHERE itemname '.$in_sql;
+			$options = $DB->get_records_sql($select.$from.$where, $in_params);
+			
+			$options = hasconfig($options);
+			return array(get_string('courseswithgrades', 'report_targetgrades') => $options);
+	    }
+	};
+
+}
 /**
  * Used to flag up when a class has no students
  */
-class no_students_exception extends Exception {}
+class no_students_exception extends \Exception {}
 
 /**
  * Used to flag up when a student has no Average GCSE data
  */
-class no_data_for_student_exception extends Exception {}
+class no_data_for_student_exception extends \Exception {}
 
 /**
  * Used to flag when a student's MTG calcucation failed for some reason
  */
-class no_mtg_for_student_exception extends Exception {}
+class no_mtg_for_student_exception extends \Exception {}
 
 /**
  * Used to flag when a course has no ALIS data configured
  */
-class no_config_for_course_exception extends Exception {}
+class no_config_for_course_exception extends \Exception {}
 
 /**
  * Used to return the ID of a grade item if one already exists for the given
  * criteria.
  */
-class grade_item_exists_exception extends Exception {
+class grade_item_exists_exception extends \Exception {
     private $id;
 
     public function __construct($message = "", $id = 0, $code = 0) {
@@ -823,10 +1071,13 @@ class grade_item_exists_exception extends Exception {
 /**
  * Used to flag when an regex with a risk of ReDOS is detected
  */
-class unsafe_regex_exception extends Exception {
+class unsafe_regex_exception extends \Exception {
     public function __construct() {
         parent::__construct('unsaferegex');
     }
 }
+
+
+class needsconfig_exception extends \Exception {}
 
 ?>

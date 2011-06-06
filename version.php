@@ -1,4 +1,4 @@
-<?php
+<?php 
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 
 
 /**
- * Defines the plugin as an admin report and adds a link in the Settings block
+ * Sets the plugin's version
  *
  * @package report
  * @subpackage targetgrades
@@ -25,7 +25,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */ 
  
-$url = new moodle_url('/'.$CFG->admin.'/report/targetgrades');
-$ADMIN->add('grades', new admin_externalpage('reporttargetgrades', get_string('pluginname', 'report_targetgrades'), $url->out(),'report/targetgrades:view'));
+$plugin->version = 2011052500;
 
 ?>

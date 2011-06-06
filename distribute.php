@@ -1,79 +1,88 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+
 /**
- * Distribute Minimum target grades
- * 
+ * Distribute and Calulate Target Grades
+ *
  * Displays a Big Select List to allow selection of courses for grades to be 
  * distributed to. 
- * When the form is submitted, each course has the 4 required
- * grade items created if necessary, and the grades for each student are
+ * When the form Calculate button is pressed, each selected course has 
+ * the 4 required grade items created if necessary, and the grades for each student are
  * calculated and entered. The gradebook is then re-sorted to move the target 
  * grade items to the front.
- *
- * @package report_targetgrades
- * @author Mark Johnson <johnsom@tauntons.ac.uk>
- * @copyright Taunton's College, Southampton, UK 2010
- */
+ * If the Recalculate button is pressed, the grades on the pages which already
+ * have the grade items on are recalculated.
+ * 
+ * @package report
+ * @subpackage targetgrades
+ * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
+ * @copyright   2011 Tauntons College, UK
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */ 
 
-require_once('../../config.php');
+require_once('../../../config.php');
 require_once($CFG->libdir.'/gradelib.php');
-require_once($CFG->dirroot.'/blocks/mtgdistribute/lib.php');
-set_time_limit(0); // This could take a while, so disable max execution time
+require_once($CFG->dirroot.'/user/selector/lib.php');
+require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot.'/'.$CFG->admin.'/report/targetgrades/lib.php');
+
+use report\targetgrades as tg;
+
+require_login($SITE);
+admin_externalpage_setup('reporttargetgrades', null, null, '/'.$CFG->admin.'/report/targetgrades/distribute.php');
+$PAGE->navbar->add(get_string('mtgdistribute', 'report_targetgrades'));
+
 
 $context = get_context_instance(CONTEXT_SYSTEM);
-if (!has_capability('block/mtgdistribute:distribute', $context)){
+if (!has_capability('report/targetgrades:distribute', $context)){
     print_error('noperms', 'report_targetgrades');
 }
 
 $defaultscale = optional_param('defaultscale', null, PARAM_INT);
 if (!empty($defaultscale)) {
-    set_config('defaultscale', $defaultscale, 'block/mtgdistribute');
+    set_config('defaultscale', $defaultscale, 'report_targetgrades');
 }
 
-$config = get_config('block/mtgdistribute'); // Get the raw config data for the block
+$config = tg\get_config(); // Get the raw config data for the block
 
 if(preg_match('/(.+?\.?[*+].*?)[*+]/', $config->exclude_regex)) {
     print_error('unsaferegex', 'report_targetgrades');
 }
 
-$config->selected = explode(',', $config->selected); // Get the list of selected programmes
+$potential_selector = new tg\potential_course_selector('potentialcourses');
+$distributed_selector = new tg\distributed_course_selector('distributedcourses'); 
 
-if(empty($config->selected[0])) {
-    // If there are no selected programmes, get the programmes where there are already MTG fields distributed
-    $select = 'SELECT c.* ';
-    
-    $from = 'FROM
-                {course} AS c,
-                {grade_items} AS g ';
+$potential_selector->exclude(array_keys(current($distributed_selector->find_users())));
 
-	$itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
-                get_string('item_alisnum', 'report_targetgrades'),
-                get_string('item_alis', 'report_targetgrades'),
-                get_string('item_mtg', 'report_targetgrades'));
-	list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);    
-	
-    $where = 'WHERE c.id = g.courseid
-                AND itemname '.$in_sql;
-
-    if($distributed = $DB->get_records_sql($select.$from.$where, $in_params)) {
-        $config->selected = array();
-        foreach ($distributed as $record) {
-            $config->selected[] = $record->id;
-        }
-        mtgdistribute_saveselected($config->selected, 'add'); // Add these programmes to the selected list
-    }
+$courses = array();
+if (optional_param('calculate', false, PARAM_TEXT)) {
+    $courses = $potential_selector->get_selected_users(); 
+} else if (optional_param('recalculate', false, PARAM_TEXT)) {
+    $courses = current($distributed_selector->find_users());
 }
 
-$courses = mtgdistribute_get_courses_with_qualtype(); // Get a list of all courses matching the preferences
 
-$unselectedcourses = $courses; // Remove any courses that aren't a qualification tracked in this year's ALIS
-array_walk($courses, 'mtgdistribute_hasconfig'); // Mark all courses that don't have any ALIS data
-
-$distribute = optional_param('distribute', null, PARAM_TEXT);
-if (!empty($distribute)) { // If the distribute button has been clicked,    
+if (!empty($courses)) {  
+    
+	set_time_limit(0); // This could take a while, so disable max execution time
     $output = '';
 
-    $itemnames = array('mtg'   =>  get_string('item_mtg', 'report_targetgrades'),
-                        'alis'  =>  get_string('item_alis', 'report_targetgrades'),
+    $itemnames = array('target'   =>  get_string('item_mtg', 'report_targetgrades'),
+                        'min'  =>  get_string('item_alis', 'report_targetgrades'),
                         'alisnum' =>    get_string('item_alisnum', 'report_targetgrades'),
                         'avgcse' => get_string('item_avgcse', 'report_targetgrades'),
                         'cpg' => get_string('item_cpg', 'report_targetgrades'));
@@ -82,65 +91,64 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
     $empty_students = array();
     $failed_grade_calcs = array();
     $errors = '';
-    $infofield = $DB->get_record('user_info_field', array('shortname' => $config->gcse_field));
+    $infofield = $DB->get_record('user_info_field', array('id' => $config->gcse_field));
 
-    foreach($config->selected as $courseid) {
-        if($course = mtgdistribute_get_course_with_qualtype($courseid)) {
-            $category = grade_category::fetch_course_category($course->id);
+    foreach($courses as $course) {
+        $category = grade_category::fetch_course_category($course->id);
 
-            $records = null;
+        $records = null;
 
-            $regrade = false;
-            foreach ($itemnames as $item => $itemname) {
-                try {
-                    if($grade_item = grade_item::fetch(array('idnumber'=>'alis_'.$item, 'courseid'=>$course->id))) {
-                        $itemdata = new stdClass();
-                        if(empty($grade_item->timecreated)) {
-                            $itemdata->timecreated = time();
-                        }
-                        if(empty($grade_item->itemnumber)) {
-                            $itemdata->itemnumber = 0;
-                        }
-                        grade_item::set_properties($grade_item, $itemdata);
-                        $grade_item->update();
-                        unset($itemdata);
-                        throw new grade_item_exists_exception($item, $grade_item->id);
+        $regrade = false;
+        foreach ($itemnames as $item => $itemname) {
+            try {
+                if($grade_item = grade_item::fetch(array('idnumber'=>'targetgrades_'.$item, 'courseid'=>$course->id))) {
+                    $itemdata = new stdClass();
+                    if(empty($grade_item->timecreated)) {
+                        $itemdata->timecreated = time();
                     }
-
-                    $itemclass = 'mtg_item_'.$item;
-                    $itemdata = new $itemclass($course->id, $category->id);
-                    if (in_array($item, array('mtg', 'alis', 'cpg'))) {
-                        try {
-                            $itemdata->set_scale($course->qualtype, $defaultscale);
-                        } catch (Exception $e) {
-                            $failed_grade_calcs++;
-                            $errors .= get_string('nogradescale', 'report_targetgrades', $e->getMessage()).'<br />';
-                        }
+                    if(empty($grade_item->itemnumber)) {
+                        $itemdata->itemnumber = 0;
                     }
-
-                    $grade_item = new grade_item(array('courseid'=>$course->id, 'itemtype'=>'manual'), false);
                     grade_item::set_properties($grade_item, $itemdata);
-                    $itemids[$item] = $grade_item->insert();
-                    $regrade = true;
-
-                } catch (grade_item_exists_exception $e) {
-                    $itemids[$e->getMessage()] = $e->getId();
+                    $grade_item->update();
+                    unset($itemdata);
+                    throw new tg\grade_item_exists_exception($item, $grade_item->id);
                 }
 
+                $itemclass = 'report\targetgrades\item_'.$item;
+                $itemdata = new $itemclass($course->id, $category->id);
+                if (in_array($item, array('target', 'min', 'cpg'))) {
+                    try {
+                        $itemdata->set_scale($course->qualtype, $defaultscale);
+                    } catch (Exception $e) {
+                        $failed_grade_calcs++;
+                        $errors .= get_string('nogradescale', 'report_targetgrades', $e->getMessage()).'<br />';
+                    }
+                }
+
+                $grade_item = new grade_item(array('courseid'=>$course->id, 'itemtype'=>'manual'), false);
+                grade_item::set_properties($grade_item, $itemdata);
+                $itemids[$item] = $grade_item->insert();
+                $regrade = true;
+
+            } catch (tg\grade_item_exists_exception $e) {
+                $itemids[$e->getMessage()] = $e->getId();
             }
 
+        }
+
+        if($course->qualtype) {
             // Get the ID and average GCSE score of all students in the course
 
             $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
 
             $select = 'SELECT u.id AS id ';
 
-            $from = 'FROM {user} as u
-                    JOIN {role_assignments} as ra
+            $from = 'FROM {user} u
+                    JOIN {role_assignments} ra
                         ON u.id = ra.userid ';
-			$roles = explode(',', $config->roles);
 			
-			list($in_sql, $in_params) = $DB->get_in_or_equal($roles);
+			list($in_sql, $in_params) = $DB->get_in_or_equal($config->roles);
             $params = array_merge($in_params, array($coursecontext->id));
             $where = 'WHERE u.deleted = 0
                         AND ra.roleid '.$in_sql.'
@@ -150,25 +158,24 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
                 $students = $DB->get_records_sql($select.$from.$where, $params);
 
                 if(!$students) {
-                    throw new no_students_exception($course->id);
+                    throw new tg\no_students_exception($course->id);
                 }
 
                 if (!isset($course->pattern)) {
-                    throw new no_config_for_course_exception($course->id);
+                    throw new tg\no_config_for_course_exception($course->id);
                 }
 
                 // If there are some students in the class
                 foreach($students as $student) {
-
                     if($data = $DB->get_record('user_info_data', array('fieldid' => $infofield->id, 'userid' => $student->id))) {
-                        $student->{$config->gcse_field} = $data->data;
+                        $student->avgcse = $data->data;
                     } else {
-                        $student->{$config->gcse_field} = '';
+                        $student->avgcse = '';
                     }
 
                     try {
-                        if(empty($student->{$config->gcse_field})) {
-                            throw new no_data_for_student_exception($student->id);
+                        if (empty($student->avgcse)) {
+                            throw new tg\no_data_for_student_exception($student->id);
                         }
 
                         if($avgcse = grade_grade::fetch(array('itemid' => $itemids['avgcse'], 'userid' => $student->id))) {
@@ -176,10 +183,8 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
                             $avgcse->rawgrade = $student->avgcse;
                             $avgcse->finalgrade = $student->avgcse;
                             $avgcse->timemodified = time();
-                            $avgcse->update('mtgdistribute');
+                            $avgcse->update('report_targetgrades');
                         } else {
-                            // Otherwise, create it
-                            //$gradedata = new mtg_grade($itemids['avgcse'], $student, $student->avgcse);
                             $avgcse = new grade_grade();
                             $avgcse->itemid = $itemids['avgcse'];
                             $avgcse->userid = $student->id;
@@ -187,32 +192,32 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
                             $avgcse->finalgrade = $student->avgcse;
                             $avgcse->timecreated = time();
                             $avgcse->timemodified = time();
-                            $avgcse->insert('mtgdistribute');
+                            $avgcse->insert('report_targetgrades');
                         }
 
-                        $mtg = mtgdistribute_calculate_mtg($student, $course);
+                        $mtg = tg\calculate_mtg($student, $course);
 
-                        if($alis = grade_grade::fetch(array('itemid' => $itemids['alis'], 'userid' => $student->id))) {
+                        if($alis = grade_grade::fetch(array('itemid' => $itemids['min'], 'userid' => $student->id))) {
                             $alis->rawgrade = $mtg['grade'];
                             $alis->finalgrade = $mtg['grade'];
                             $alis->timemodified = time();
-                            $alis->update('mtgdistribute');
+                            $alis->update('report_targetgrades');
                         } else {
                             $alis = new grade_grade();
-                            $alis->itemid = $itemids['alis'];
+                            $alis->itemid = $itemids['min'];
                             $alis->userid = $student->id;
                             $alis->rawgrade = $mtg['grade'];
                             $alis->finalgrade = $mtg['grade'];
                             $alis->timecreated = time();
                             $alis->timemodified = time();
-                            $alis->insert('mtgdistribute');
+                            $alis->insert('report_targetgrades');
                         }
 
                         if($alis_num = grade_grade::fetch(array('itemid' => $itemids['alisnum'], 'userid' => $student->id))){
                             $alis_num->rawgrade = $mtg['number'];
                             $alis_num->finalgrade = $mtg['number'];
                             $alis_num->timemodified = time();
-                            $alis_num->update('mtgdistribute');
+                            $alis_num->update('report_targetgrades');
                         } else {
                             $alis_num = new grade_grade();
                             $alis_num->itemid = $itemids['alisnum'];
@@ -221,218 +226,75 @@ if (!empty($distribute)) { // If the distribute button has been clicked,
                             $alis_num->finalgrade = $mtg['number'];
                             $alis_num->timecreated = time();
                             $alis_num->timemodified = time();
-                            $alis_num->insert('mtgdistribute');
+                            $alis_num->insert('report_targetgrades');
                         }
 
-                    } catch (no_data_for_student_exception $e) {
+                    } catch (tg\no_data_for_student_exception $e) {
                         $empty_students[] = $e->getMessage();
-                    } catch (no_mtg_for_student_exception $e) {
+                    } catch (tg\no_mtg_for_student_exception $e) {
                         $failed_grade_calcs[] = $e->getMessage();
                     }
 
                 }
 
-            } catch (no_students_exception $e) {
+            } catch (tg\no_students_exception $e) {
                 $empty_courses[] = $e->getMessage();
-            } catch (no_config_for_course_exception $e) {
+            } catch (tg\no_config_for_course_exception $e) {
                 $unconfigured_courses[] = $e->getMessage();
             }
             if($regrade) {
-                grade_regrade_final_grades($courseid);
-                mtgdistribute_sort_gradebook($course);
+                grade_regrade_final_grades($course->id);
+                tg\sort_gradebook($course);
             }
         }
     }
 
-    $output = '<p>'.
-    get_string('distribute_success', 'report_targetgrades', count($config->selected)-count($empty_courses)-count($unconfigured_courses)).
-    '<br />'.
+    $output = html_writer::start_tag('p').
+    get_string('distribute_success', 'report_targetgrades', count($distributed_selector->find_users())-count($empty_courses)-count($unconfigured_courses)).
+    html_writer::empty_tag('br').
     get_string('distribute_empty', 'report_targetgrades', count($empty_courses)).
-    '<br />'.
+    html_writer::empty_tag('br').
     get_string('distribute_unconfigured', 'report_targetgrades', count($unconfigured_courses)).
-    '<br />'.
+    html_writer::empty_tag('br').
     get_string('distribute_noavgcse', 'report_targetgrades', count(array_unique($empty_students))).
-    '<br />'.
+    html_writer::empty_tag('br').
     get_string('distribute_failedcalc', 'report_targetgrades', count($failed_grade_calcs)).
-    '<br />'.$errors.
-    '</p>';
+    html_writer::empty_tag('br').
+    $errors.
+    html_writer::end_tag('p');
 
-    $selectedcourses = array();
-    foreach ($config->selected as $value) {
-        $selectedcourses[$value] = $unselectedcourses[$value];
-    }
-    $unselectedcourses = array_diff_key($unselectedcourses, $selectedcourses);
+} 
 
-} else {
-   
-    $selectedcourses = array();
-    $add = optional_param('add', null, PARAM_TEXT);
-    $remove = optional_param('remove', null, PARAM_TEXT);
-    if(!empty($add)) {
-        $selected = optional_param('addselect', array(), PARAM_RAW);
-        if(!empty($selected)) {
-            mtgdistribute_saveselected($selected, 'add');
-            foreach ($selected as $value) {
-                $selectedcourses[$value] = $unselectedcourses[$value];
-            }
-        }
-        if(!empty($config->selected[0])) {
-            foreach ($config->selected as $value) {
-                $selectedcourses[$value] = $unselectedcourses[$value];
-            }
-        }
-        $unselectedcourses = array_diff_key($unselectedcourses, $selectedcourses);
-    } else if(!empty($remove)) {
-        $selected = optional_param('removeselect', array(), PARAM_RAW);
-        if (!empty($selected)) {
-            $config->selected = array_diff($config->selected, $selected);
-            mtgdistribute_saveselected($selected, 'remove');
-        }
-        if(!empty($config->selected)) {
-            foreach ($config->selected as $value) {
-                $selectedcourses[$value] = $unselectedcourses[$value];
-            }
-        }
-    } else {
-        mtgdistribute_clearselected();
-        if(!empty($config->selected[0])) {
-            foreach ($config->selected as $value) {
-                $selectedcourses[$value] = $unselectedcourses[$value];
-            }
-        }
-        $unselectedcourses = array_diff_key($unselectedcourses, $selectedcourses);
-    }
 
-}
+$table = new html_table('course_selector');
+$row = new html_table_row();
+$row->cells[] = $distributed_selector->display(true);
+$cell = html_writer::empty_tag('input', array('id' => 'report_targetgrades_calcbutton', 'name' => 'calculate', 'type' => 'submit', 'value' => $OUTPUT->larrow().' '.get_string('calculategrades', 'report_targetgrades')));
+$cell .= $OUTPUT->help_icon('calculategrades', 'report_targetgrades');
+$row->cells[] = $cell;
+$row->cells[] = $potential_selector->display(true);
+$table->data[] = $row;
 
-$navlinks = array();
-$navlinks[] = array('name' => get_string('mtgs', 'report_targetgrades'),
-                    'type' => 'misc');
-$navlinks[] = array('name' => get_string('mtgdistribute', 'report_targetgrades'),
-                    'type' => 'misc');
-$nav = build_navigation($navlinks);
-print_header_simple(get_string('mtgdistribute', 'report_targetgrades'), get_string('mtgdistribute', 'report_targetgrades'), $nav);
-mtgdistribute_print_tabs(2);
-?>
+$scales = $DB->get_records_menu('scale', null, null, 'id, name');
 
-<h2><?php get_string('mtgdistribute', 'report_targetgrades') ?></h2>
-<form id="distributeform" method="post" action="distribute.php">
-    <label for="defaultscale"><?php echo get_string('defaultscale', 'report_targetgrades'); ?></label>
-    <?php
-        $scales = $DB->get_records('scale');
-    ?>
-    <select name="defaultscale">
-        <option value=""></option>
-        <?php
-            foreach($scales as $scale) {
-                if (isset($config->defaultscale) && $scale->id == $config->defaultscale) {
-                    $selected = ' selected="selected"';
-                } else {
-                    $selected = '';
-                }
-                $args = array($scale->id, $scale->name.' ('.$scale->scale.')', $selected);
-                vprintf('<option value="%1$d"%3$s>%2$s</option>', $args);
-            }
-        ?>
-    </select><br />
-    <?php
-        print_string('defaultscaledesc', 'report_targetgrades');
-    ?>
-<div style="text-align:center;">
+$defaultscale = (isset($config->defaultscale)) ? $config->defaultscale : null;
 
-  <table summary="" style="margin-left:auto;margin-right:auto" border="0" cellpadding="5" cellspacing="0">
-    <tr>
-      <td valign="top">
-          <select name="removeselect[]" size="20" id="removeselect" multiple="multiple">
+echo $OUTPUT->header();
+tg\print_tabs(2);
 
-          <?php
-            $i = 0;
-            foreach ($selectedcourses as $course) {
-                if (!empty($course)) {
-                    echo '<option value="'.$course->id.'">'.$course->shortname.': '.$course->fullname.'</option>'."\n";
-                    $i++;
-                }
-            }
-            if ($i==0) {
-                echo '<option/>'; // empty select breaks xhtml strict
-            }
-          ?>
-
-          </select><br>
-            <input type="text" id="removeselect_search" onkeyup="removesearch()"><br>
-            <input type="submit" name="distribute" value="<?php print_string('distributegrades','report_targetgrades');?>" />
-
-          </td>
-      <td valign="top">
-        <br />
-
-        <?php check_theme_arrows(); ?>
-        <p class="arrow_button">
-            <input name="add" id="add" type="submit" value="<?php echo '&nbsp;&nbsp;&nbsp;'.$THEME->larrow.'&nbsp;'.get_string('add'); ?>" title="<?php print_string('add'); ?>" /><br />
-            <input name="remove" id="remove" type="submit" value="<?php echo '&nbsp;&nbsp;&nbsp;'.get_string('remove'). '&nbsp;'.$THEME->rarrow.'&nbsp;'; ?>" title="<?php print_string('remove'); ?>" />
-        </p>
-      </td>
-      <td valign="top">
-          <select name="addselect[]" size="20" id="addselect" multiple="multiple">
-       <?php
-            $i = 0;
-            foreach ($unselectedcourses as $course) {
-                echo '<option value="'.$course->id.'">'.$course->shortname.': '.$course->fullname.'</option>'."\n";
-                $i++;
-            }
-            if ($i==0) {
-                echo '<option/>'; // empty select breaks xhtml strict
-            }
-          ?>
-            </select><br>
-            <input type="text" id="addselect_search" onkeyup="addsearch()"><br />
-            <?php print_string('noalis', 'report_targetgrades'); ?>
-       </td>
-    </tr>
-  </table>
-</div>
-</form>
-<?php
-if(!empty($output)) {
+if (isset($output)) {
     echo $output;
 }
-?>
-<script type="text/javascript">
-function addsearch(){
-    searchbox = document.getElementById('addselect_search');
-    searchstring= new RegExp(searchbox.value,'gi');
-    var list = document.getElementById('addselect');
-    var i;
-    for (i = list.length - 1; i>=0; i--) {
-        if((list.options[i].text.search(searchstring) == -1)&&(searchbox.value!='')){
-            list.options[i].style.display="none";
-            list.appendChild(list.options[i]);//put to end so that not caught by shift-click
-        }else{
-            list.options[i].style.display="block";
-        }
 
-   }
-}
-function removesearch(){
-    searchbox = document.getElementById('removeselect_search');
-    searchstring= new RegExp(searchbox.value,'gi');
-    var list = document.getElementById('removeselect');
-    var i;
-    for (i = list.length - 1; i>=0; i--) {
-        if((list.options[i].text.search(searchstring) == -1)&&(searchbox.value!='')){
-            list.options[i].style.display="none";
-            list.appendChild(list.options[i]);//put to end so that not caught by shift-click
-        }else{
-            list.options[i].style.display="block";
-        }
+echo html_writer::start_tag('form', array('action' => $PAGE->url->out(), 'method' => 'post'));
+echo html_writer::tag('label', get_string('defaultscale', 'report_targetgrades'), array('for' => 'defaultscale'));
+echo html_writer::select($scales, 'report_targetgrades', $defaultscale);
+echo $OUTPUT->help_icon('defaultscale', 'report_targetgrades');
+echo html_writer::table($table);
+echo html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'recalculate', 'value' => get_string('recalculate', 'report_targetgrades')));
+echo $OUTPUT->help_icon('recalculate', 'report_targetgrades');
+echo html_writer::end_tag('form');
 
-   }
-}
-</script>
-
-<?php
-
-print_footer();
-
+echo $OUTPUT->footer();
 
 ?>

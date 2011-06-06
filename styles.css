@@ -1,0 +1,21 @@
+.tg_okquality {
+    font-size: 2em;
+    font-weight: bold;
+    color: green;
+}
+
+.tg_lowquality {
+    font-size: 2em;
+    font-weight:bold;
+    color:gold;
+}
+
+.tg_vlowquality {
+    font-size: 2em;
+    font-weight:bold;
+    color: red;
+}
+
+#report_targetgrades_calcbutton {
+    margin-top: 100%;
+}
