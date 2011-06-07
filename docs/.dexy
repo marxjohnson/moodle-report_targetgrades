@@ -4,5 +4,6 @@
     },
     "*.sh|bash" : {},
     "*.sh|pyg" : {},
-    "*.css|dexy" : {}
+    "*.css|dexy" : {},
+    "*.php|php" : {}
 }

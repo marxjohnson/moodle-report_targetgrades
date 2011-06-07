@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <link src="pastie.css" type="text/css" rel="stylesheet" />
+        <title>Target Grades - Database</title>
+    </head>
+    <body>
+        <h1>Target Grades</h1>
+        <h2>Database</h2>
+        
+        <h3>mdl_report_targetgrades_alisdata</h3>
+        <pre>+---------------------+-----------------------+------+-----+---------+----------------+
+| Field               | Type                  | Null | Key | Default | Extra          |
++---------------------+-----------------------+------+-----+---------+----------------+
+| id                  | bigint(10) unsigned   | NO   | PRI | NULL    | auto_increment |
+| name                | text                  | YES  |     | NULL    |                |
+| qualtypeid          | bigint(10) unsigned   | NO   |     | NULL    |                |
+| samplesize          | mediumint(6) unsigned | NO   |     | NULL    |                |
+| gradient            | decimal(6,2)          | YES  |     | NULL    |                |
+| intercept           | decimal(6,2)          | YES  |     | NULL    |                |
+| correlation         | decimal(3,2)          | YES  |     | NULL    |                |
+| standarddeviation   | decimal(6,2) unsigned | NO   |     | NULL    |                |
+| quality_samplesize  | tinyint(1) unsigned   | NO   |     | 0       |                |
+| quality_correlation | tinyint(1) unsigned   | NO   |     | 0       |                |
+| quality_deviation   | tinyint(1) unsigned   | NO   |     | 0       |                |
++---------------------+-----------------------+------+-----+---------+----------------+
+</pre>
+        <p>This table contains the data extracted from the uploaded CSV file.  The name and raw statistics are stored in the <tt>name</tt>, <tt>samplesize</tt>, <tt>gradient</tt>, <tt>intercept</tt>, <tt>correlation</tt>, <tt>standarddeviation</tt> fields.  The <tt>quality_*</tt> fields are used to store flags indicating that there may be issues with the quality of the statistics. <tt>qualtypeid</tt> is a foreign key linking to the <tt>qualtype</tt> table, to associate these statistics with the appropriate grade scale and grade boundaries.</p> 
+        
+        <h3>mdl_report_targetgrades_qualtypes</h3>
+        <pre>+---------+---------------------+------+-----+---------+----------------+
+| Field   | Type                | Null | Key | Default | Extra          |
++---------+---------------------+------+-----+---------+----------------+
+| id      | bigint(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name    | varchar(255)        | YES  |     | NULL    |                |
+| scaleid | bigint(10) unsigned | YES  |     | NULL    |                |
++---------+---------------------+------+-----+---------+----------------+
+</pre>
+        <p>This table contains the various types of qualification tracked by ALIS's statistics.  The table is built when the report is installed, using the constants in lib.php.  <tt>name</tt> stores the name of the qualification as used by ALIS, and <tt>scaleid</tt> links to the record in the <tt>scale</tt> table for this qualification that was created on install.</p>
+        
+        <h3>mdl_report_targetgrades_patterns</h3>
+        <pre>+------------+---------------------+------+-----+---------+----------------+
+| Field      | Type                | Null | Key | Default | Extra          |
++------------+---------------------+------+-----+---------+----------------+
+| id         | bigint(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| alisdataid | bigint(10) unsigned | YES  |     | NULL    |                |
+| pattern    | text                | YES  |     | NULL    |                |
++------------+---------------------+------+-----+---------+----------------+
+</pre>
+        <p>This table stores the association between a set of courses (grouped by the group_field set in the report's config) and a set of alis statistics.  <tt>alisdataid</tt> links to the set of stats in the <tt>alisdata</tt> table, and <tt>pattern</tt> holds the pattern that is matched against the group_field.</p>
+    </body>
+</html>
