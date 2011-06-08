@@ -1,10 +1,190 @@
 <html>
     <head>
+        <link rel="stylesheet" type="text/css" href="pastie.css" />
         <title>Target Grades</title>
     </head>
     <body>
         <ul>
-            {{ d['list.php|php']}}
+            <li><a href="architecture.html">Architecture</a></li>
+<li><a href="database.html">Database</a></li>
+
         </ul>   
+        <div class="highlight"><pre><a name="l-1"></a><span class="cp">&lt;?php</span>
+<a name="l-2"></a><span class="c1">// This file is part of Moodle - http://moodle.org/</span>
+<a name="l-3"></a><span class="c1">//</span>
+<a name="l-4"></a><span class="c1">// Moodle is free software: you can redistribute it and/or modify</span>
+<a name="l-5"></a><span class="c1">// it under the terms of the GNU General Public License as published by</span>
+<a name="l-6"></a><span class="c1">// the Free Software Foundation, either version 3 of the License, or</span>
+<a name="l-7"></a><span class="c1">// (at your option) any later version.</span>
+<a name="l-8"></a><span class="c1">//</span>
+<a name="l-9"></a><span class="c1">// Moodle is distributed in the hope that it will be useful,</span>
+<a name="l-10"></a><span class="c1">// but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<a name="l-11"></a><span class="c1">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<a name="l-12"></a><span class="c1">// GNU General Public License for more details.</span>
+<a name="l-13"></a><span class="c1">//</span>
+<a name="l-14"></a><span class="c1">// You should have received a copy of the GNU General Public License</span>
+<a name="l-15"></a><span class="c1">// along with Moodle.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<a name="l-16"></a>
+<a name="l-17"></a>
+<a name="l-18"></a><span class="sd">/**</span>
+<a name="l-19"></a><span class="sd"> * Defines the form for uploading ALIS data</span>
+<a name="l-20"></a><span class="sd"> *</span>
+<a name="l-21"></a><span class="sd"> * @package report</span>
+<a name="l-22"></a><span class="sd"> * @subpackage targetgrades</span>
+<a name="l-23"></a><span class="sd"> * @author      Mark Johnson &lt;mark.johnson@tauntons.ac.uk&gt;</span>
+<a name="l-24"></a><span class="sd"> * @copyright   2011 Tauntons College, UK</span>
+<a name="l-25"></a><span class="sd"> * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later</span>
+<a name="l-26"></a><span class="sd"> */</span> 
+<a name="l-27"></a> 
+<a name="l-28"></a><span class="k">namespace</span> <span class="nx">report\targetgrades</span><span class="p">;</span>
+<a name="l-29"></a>
+<a name="l-30"></a><span class="k">require_once</span><span class="p">(</span><span class="nv">$CFG</span><span class="o">-&gt;</span><span class="na">libdir</span><span class="o">.</span><span class="s1">&#39;/formslib.php&#39;</span><span class="p">);</span>
+<a name="l-31"></a>
+<a name="l-32"></a><span class="sd">/**</span>
+<a name="l-33"></a><span class="sd"> * The upload form&#39;s class for uploading ALIS data</span>
+<a name="l-34"></a><span class="sd"> */</span>
+<a name="l-35"></a><span class="k">class</span> <span class="nc">alisdata_upload_form</span> <span class="k">extends</span> <span class="nx">\moodleform</span> <span class="p">{</span>
+<a name="l-36"></a>
+<a name="l-37"></a>    <span class="sd">/**</span>
+<a name="l-38"></a><span class="sd">     * Define the form for uploading the ALIS data as a CSV file. </span>
+<a name="l-39"></a><span class="sd">     */</span>
+<a name="l-40"></a>    <span class="k">public</span> <span class="k">function</span> <span class="nf">definition</span><span class="p">()</span> <span class="p">{</span>
+<a name="l-41"></a>        <span class="nv">$mform</span>    <span class="o">=&amp;</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_form</span><span class="p">;</span>
+<a name="l-42"></a>        <span class="nv">$mform</span><span class="o">-&gt;</span><span class="na">addElement</span><span class="p">(</span><span class="s1">&#39;filepicker&#39;</span><span class="p">,</span> <span class="s1">&#39;equationsfile&#39;</span><span class="p">,</span> <span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;equationsfile&#39;</span><span class="p">,</span> <span class="s1">&#39;report_targetgrades&#39;</span><span class="p">));</span>
+<a name="l-43"></a>        <span class="nv">$mform</span><span class="o">-&gt;</span><span class="na">addElement</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="s1">&#39;filedesc&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;equationsfiledesc&#39;</span><span class="p">,</span> <span class="s1">&#39;report_targetgrades&#39;</span><span class="p">));</span>
+<a name="l-44"></a>        <span class="nv">$mform</span><span class="o">-&gt;</span><span class="na">addElement</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">,</span> <span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;upload&#39;</span><span class="p">));</span>
+<a name="l-45"></a>    <span class="p">}</span>
+<a name="l-46"></a><span class="p">}</span>
+<a name="l-47"></a>
+<a name="l-48"></a><span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+
+        <div class="highlight"><pre><a name="l-1"></a><span class="cp">&lt;?php</span>
+<a name="l-2"></a><span class="c1">// This file is part of Moodle - http://moodle.org/</span>
+<a name="l-3"></a><span class="c1">//</span>
+<a name="l-4"></a><span class="c1">// Moodle is free software: you can redistribute it and/or modify</span>
+<a name="l-5"></a><span class="c1">// it under the terms of the GNU General Public License as published by</span>
+<a name="l-6"></a><span class="c1">// the Free Software Foundation, either version 3 of the License, or</span>
+<a name="l-7"></a><span class="c1">// (at your option) any later version.</span>
+<a name="l-8"></a><span class="c1">//</span>
+<a name="l-9"></a><span class="c1">// Moodle is distributed in the hope that it will be useful,</span>
+<a name="l-10"></a><span class="c1">// but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<a name="l-11"></a><span class="c1">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<a name="l-12"></a><span class="c1">// GNU General Public License for more details.</span>
+<a name="l-13"></a><span class="c1">//</span>
+<a name="l-14"></a><span class="c1">// You should have received a copy of the GNU General Public License</span>
+<a name="l-15"></a><span class="c1">// along with Moodle.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<a name="l-16"></a>
+<a name="l-17"></a>
+<a name="l-18"></a><span class="sd">/**</span>
+<a name="l-19"></a><span class="sd"> * Defines english strings for the targetgrades report</span>
+<a name="l-20"></a><span class="sd"> *</span>
+<a name="l-21"></a><span class="sd"> * @package report</span>
+<a name="l-22"></a><span class="sd"> * @subpackage targetgrades</span>
+<a name="l-23"></a><span class="sd"> * @author      Mark Johnson &lt;mark.johnson@tauntons.ac.uk&gt;</span>
+<a name="l-24"></a><span class="sd"> * @copyright   2011 Tauntons College, UK</span>
+<a name="l-25"></a><span class="sd"> * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later</span>
+<a name="l-26"></a><span class="sd"> */</span> 
+<a name="l-27"></a> 
+<a name="l-28"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;alisdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Upload ALIS data&#39;</span><span class="p">;</span>
+<a name="l-29"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;calculategrades&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Calculate Target Grades&#39;</span><span class="p">;</span>
+<a name="l-30"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;calculategrades_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Clicking this button will add 4 grade items to each of the courses selected from the list on the right - Average GCSE Points, ALIS Points, Minimum Grade and Target Grade.</span>
+<a name="l-31"></a>
+<a name="l-32"></a><span class="s1">If a set of ALIS statistics has been linked to a pattern matching a course, a Minimum Grade will be calculated for each student. The raw points score will be stored in the ALIS Points item, and the grade in the Minimum Grade item. The Target Grade will be left blank, to be filled in with an individual target for that student, using the Minimum Grade as a guide.</span>
+<a name="l-33"></a>
+<a name="l-34"></a><span class="s1">Courses marked with a * have no statistics linked to them, so will just have grade items added.&#39;</span><span class="p">;</span>
+<a name="l-35"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;cantreadcsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The CSV file could not be read! Try uploading /.&#39;</span><span class="p">;</span>
+<a name="l-36"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;categories&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Categories for Distribution&#39;</span><span class="p">;</span>
+<a name="l-37"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;categories_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Only courses checked will be available for MTG distribution. Disable those you don\&#39;t need to make the list more manageable&#39;</span><span class="p">;</span>
+<a name="l-38"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Course Name&#39;</span><span class="p">;</span>
+<a name="l-39"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_pattern&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Apply stats to pattern&#39;</span><span class="p">;</span>
+<a name="l-40"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_gradient&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Gradient&#39;</span><span class="p">;</span>
+<a name="l-41"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_intercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Intercept&#39;</span><span class="p">;</span>
+<a name="l-42"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_qualtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Qualification&#39;</span><span class="p">;</span>
+<a name="l-43"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_quality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Quality&#39;</span><span class="p">;</span>
+<a name="l-44"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;col_quality_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;This column indicates the quality of the statistics.  This should be used when considering whether Target Grades should be calculated for each subject, since low quality statistics may not produce meaningful Target Grades. </span>
+<a name="l-45"></a>
+<a name="l-46"></a><span class="s1">An S indicates a below average sample size. This means that the statistics were calculated from a small number of actual grades.  Without knowing how many students took each subject, it\&#39;s hard to determine confidence from sample size, so this indicator should be considered in the context of other indicators that may be present.</span>
+<a name="l-47"></a>
+<a name="l-48"></a><span class="s1">A C indicates low correlation (&lt;0.3, where 0.6-0.7 is considered strong).  This means that the actual results gathered don\&#39;t follow the line described by the statistics to a large degree.</span>
+<a name="l-49"></a>
+<a name="l-50"></a><span class="s1">A D indicates a high standard deviation.  This means that, while the trend of actual grades may match the line described by the statistics, the grades themselves are generally not on or close to the line itself.</span>
+<a name="l-51"></a>
+<a name="l-52"></a><span class="s1">Each of these indicators should be considered in context when deciding which subjects to calculate target grades for. For example, a below average sample size doesn\&#39;t mean statistics should be automatically disregarded. However, where there is a combination of quality issues such as a very high standard deviation and a low correlation, it\&#39;s unlikely that grades calculated from the statistics would have any meaning.&#39;</span><span class="p">;</span>
+<a name="l-53"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;configtitle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Configure Target Grades Report&#39;</span><span class="p">;</span>
+<a name="l-54"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;configalis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ALIS (Advanced Level Information System) data is used to calculate minimum target grades for students based on their average GCSE score and past statistics for the relevant course.&lt;br /&gt;</span>
+<a name="l-55"></a><span class="s1">                        Latest data can be downloaded &lt;a href=&quot;https://css.cemcentre.org/ALIS/Site/reports/default.aspx?reptype=6&quot;&gt;here&lt;/a&gt; in PDF format. This must be converted to CSV format using the script included with this report before uploading.&#39;</span><span class="p">;</span>
+<a name="l-56"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;configgradient&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Gradient&#39;</span><span class="p">;</span>
+<a name="l-57"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;configintercept&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Intercept&#39;</span><span class="p">;</span>
+<a name="l-58"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;courseswithgrades&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Courses with Target Grade items&#39;</span><span class="p">;</span>
+<a name="l-59"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;courseswithoutgrades&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Courses without Target Grade items&#39;</span><span class="p">;</span>
+<a name="l-60"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;createdgis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Grade items created&#39;</span><span class="p">;</span>
+<a name="l-61"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;equationsfile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ALIS Equations file&#39;</span><span class="p">;</span>
+<a name="l-62"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;equationsfiledesc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;This MUST be a CSV file produced using alis_pdf2csv.sh, included with this report&#39;</span><span class="p">;</span>
+<a name="l-63"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;exclude_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Exclude courses where:&#39;</span><span class="p">;</span>
+<a name="l-64"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;exclude_regex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;matches pattern:&#39;</span><span class="p">;</span>
+<a name="l-65"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;exclude_regexdesc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Exclude Regex&#39;</span><span class="p">;</span>
+<a name="l-66"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;exclude_regexdesc_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Must be a valid Regular Expression. Any courses matching this pattern will be excluded, and will NOT be available for distribution.&lt;br /&gt;Use this to make the distribution list more manageable.&#39;</span><span class="p">;</span>
+<a name="l-67"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;explainpatterns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;A list of patterns has been generated based on the crietria defined in the report\&#39;s settings, and the courses currently on the system. Selecting a pattern for a row in the table will apply those statistics to courses matching that pattern. Currently the pattern matches the first {$a-&gt;group_length} characters of {$a-&gt;group_field}&#39;</span><span class="p">;</span>
+<a name="l-68"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;defaultscale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Default grade scale&#39;</span><span class="p">;</span>
+<a name="l-69"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;defaultscale_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;This scale will be applied to grade items in all courses with no configured ALIS Data. They can be changed after distribution in each course\&#39;s gradebook&#39;</span><span class="p">;</span>
+<a name="l-70"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;distribute_success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Grade items distributed to {$a} courses successfully&#39;</span><span class="p">;</span>
+<a name="l-71"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;distribute_empty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;{$a} courses were ignored, becuase they have no students&#39;</span><span class="p">;</span>
+<a name="l-72"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;distribute_unconfigured&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;{$a} courses were ignored, becuase they have no ALIS data&#39;</span><span class="p">;</span>
+<a name="l-73"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;distribute_noavgcse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;{$a} students were ignored, because they have no Average GCSE score&#39;</span><span class="p">;</span>
+<a name="l-74"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;distribute_failedcalc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;{$a} grade calculations failed.&#39;</span><span class="p">;</span>
+<a name="l-75"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;err_gcsefield&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;You must select a field&#39;</span><span class="p">;</span>
+<a name="l-76"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;err_nouserfields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;This report needs a User Profile Field to be defined to hold students\&#39; Average GCSE points score. Please define one before attempting to configure the report&#39;</span><span class="p">;</span> 
+<a name="l-77"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;err_group_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;If you define a group field you must define a group length&#39;</span><span class="p">;</span>
+<a name="l-78"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;err_group_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;If you define a group length you must define a group field&#39;</span><span class="p">;</span>
+<a name="l-79"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;err_exclude_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;If you define an exclude pattern you must define a field to check&#39;</span><span class="p">;</span>
+<a name="l-80"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;gcse_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Average GCSE field&#39;</span><span class="p">;</span>
+<a name="l-81"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;gcse_field_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Select the user profile field where the user\&#39;s average GCSE score is stored (as a number from 0-8).&#39;</span><span class="p">;</span>
+<a name="l-82"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;gradesentered&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Grades Entered&#39;</span><span class="p">;</span>
+<a name="l-83"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;group_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Group Courses By:&#39;</span><span class="p">;</span>
+<a name="l-84"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;group_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;characters of&#39;</span><span class="p">;</span>
+<a name="l-85"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;group_fielddesc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Grouping field&#39;</span><span class="p">;</span>
+<a name="l-86"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;group_fielddesc_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;These settings allow you to apply a set of ALIS statistics to all courses that match the specified pattern. For example, you may have 3 classes in each A level which share the first 5 characters of their shortname.&#39;</span><span class="p">;</span>
+<a name="l-87"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;highdeviation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The deviation of actual results from these statistics is typically more than 1 grade boundary.  Target Grades calulated using these statistics may not be reliable&#39;</span><span class="p">;</span>
+<a name="l-88"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;item_avgcse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Average GCSE&#39;</span><span class="p">;</span>
+<a name="l-89"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;item_alisnum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ALIS Number&#39;</span><span class="p">;</span>
+<a name="l-90"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;item_alis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Minimum Grade&#39;</span><span class="p">;</span>
+<a name="l-91"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;item_cpg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Current Performance Grade&#39;</span><span class="p">;</span>
+<a name="l-92"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;item_mtg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Target Grade&#39;</span><span class="p">;</span>
+<a name="l-93"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;importoutput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Imported {$a-&gt;qualcount} new qualification types, and {$a-&gt;subjectcount} new subjects. Updated {$a-&gt;updatecount} subjects.&#39;</span><span class="p">;</span>
+<a name="l-94"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;lowsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The sample size for this subject ({$a}) is less than half of the average.&#39;</span><span class="p">;</span>
+<a name="l-95"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;lowcorrelation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The correlation of actual results to these statistics is low ({$a}). Target Grades calculated using these statistics may not be reliable.&#39;</span><span class="p">;</span>
+<a name="l-96"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;mtgs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Minimum Target Grades&#39;</span><span class="p">;</span>
+<a name="l-97"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;mtgdistribute&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Distribute Target Grades&#39;</span><span class="p">;</span>
+<a name="l-98"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;needsconfig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;This report is not configured. You must select at least a gcse_field, roles and categories on the report\&#39;s settings page.&#39;</span><span class="p">;</span>
+<a name="l-99"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;needsalis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;You must at least import ALIS data before you can distrbute grades.&#39;</span><span class="p">;</span>
+<a name="l-100"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;noconfig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Some ALIS data is missing - please configure the report&#39;</span><span class="p">;</span>
+<a name="l-101"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;noalis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;*No ALIS Data - grade items will be created, but no MTG calculated.&#39;</span><span class="p">;</span>
+<a name="l-102"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;nostuds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;No Students - ignored&#39;</span><span class="p">;</span>
+<a name="l-103"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;nogrades&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;missing data - MTG not calculated&#39;</span><span class="p">;</span>
+<a name="l-104"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;nogradescale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;No grade scale was found for {$a}, and no default scale has been specified.&#39;</span><span class="p">;</span>
+<a name="l-105"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;distributegrades&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Distribute Target Grades&#39;</span><span class="p">;</span>
+<a name="l-106"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;noperms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;You don\&#39;t have permission to use this function!&#39;</span><span class="p">;</span>
+<a name="l-107"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;okquality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;These statistics are of sufficient quality to calculate a Target Grade&#39;</span><span class="p">;</span>
+<a name="l-108"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;oksize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The sample size for this subject ({$a}) is below average. However, these stats should still be OK for calulating Target Grades.&#39;</span><span class="p">;</span>
+<a name="l-109"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;pluginname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Target Grades&#39;</span><span class="p">;</span>
+<a name="l-110"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;settingssaved&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Settings Saved&#39;</span><span class="p">;</span>
+<a name="l-111"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;unsaferegex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The exclusion pattern you entered in the report\&#39;s settings is unsafe and may overload the server. Matching it will not be attempted until you have edited it. Please see http://www.regular-expressions.info/catastrophic.html for more details.&#39;</span><span class="p">;</span>
+<a name="l-112"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;uploadalis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Upload ALIS data&#39;</span><span class="p">;</span>
+<a name="l-113"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;recalculate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Recalculate existing grades&#39;</span><span class="p">;</span>
+<a name="l-114"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;recalculate_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Clicking this button will recalulate ALIS points and Minimum Grades for all courses on the left hand list (those that already have the grade items). </span>
+<a name="l-115"></a>
+<a name="l-116"></a><span class="s1">For example, if you\&#39;ve changed the statistics associated with a pattern, this will replace the grades with those calculated using the new statistics.&#39;</span><span class="p">;</span>
+<a name="l-117"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;roles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Use Roles&#39;</span><span class="p">;</span>
+<a name="l-118"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;roles_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The report will attempt to distribute to users with these roles on each selected course.&#39;</span><span class="p">;</span>
+<a name="l-119"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;searchresults&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Search Results&#39;</span><span class="p">;</span>
+<a name="l-120"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;settingssaved&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Settings Saved&#39;</span><span class="p">;</span>
+<a name="l-121"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;wrongcolcsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The CSV file has the wrong number of columns on line {$a} - It should either have 1 column for a subject type heading, or 6 for a set of statistics.&#39;</span><span class="p">;</span>
+<a name="l-122"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;vlowsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;The sample size for these statisics ({$a}) is less than a quarter of the average.&#39;</span><span class="p">;</span>
+<a name="l-123"></a><span class="nv">$string</span><span class="p">[</span><span class="s1">&#39;vhighdeviation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Results typically deviate from these statistics by more than 2 grade boundaries.  Target Grades calulated using these statistics are unlikely to be reliable.&#39;</span><span class="p">;</span>
+<a name="l-124"></a>
+<a name="l-125"></a><span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+
     </body>
 </html>

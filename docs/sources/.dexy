@@ -1,0 +1,8 @@
+{
+	"*.html|jinja": {
+		"allinputs": true
+	},
+	"*.sh|bash|idio": {},
+	"*.php|php": {},
+	"*.css|cp": {}
+}

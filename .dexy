@@ -1,9 +1,7 @@
 {
-    "*.html|jinja" : {
-	"allinputs": true
-    },
-    "*.sh|bash" : {},
-    "*.sh|pyg" : {},
-    "*.css|dexy" : {},
-    "*.php|php" : {}
+    "*.sh|pyg" : {},        
+    "*.php|idio" : {},
+    "debug.txt|jinja" : {
+    "allinputs" : true
+  	}
 }
