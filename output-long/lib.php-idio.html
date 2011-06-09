@@ -1,0 +1,1131 @@
+<div class="highlight"><pre><a name="l-1"></a><span class="cp">&lt;?php</span>
+<a name="l-2"></a><span class="c1">// This file is part of Moodle - http://moodle.org/</span>
+<a name="l-3"></a><span class="c1">//</span>
+<a name="l-4"></a><span class="c1">// Moodle is free software: you can redistribute it and/or modify</span>
+<a name="l-5"></a><span class="c1">// it under the terms of the GNU General Public License as published by</span>
+<a name="l-6"></a><span class="c1">// the Free Software Foundation, either version 3 of the License, or</span>
+<a name="l-7"></a><span class="c1">// (at your option) any later version.</span>
+<a name="l-8"></a><span class="c1">//</span>
+<a name="l-9"></a><span class="c1">// Moodle is distributed in the hope that it will be useful,</span>
+<a name="l-10"></a><span class="c1">// but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<a name="l-11"></a><span class="c1">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<a name="l-12"></a><span class="c1">// GNU General Public License for more details.</span>
+<a name="l-13"></a><span class="c1">//</span>
+<a name="l-14"></a><span class="c1">// You should have received a copy of the GNU General Public License</span>
+<a name="l-15"></a><span class="c1">// along with Moodle.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<a name="l-16"></a>
+<a name="l-17"></a>
+<a name="l-18"></a><span class="sd">/**</span>
+<a name="l-19"></a><span class="sd"> * Library of functions, classes and constants for Target Grade distribution</span>
+<a name="l-20"></a><span class="sd"> *</span>
+<a name="l-21"></a><span class="sd"> * @package report</span>
+<a name="l-22"></a><span class="sd"> * @subpackage targetgrades</span>
+<a name="l-23"></a><span class="sd"> * @author      Mark Johnson &lt;mark.johnson@tauntons.ac.uk&gt;</span>
+<a name="l-24"></a><span class="sd"> * @copyright   2011 Tauntons College, UK</span>
+<a name="l-25"></a><span class="sd"> * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later</span>
+<a name="l-26"></a><span class="sd"> */</span> 
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">namespace report\targetgrades;</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * These constants store the strings used by ALIS to describe each type of</span>
+<a name="l-3"></a><span class="x"> * qualification that statistics are available for.</span>
+<a name="l-4"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">const ALIS_GCSE = &#39;GCSE&#39;;</span>
+<a name="l-2"></a><span class="x">const ALIS_ADVANCED_GCE = &#39;Advanced GCE&#39;;</span>
+<a name="l-3"></a><span class="x">const ALIS_ADVANCED_GCE_DOUBLE = &#39;Advanced GCE (Double Award)&#39;;</span>
+<a name="l-4"></a><span class="x">const ALIS_ADVANCED_SUBSIDIARY_GCE = &#39;Advanced Subsidiary GCE&#39;;</span>
+<a name="l-5"></a><span class="x">const ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE = &#39;Advanced Subsidiary GCE (Double Award)&#39;;</span>
+<a name="l-6"></a><span class="x">const ALIS_INTERMEDIATE_GNVQ = &#39;Intermediate GNVQ&#39;;</span>
+<a name="l-7"></a><span class="x">const ALIS_IB_STANDARD = &#39;IB Standard&#39;;</span>
+<a name="l-8"></a><span class="x">const ALIS_IB_HIGHER = &#39;IB Higher&#39;;</span>
+<a name="l-9"></a><span class="x">const ALIS_CACHE_L3_DIPLOMA = &#39;CACHE Level 3 Diploma&#39;;</span>
+<a name="l-10"></a><span class="x">const ALIS_OCR_NATIONAL_CERTIFICATE = &#39;OCR National Certificate&#39;;</span>
+<a name="l-11"></a><span class="x">const ALIS_OCR_NATIONAL_DIPLOMA = &#39;OCR National Diploma&#39;;</span>
+<a name="l-12"></a><span class="x">const ALIS_BTEC_NATIONAL_AWARD = &#39;BTEC National Award&#39;;</span>
+<a name="l-13"></a><span class="x">const ALIS_BTEC_NATIONAL_CERTIFICATE = &#39;BTEC National Certificate&#39;;</span>
+<a name="l-14"></a><span class="x">const ALIS_BTEC_NATIONAL_DIPLOMA = &#39;BTEC National Diploma&#39;;</span>
+<a name="l-15"></a><span class="x">const ALIS_BTEC_FIRST_DIPLOMA = &#39;BTEC First Diploma&#39;;</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * These constants define the various grade scales required for the above</span>
+<a name="l-3"></a><span class="x"> * qualifications. Only unique scales are stored here, e.g. the CACHE L3 diploma</span>
+<a name="l-4"></a><span class="x"> * can use MTG_SCALE_ADVANCED_SUBSIDIARY_GCE as they are the same.</span>
+<a name="l-5"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">const MTG_SCALE_GCSE = &#39;U,G,F,E,D,C,B,A,A*&#39;;</span>
+<a name="l-2"></a><span class="x">const MTG_SCALE_ADVANCED_GCE = &#39;U,E,D,C,B,A,A*&#39;;</span>
+<a name="l-3"></a><span class="x">const MTG_SCALE_ADVANCED_SUBSIDIARY_GCE = &#39;U,E,D,C,B,A,A*&#39;;</span>
+<a name="l-4"></a><span class="x">const MTG_SCALE_BTEC_AWARD = &#39;Fail,Pass,Merit,Distinction&#39;;</span>
+<a name="l-5"></a><span class="x">const MTG_SCALE_BTEC_CERTIFICATE = &#39;Fail,PP,MP,MM,DM,DD&#39;;</span>
+<a name="l-6"></a><span class="x">const MTG_SCALE_BTEC_DIPLOMA = &#39;Fail,PPP,MPP,MMP,MMM,DMM,DDM,DDD&#39;;</span>
+<a name="l-7"></a><span class="x">const MTG_SCALE_ADVANCED_GCE_DOUBLE = &#39;U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*&#39;;</span>
+<a name="l-8"></a><span class="x">const MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE = &#39;U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*&#39;;</span>
+<a name="l-9"></a><span class="x">const MTG_SCALE_IB = &#39;1,2,3,4,5,6,7&#39;;</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * The threshold under which to mark stats has having low correlations</span>
+<a name="l-3"></a><span class="x"> * @var float</span>
+<a name="l-4"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">const CORRELATION_THRESHOLD = 0.3;</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Returns the grade scale for the provided qualification type.</span>
+<a name="l-3"></a><span class="x"> * </span>
+<a name="l-4"></a><span class="x"> * @param string $qualtype </span>
+<a name="l-5"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function get_scale($qualtype) {</span>
+<a name="l-2"></a><span class="x">    switch ($qualtype) {</span>
+<a name="l-3"></a><span class="x">        case ALIS_GCSE:</span>
+<a name="l-4"></a><span class="x">            return MTG_SCALE_GCSE;</span>
+<a name="l-5"></a><span class="x">            break;</span>
+<a name="l-6"></a>
+<a name="l-7"></a><span class="x">        case ALIS_ADVANCED_GCE:</span>
+<a name="l-8"></a><span class="x">            return MTG_SCALE_ADVANCED_GCE;</span>
+<a name="l-9"></a><span class="x">            break;</span>
+<a name="l-10"></a>
+<a name="l-11"></a><span class="x">        case ALIS_ADVANCED_GCE_DOUBLE:</span>
+<a name="l-12"></a><span class="x">            return MTG_SCALE_ADVANCED_GCE_DOUBLE;</span>
+<a name="l-13"></a><span class="x">            break;</span>
+<a name="l-14"></a>
+<a name="l-15"></a><span class="x">        case ALIS_ADVANCED_SUBSIDIARY_GCE:</span>
+<a name="l-16"></a><span class="x">            return MTG_SCALE_ADVANCED_SUBSIDIARY_GCE;</span>
+<a name="l-17"></a><span class="x">            break;</span>
+<a name="l-18"></a>
+<a name="l-19"></a><span class="x">        case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE:</span>
+<a name="l-20"></a><span class="x">            return MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE;</span>
+<a name="l-21"></a><span class="x">            break;</span>
+<a name="l-22"></a>
+<a name="l-23"></a><span class="x">        case ALIS_INTERMEDIATE_GNVQ:</span>
+<a name="l-24"></a><span class="x">            // TODO: Work out what this should be</span>
+<a name="l-25"></a><span class="x">            return false;</span>
+<a name="l-26"></a><span class="x">            break;</span>
+<a name="l-27"></a>
+<a name="l-28"></a><span class="x">        case ALIS_IB_STANDARD:</span>
+<a name="l-29"></a><span class="x">            return MTG_SCALE_IB;</span>
+<a name="l-30"></a><span class="x">            break;</span>
+<a name="l-31"></a>
+<a name="l-32"></a><span class="x">        case ALIS_IB_HIGHER:</span>
+<a name="l-33"></a><span class="x">            return MTG_SCALE_IB;</span>
+<a name="l-34"></a><span class="x">            break;</span>
+<a name="l-35"></a>
+<a name="l-36"></a><span class="x">        case ALIS_CACHE_L3_DIPLOMA:</span>
+<a name="l-37"></a><span class="x">            return MTG_SCALE_ADVANCED_SUBSIDIARY_GCE;</span>
+<a name="l-38"></a><span class="x">            break;</span>
+<a name="l-39"></a>
+<a name="l-40"></a><span class="x">        case ALIS_OCR_NATIONAL_CERTIFICATE:</span>
+<a name="l-41"></a><span class="x">            return MTG_SCALE_BTEC_AWARD;</span>
+<a name="l-42"></a><span class="x">            break;</span>
+<a name="l-43"></a>
+<a name="l-44"></a><span class="x">        case ALIS_OCR_NATIONAL_DIPLOMA:</span>
+<a name="l-45"></a><span class="x">            return MTG_SCALE_BTEC_CERTIFICATE;</span>
+<a name="l-46"></a><span class="x">            break;</span>
+<a name="l-47"></a>
+<a name="l-48"></a><span class="x">        case ALIS_BTEC_NATIONAL_AWARD:</span>
+<a name="l-49"></a><span class="x">            return MTG_SCALE_BTEC_AWARD;</span>
+<a name="l-50"></a><span class="x">            break;</span>
+<a name="l-51"></a>
+<a name="l-52"></a><span class="x">        case ALIS_BTEC_NATIONAL_CERTIFICATE:</span>
+<a name="l-53"></a><span class="x">            return MTG_SCALE_BTEC_CERTIFICATE;</span>
+<a name="l-54"></a><span class="x">            break;</span>
+<a name="l-55"></a>
+<a name="l-56"></a><span class="x">        case ALIS_BTEC_NATIONAL_DIPLOMA:</span>
+<a name="l-57"></a><span class="x">            return MTG_SCALE_BTEC_DIPLOMA;</span>
+<a name="l-58"></a><span class="x">            break;</span>
+<a name="l-59"></a>
+<a name="l-60"></a><span class="x">        case ALIS_BTEC_FIRST_DIPLOMA:</span>
+<a name="l-61"></a><span class="x">            return MTG_SCALE_BTEC_AWARD;</span>
+<a name="l-62"></a><span class="x">            break;</span>
+<a name="l-63"></a><span class="x">    }</span>
+<a name="l-64"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Gets the config data for the plugin with arrays unserialized.</span>
+<a name="l-3"></a><span class="x"> * </span>
+<a name="l-4"></a><span class="x"> * Will normally only query the database the first time it&#39;s run, subsequent requests</span>
+<a name="l-5"></a><span class="x"> * will just return the static $config. However, this behaviour can be overridden using</span>
+<a name="l-6"></a><span class="x"> * the $force parameter, to ensure the data is fresh. </span>
+<a name="l-7"></a><span class="x"> * </span>
+<a name="l-8"></a><span class="x"> * @param $force bool Force a fresh query on the database (defaults to false)</span>
+<a name="l-9"></a><span class="x"> * @return object The config data.</span>
+<a name="l-10"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function get_config($force = false) {</span>
+<a name="l-2"></a><span class="x">    static $config;</span>
+<a name="l-3"></a><span class="x">    if (empty($config) || $force) {</span>
+<a name="l-4"></a><span class="x">        $config = \get_config(&#39;report_targetgrades&#39;);</span>
+<a name="l-5"></a><span class="x">        $config-&gt;categories = isset($config-&gt;categories) ? unserialize($config-&gt;categories) : array();</span>
+<a name="l-6"></a><span class="x">        $config-&gt;roles = isset($config-&gt;roles) ? unserialize($config-&gt;roles) : array();</span>
+<a name="l-7"></a><span class="x">    }</span>
+<a name="l-8"></a><span class="x">    return $config;</span>
+<a name="l-9"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Append an asterisk to the course&#39;s name if it doesn&#39;t have ALIS data</span>
+<a name="l-3"></a><span class="x"> *</span>
+<a name="l-4"></a><span class="x"> * @global object $DB Global database object</span>
+<a name="l-5"></a><span class="x"> * @param array $options the courses being used as options for the select list</span>
+<a name="l-6"></a><span class="x"> * @return array The options with asterisks added where appropriate</span>
+<a name="l-7"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function hasconfig($options){    </span>
+<a name="l-2"></a><span class="x">     array_walk($options, function ($option){ // Mark all courses that don&#39;t have any ALIS data</span>
+<a name="l-3"></a><span class="x">	    global $DB;</span>
+<a name="l-4"></a><span class="x">	    $select = &#39;SELECT * &#39;;</span>
+<a name="l-5"></a><span class="x">	    $from = &#39;FROM {report_targetgrades_patterns} p</span>
+<a name="l-6"></a><span class="x">	        JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id &#39;;</span>
+<a name="l-7"></a><span class="x">	    $where = &#39;WHERE p.pattern = ?&#39;;</span>
+<a name="l-8"></a><span class="x">		$params = array($option-&gt;pattern);</span>
+<a name="l-9"></a><span class="x">	    if($DB-&gt;get_record_sql($select.$from.$where, $params)) {</span>
+<a name="l-10"></a><span class="x">	        return true;</span>
+<a name="l-11"></a><span class="x">	    } else {</span>
+<a name="l-12"></a><span class="x">	        $option-&gt;firstname = &#39;*&#39;;</span>
+<a name="l-13"></a><span class="x">	    }    </span>
+<a name="l-14"></a><span class="x">	});</span>
+<a name="l-15"></a><span class="x">	return $options;</span>
+<a name="l-16"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Calculates a minimum target grade for a particular course based on</span>
+<a name="l-3"></a><span class="x"> * an average GCSE score</span>
+<a name="l-4"></a><span class="x"> *</span>
+<a name="l-5"></a><span class="x"> * @param $course text either a full classcode or just the first 5 characters (will take the first 5 characters anyway)</span>
+<a name="l-6"></a><span class="x"> * @param $avgcse int student&#39;s average gcse score</span>
+<a name="l-7"></a><span class="x"> *</span>
+<a name="l-8"></a><span class="x"> * @return integer relating to the grade on a scale or false if fails</span>
+<a name="l-9"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function calculate_mtg($student, $course){</span>
+<a name="l-2"></a><span class="x">    global $DB;</span>
+<a name="l-3"></a><span class="x">    $select = &#39;SELECT name, gradient, intercept &#39;;</span>
+<a name="l-4"></a><span class="x">    $from = &#39;FROM {report_targetgrades_patterns} AS p</span>
+<a name="l-5"></a><span class="x">        JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id &#39;;</span>
+<a name="l-6"></a><span class="x">    $where = &#39;WHERE p.pattern = ?&#39;;</span>
+<a name="l-7"></a><span class="x">	$params = array($course-&gt;pattern);</span>
+<a name="l-8"></a><span class="x">	</span>
+<a name="l-9"></a><span class="x">    if($alis = $DB-&gt;get_record_sql($select.$from.$where, $params)) {</span>
+<a name="l-10"></a><span class="x">        $points = ($student-&gt;avgcse * $alis-&gt;gradient)+$alis-&gt;intercept;</span>
+<a name="l-11"></a>
+<a name="l-12"></a><span class="x">        // Calculate UCAS points using ALIS formula</span>
+<a name="l-13"></a>
+<a name="l-14"></a><span class="x">        switch($course-&gt;qualtype) {</span>
+<a name="l-15"></a><span class="x">            // Calculate grade value based on course type</span>
+<a name="l-16"></a>
+<a name="l-17"></a><span class="x">            case ALIS_ADVANCED_GCE: // A2</span>
+<a name="l-18"></a><span class="x">                // Divide points score by 2</span>
+<a name="l-19"></a><span class="x">                // Divide by 10</span>
+<a name="l-20"></a><span class="x">                // Round Up</span>
+<a name="l-21"></a><span class="x">                $mtg = \ceil((($points/2))/10);</span>
+<a name="l-22"></a><span class="x">                break;</span>
+<a name="l-23"></a>
+<a name="l-24"></a><span class="x">            case ALIS_ADVANCED_GCE_DOUBLE: // A2 Double Award</span>
+<a name="l-25"></a><span class="x">                // Divide points score by 2</span>
+<a name="l-26"></a><span class="x">                // Minus 20</span>
+<a name="l-27"></a><span class="x">                // Divide by 10</span>
+<a name="l-28"></a><span class="x">                // Round Up</span>
+<a name="l-29"></a><span class="x">                $mtg = \ceil((($points/2)-20)/10);</span>
+<a name="l-30"></a><span class="x">                break;</span>
+<a name="l-31"></a>
+<a name="l-32"></a><span class="x">            case ALIS_ADVANCED_SUBSIDIARY_GCE: // AS</span>
+<a name="l-33"></a><span class="x">                // Minus 20</span>
+<a name="l-34"></a><span class="x">                // Divide by 10</span>
+<a name="l-35"></a><span class="x">                // Round Up</span>
+<a name="l-36"></a><span class="x">                $mtg = \ceil($points/10);</span>
+<a name="l-37"></a>
+<a name="l-38"></a><span class="x">                break;           </span>
+<a name="l-39"></a>
+<a name="l-40"></a><span class="x">            case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE: // AS Double Award</span>
+<a name="l-41"></a><span class="x">                // Divide by 10</span>
+<a name="l-42"></a><span class="x">                // Round Up</span>
+<a name="l-43"></a><span class="x">                $mtg = \ceil(($points-20)/10);</span>
+<a name="l-44"></a><span class="x">                break;</span>
+<a name="l-45"></a>
+<a name="l-46"></a><span class="x">            case ALIS_BTEC_NATIONAL_DIPLOMA: // BTEC Diploma</span>
+<a name="l-47"></a><span class="x">                // Add 30</span>
+<a name="l-48"></a><span class="x">                // Minus 100</span>
+<a name="l-49"></a><span class="x">                // Divide by 40</span>
+<a name="l-50"></a><span class="x">                // Round up</span>
+<a name="l-51"></a><span class="x">                // Add 1 (scale includes Fail)</span>
+<a name="l-52"></a><span class="x">                $mtg = \ceil((($points+20)-100)/40)+1;</span>
+<a name="l-53"></a><span class="x">                break;</span>
+<a name="l-54"></a>
+<a name="l-55"></a><span class="x">            case ALIS_BTEC_NATIONAL_CERTIFICATE: // BTEC Certificate</span>
+<a name="l-56"></a><span class="x">                $mtg = \ceil($points/40);</span>
+<a name="l-57"></a><span class="x">                break;</span>
+<a name="l-58"></a>
+<a name="l-59"></a><span class="x">            case ALIS_BTEC_NATIONAL_AWARD: // BTEC Award            </span>
+<a name="l-60"></a><span class="x">                // Add 10</span>
+<a name="l-61"></a><span class="x">                // Divide by 40</span>
+<a name="l-62"></a><span class="x">                // Round up</span>
+<a name="l-63"></a><span class="x">                // Add 1 (scale includes Fail)</span>
+<a name="l-64"></a><span class="x">                $mtg = \ceil($points/40)+1;</span>
+<a name="l-65"></a><span class="x">                if($mtg &gt; 4) {</span>
+<a name="l-66"></a><span class="x">                   $mtg = 4;</span>
+<a name="l-67"></a><span class="x">                }</span>
+<a name="l-68"></a><span class="x">                break;</span>
+<a name="l-69"></a>
+<a name="l-70"></a><span class="x">            case ALIS_CACHE_L3_DIPLOMA: // CACHE L3 Diploma</span>
+<a name="l-71"></a><span class="x">                $mtg = \ceil($points/60);</span>
+<a name="l-72"></a><span class="x">                break;</span>
+<a name="l-73"></a>
+<a name="l-74"></a><span class="x">             // These all provide a raw number on the scale, rather than UCAS</span>
+<a name="l-75"></a><span class="x">            // tariff points.</span>
+<a name="l-76"></a><span class="x">            case ALIS_IB_STANDARD: // IB</span>
+<a name="l-77"></a><span class="x">            case ALIS_IB_HIGHER: // IB            </span>
+<a name="l-78"></a><span class="x">            case ALIS_BTEC_FIRST_DIPLOMA: // BTEC 1st</span>
+<a name="l-79"></a><span class="x">            case ALIS_OCR_NATIONAL_DIPLOMA: // OCR Diploma</span>
+<a name="l-80"></a><span class="x">            case ALIS_OCR_NATIONAL_CERTIFICATE: // OCR Certificate</span>
+<a name="l-81"></a><span class="x">                // Add 0.5</span>
+<a name="l-82"></a><span class="x">                // Round up</span>
+<a name="l-83"></a><span class="x">                $mtg = \ceil($points+0.5);</span>
+<a name="l-84"></a><span class="x">                if ($course-&gt;qualtype == ALIS_BTEC_FIRST_DIPLOMA</span>
+<a name="l-85"></a><span class="x">                        || $course-&gt;qualtype == ALIS_OCR_NATIONAL_DIPLOMA</span>
+<a name="l-86"></a><span class="x">                        ||  $course-&gt;qualtype == ALIS_OCR_NATIONAL_CERTIFICATE) {</span>
+<a name="l-87"></a><span class="x">                    // For these 3, add an extra one as the scale includes Fail</span>
+<a name="l-88"></a><span class="x">                    $mtg += 1;</span>
+<a name="l-89"></a><span class="x">                }</span>
+<a name="l-90"></a><span class="x">                break;</span>
+<a name="l-91"></a>
+<a name="l-92"></a><span class="x">            case ALIS_GCSE: // GCSE</span>
+<a name="l-93"></a><span class="x">                // Always a C, since if they&#39;re in FE and taking a GCSE it&#39;s becuase</span>
+<a name="l-94"></a><span class="x">                // they failed and are trying to pass.</span>
+<a name="l-95"></a><span class="x">                $mtg = 6;</span>
+<a name="l-96"></a><span class="x">                break;</span>
+<a name="l-97"></a>
+<a name="l-98"></a><span class="x">            default:</span>
+<a name="l-99"></a><span class="x">                $mtg = &#39;&#39;;</span>
+<a name="l-100"></a>
+<a name="l-101"></a><span class="x">        }</span>
+<a name="l-102"></a>
+<a name="l-103"></a><span class="x">        if ($mtg !== &#39;&#39; &amp;&amp; $mtg &lt;= 1) {</span>
+<a name="l-104"></a><span class="x">            $mtg = 2;</span>
+<a name="l-105"></a><span class="x">        }</span>
+<a name="l-106"></a><span class="x">        $alis = array();</span>
+<a name="l-107"></a><span class="x">        $alis[&#39;number&#39;] = $points;</span>
+<a name="l-108"></a><span class="x">        $alis[&#39;grade&#39;] = $mtg;</span>
+<a name="l-109"></a><span class="x">        return $alis;</span>
+<a name="l-110"></a>
+<a name="l-111"></a><span class="x">    } else {</span>
+<a name="l-112"></a><span class="x">        throw new no_mtg_for_student_exception($student-&gt;id);</span>
+<a name="l-113"></a><span class="x">    }</span>
+<a name="l-114"></a><span class="x">    </span>
+<a name="l-115"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Builds a set of options to select pattens to apply ALIS stats to</span>
+<a name="l-3"></a><span class="x"> *</span>
+<a name="l-4"></a><span class="x"> * @global object $DB The global config object</span>
+<a name="l-5"></a><span class="x"> * @return array The array of options for the menu</span>
+<a name="l-6"></a><span class="x"> * @throws Exception if the exclusion regex shows a risk of ReDOS</span>
+<a name="l-7"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function build_pattern_options() {</span>
+<a name="l-2"></a>
+<a name="l-3"></a><span class="x">    global $DB;</span>
+<a name="l-4"></a><span class="x">    $config = get_config();</span>
+<a name="l-5"></a><span class="x">    if(\preg_match(&#39;/(.+?\.?[*+].*?)[*+]/&#39;, $config-&gt;exclude_regex)) {</span>
+<a name="l-6"></a><span class="x">        throw new unsafe_regex_exception();</span>
+<a name="l-7"></a><span class="x">    }</span>
+<a name="l-8"></a>
+<a name="l-9"></a><span class="x">    list($in_sql, $params) = $DB-&gt;get_in_or_equal($config-&gt;categories);</span>
+<a name="l-10"></a><span class="x"> </span>
+<a name="l-11"></a><span class="x">    $select = &#39;SELECT DISTINCT &#39;;</span>
+<a name="l-12"></a><span class="x">	if(!empty($config-&gt;group_field) &amp;&amp; !empty($config-&gt;group_length)) {</span>
+<a name="l-13"></a><span class="x">	    $select .= &#39;LEFT(&#39;.$config-&gt;group_field.&#39;, &#39;.$config-&gt;group_length.&#39;), LEFT(&#39;.$config-&gt;group_field.&#39;, &#39;.$config-&gt;group_length.&#39;) as pattern &#39;;</span>
+<a name="l-14"></a><span class="x">	} else {</span>
+<a name="l-15"></a><span class="x">	    $select .= &#39;shortname, shortname AS pattern &#39;;</span>
+<a name="l-16"></a><span class="x">	}</span>
+<a name="l-17"></a><span class="x">	</span>
+<a name="l-18"></a><span class="x">	$from = &#39;FROM {course} &#39;;</span>
+<a name="l-19"></a><span class="x">	</span>
+<a name="l-20"></a><span class="x">	$order = &#39;ORDER BY pattern&#39;;</span>
+<a name="l-21"></a><span class="x">	    </span>
+<a name="l-22"></a><span class="x">    if ($DB-&gt;sql_regex_supported()) {</span>
+<a name="l-23"></a><span class="x">        $where = &#39;WHERE category &#39;.$in_sql.&#39; AND &#39;.$config-&gt;exclude_field.&#39; &#39;.$DB-&gt;sql_regex(false).&#39; ? &#39;;</span>
+<a name="l-24"></a><span class="x">        $params = array_merge($params, array($config-&gt;exclude_regex));        </span>
+<a name="l-25"></a><span class="x">    } else {</span>
+<a name="l-26"></a><span class="x">	    $courses = $DB-&gt;get_records_select(&#39;course&#39;, &#39;category &#39;.$in_sql, $params);</span>
+<a name="l-27"></a><span class="x">	    </span>
+<a name="l-28"></a><span class="x">		\array_filter($courses, function($course, $config) {				    </span>
+<a name="l-29"></a><span class="x">		    $field = $config-&gt;exclude_field;</span>
+<a name="l-30"></a><span class="x">		    return !\preg_match(&#39;/&#39;.$config-&gt;exclude_regex.&#39;/&#39;, $course-&gt;$field);</span>
+<a name="l-31"></a><span class="x">		});	    </span>
+<a name="l-32"></a><span class="x">		</span>
+<a name="l-33"></a><span class="x">		list($in_sql, $params) = $DB-&gt;get_in_or_equal(array_keys($courses));		</span>
+<a name="l-34"></a><span class="x">	    $where = &#39;WHERE id &#39;.$in_sql.&#39; &#39;;</span>
+<a name="l-35"></a><span class="x">	}</span>
+<a name="l-36"></a><span class="x">	</span>
+<a name="l-37"></a><span class="x">	$where .= &#39;AND LEFT(&#39;.$config-&gt;group_field.&#39;, &#39;.$config-&gt;group_length.&#39;) NOT IN (SELECT pattern FROM {report_targetgrades_patterns} tp) &#39;;</span>
+<a name="l-38"></a><span class="x">	</span>
+<a name="l-39"></a><span class="x">    $options = $DB-&gt;get_records_sql_menu($select.$from.$where.$order, $params);</span>
+<a name="l-40"></a>
+<a name="l-41"></a><span class="x">    return $options;</span>
+<a name="l-42"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Re-sorts the gradebook to put all MTG grade items first.</span>
+<a name="l-3"></a><span class="x"> *</span>
+<a name="l-4"></a><span class="x"> * Gets all of the grade items for the specifed course. Iterates over the array</span>
+<a name="l-5"></a><span class="x"> * of items and moves the MTG items to the front of the array. Then does a</span>
+<a name="l-6"></a><span class="x"> * second pass to renumber all the sortorders to make the items sequential from</span>
+<a name="l-7"></a><span class="x"> * 2 upwards (1 will be the course item).</span>
+<a name="l-8"></a><span class="x"> *</span>
+<a name="l-9"></a><span class="x"> * @param object $course Database record for course, containing the id.</span>
+<a name="l-10"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function sort_gradebook($course) {</span>
+<a name="l-2"></a>
+<a name="l-3"></a><span class="x">    global $CFG, $DB;</span>
+<a name="l-4"></a><span class="x">    require_once $CFG-&gt;dirroot.&#39;/grade/lib.php&#39;;</span>
+<a name="l-5"></a><span class="x">    require_once $CFG-&gt;dirroot.&#39;/grade/edit/tree/lib.php&#39;;</span>
+<a name="l-6"></a><span class="x">    $gtree = new \grade_tree($course-&gt;id, false, false);</span>
+<a name="l-7"></a><span class="x">	</span>
+<a name="l-8"></a><span class="x">	$fields = array(&#39;alis_avgcse&#39;, &#39;alis_alisnum&#39;, &#39;alis_alis&#39;, &#39;alis_mtg&#39;, &#39;alis_cpg&#39;);	</span>
+<a name="l-9"></a><span class="x">	$params = array($course-&gt;id);</span>
+<a name="l-10"></a><span class="x">	list($in_sql, $in_params) = $DB-&gt;get_in_or_equal($params);</span>
+<a name="l-11"></a><span class="x">	$params = \array_merge($params, $in_params);</span>
+<a name="l-12"></a><span class="x">    $where = &#39;courseid = ? AND idnumber &#39;.$in_sql;</span>
+<a name="l-13"></a><span class="x">    $gradeitems = $DB-&gt;get_records_select(&#39;grade_items&#39;, $where, $params, &#39;itemnumber DESC&#39;);</span>
+<a name="l-14"></a><span class="x">    $courseitem = $DB-&gt;get_record(&#39;grade_items&#39;, array(&#39;courseid&#39; =&gt; $course-&gt;id, &#39;itemtype&#39; =&gt; &#39;course&#39;));</span>
+<a name="l-15"></a><span class="x">    //$mtgitems = count_records_select(&#39;grade_items&#39;, $where);</span>
+<a name="l-16"></a>
+<a name="l-17"></a><span class="x">    // First, move the MTG grade items to the front</span>
+<a name="l-18"></a><span class="x">    $offset = 0;</span>
+<a name="l-19"></a><span class="x">    foreach($gradeitems as $item) {</span>
+<a name="l-20"></a>
+<a name="l-21"></a><span class="x">        if (!$element = $gtree-&gt;locate_element(&#39;i&#39;.$item-&gt;id)) {</span>
+<a name="l-22"></a><span class="x">            \print_error(&#39;invalidelementid&#39;);</span>
+<a name="l-23"></a><span class="x">        }</span>
+<a name="l-24"></a><span class="x">        $object = $element[&#39;object&#39;];</span>
+<a name="l-25"></a>
+<a name="l-26"></a><span class="x">        $moveafter = &#39;c&#39;.$courseitem-&gt;iteminstance;</span>
+<a name="l-27"></a><span class="x">        $first = 1; // If First is set to 1, it means the target is the first child of the category $moveafter</span>
+<a name="l-28"></a>
+<a name="l-29"></a><span class="x">        if(!$after_el = $gtree-&gt;locate_element($moveafter)) {</span>
+<a name="l-30"></a><span class="x">            \print_error(&#39;invalidelementid&#39;);</span>
+<a name="l-31"></a><span class="x">        }</span>
+<a name="l-32"></a>
+<a name="l-33"></a><span class="x">        $after = $after_el[&#39;object&#39;];</span>
+<a name="l-34"></a><span class="x">        $sortorder = $after-&gt;get_sortorder();</span>
+<a name="l-35"></a>
+<a name="l-36"></a><span class="x">        if (!$first) {</span>
+<a name="l-37"></a><span class="x">            $parent = $after-&gt;get_parent_category();</span>
+<a name="l-38"></a><span class="x">            $object-&gt;set_parent($parent-&gt;id);</span>
+<a name="l-39"></a><span class="x">        } else {</span>
+<a name="l-40"></a><span class="x">            $object-&gt;set_parent($after-&gt;id);</span>
+<a name="l-41"></a><span class="x">        }</span>
+<a name="l-42"></a>
+<a name="l-43"></a><span class="x">        $object-&gt;move_after_sortorder($sortorder);</span>
+<a name="l-44"></a>
+<a name="l-45"></a><span class="x">    }</span>
+<a name="l-46"></a>
+<a name="l-47"></a>
+<a name="l-48"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Prints tabs for navigating the block&#39;s pages</span>
+<a name="l-3"></a><span class="x"> *</span>
+<a name="l-4"></a><span class="x"> * Prints a tab linking to alisdata.php, and one linking to distribute.php.</span>
+<a name="l-5"></a><span class="x"> * If ALIS data hasn&#39;t been uploaded yet, the link to distribute.php will not</span>
+<a name="l-6"></a><span class="x"> * be displayed.</span>
+<a name="l-7"></a><span class="x"> *</span>
+<a name="l-8"></a><span class="x"> * @global $DB The global Database object</span>
+<a name="l-9"></a><span class="x"> * @global $OUTPUT the output renderer.</span>
+<a name="l-10"></a><span class="x"> * @param int $selected The ID of the tab to select</span>
+<a name="l-11"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">function print_tabs($selected) {</span>
+<a name="l-2"></a><span class="x">    global $DB, $OUTPUT;</span>
+<a name="l-3"></a>
+<a name="l-4"></a><span class="x">    $tabs = array();</span>
+<a name="l-5"></a><span class="x">    $tabs[] = new \tabobject(1,</span>
+<a name="l-6"></a><span class="x">            new \moodle_url(&#39;/admin/report/targetgrades/alisdata.php&#39;),</span>
+<a name="l-7"></a><span class="x">            \get_string(&#39;alisdata&#39;, &#39;report_targetgrades&#39;));</span>
+<a name="l-8"></a><span class="x">    if($DB-&gt;get_records(&#39;report_targetgrades_alisdata&#39;)) {</span>
+<a name="l-9"></a><span class="x">        $tabs[] = new \tabobject(2,</span>
+<a name="l-10"></a><span class="x">                new \moodle_url(&#39;/admin/report/targetgrades/distribute.php&#39;),</span>
+<a name="l-11"></a><span class="x">                \get_string(&#39;mtgdistribute&#39;, &#39;report_targetgrades&#39;));</span>
+<a name="l-12"></a><span class="x">    }</span>
+<a name="l-13"></a><span class="x">    $tabs[] = new \tabobject(3,</span>
+<a name="l-14"></a><span class="x">            new \moodle_url(&#39;/&#39;.$CFG-&gt;admin.&#39;/report/targetgrades/settingsform.php&#39;),</span>
+<a name="l-15"></a><span class="x">            \get_string(&#39;settings&#39;));</span>
+<a name="l-16"></a><span class="x">    echo $OUTPUT-&gt;heading(get_string(&#39;mtgdistribute&#39;, &#39;report_targetgrades&#39;));</span>
+<a name="l-17"></a><span class="x">    \print_tabs(array($tabs), $selected);</span>
+<a name="l-18"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * A skeleton grade record</span>
+<a name="l-3"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">abstract class item_grade {</span>
+<a name="l-2"></a>
+<a name="l-3"></a><span class="x">    public   $courseid;</span>
+<a name="l-4"></a><span class="x">    public   $categoryid;</span>
+<a name="l-5"></a><span class="x">    public   $gradetype;</span>
+<a name="l-6"></a><span class="x">    public   $grademax;</span>
+<a name="l-7"></a><span class="x">    public   $grademin;</span>
+<a name="l-8"></a><span class="x">    public   $hidden;</span>
+<a name="l-9"></a><span class="x">    public   $itemnumber;</span>
+<a name="l-10"></a><span class="x">    public   $itemname;</span>
+<a name="l-11"></a><span class="x">    public   $locked;</span>
+<a name="l-12"></a><span class="x">    public   $idnumber;</span>
+<a name="l-13"></a>
+<a name="l-14"></a><span class="x">    /**</span>
+<a name="l-15"></a><span class="x">     * Define common attributes for the subclasses</span>
+<a name="l-16"></a><span class="x">     *</span>
+<a name="l-17"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-18"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-19"></a><span class="x">     */</span>
+<a name="l-20"></a><span class="x">    protected function  __construct($courseid, $categoryid) {</span>
+<a name="l-21"></a><span class="x">        $this-&gt;courseid = $courseid;</span>
+<a name="l-22"></a><span class="x">        $this-&gt;categoryid = $categoryid;</span>
+<a name="l-23"></a><span class="x">        $this-&gt;hidden = 0;</span>
+<a name="l-24"></a><span class="x">        $this-&gt;grademin = 0;</span>
+<a name="l-25"></a><span class="x">        $this-&gt;idnumber = &#39;&#39;;</span>
+<a name="l-26"></a><span class="x">        $this-&gt;timecreated = \time();</span>
+<a name="l-27"></a><span class="x">        $this-&gt;timemodified = \time();</span>
+<a name="l-28"></a><span class="x">    }</span>
+<a name="l-29"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * A course gradeitem</span>
+<a name="l-3"></a><span class="x"> */</span>
+<a name="l-4"></a><span class="x">class item_course extends item_grade {</span>
+<a name="l-5"></a><span class="x">    public $timecreated;</span>
+<a name="l-6"></a><span class="x">    public $timemodified;</span>
+<a name="l-7"></a><span class="x">    public $sortorder;</span>
+<a name="l-8"></a>
+<a name="l-9"></a><span class="x">    /**</span>
+<a name="l-10"></a><span class="x">     * Sets all the attributes to those of a course grade item</span>
+<a name="l-11"></a><span class="x">     *</span>
+<a name="l-12"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-13"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-14"></a><span class="x">     */</span>
+<a name="l-15"></a><span class="x">    public function  __construct($courseid, $categoryid) {</span>
+<a name="l-16"></a><span class="x">        $this-&gt;courseid = $courseid;</span>
+<a name="l-17"></a><span class="x">        $this-&gt;instanceid = $categoryid;</span>
+<a name="l-18"></a><span class="x">        $this-&gt;itemtype = &#39;course&#39;;</span>
+<a name="l-19"></a><span class="x">        $this-&gt;locked = 0;</span>
+<a name="l-20"></a><span class="x">        $this-&gt;hidden = 0;</span>
+<a name="l-21"></a><span class="x">        $this-&gt;gradetype = GRADE_TYPE_SCALE;</span>
+<a name="l-22"></a><span class="x">        $this-&gt;grademax = 0;</span>
+<a name="l-23"></a><span class="x">        $this-&gt;grademin = 0;</span>
+<a name="l-24"></a><span class="x">        $this-&gt;sortorder = 1;</span>
+<a name="l-25"></a><span class="x">    }</span>
+<a name="l-26"></a><span class="x">}</span>
+<a name="l-27"></a>
+<a name="l-28"></a><span class="x">/**</span>
+<a name="l-29"></a><span class="x"> * An average GCSE grade item</span>
+<a name="l-30"></a><span class="x"> */</span>
+<a name="l-31"></a><span class="x">class item_avgcse extends item_grade {</span>
+<a name="l-32"></a><span class="x">    public $decimals = 2;</span>
+<a name="l-33"></a>
+<a name="l-34"></a><span class="x">    /**</span>
+<a name="l-35"></a><span class="x">     * Sets all the attributes to those of an Average GCSE item</span>
+<a name="l-36"></a><span class="x">     *</span>
+<a name="l-37"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-38"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-39"></a><span class="x">     */</span>
+<a name="l-40"></a><span class="x">    public function __construct($courseid, $categoryid) {</span>
+<a name="l-41"></a><span class="x">        parent::__construct($courseid, $categoryid);</span>
+<a name="l-42"></a><span class="x">        $this-&gt;itemname = \get_string(&#39;item_avgcse&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-43"></a><span class="x">        $this-&gt;gradetype = GRADE_TYPE_VALUE;</span>
+<a name="l-44"></a><span class="x">        $this-&gt;grademax = 10;</span>
+<a name="l-45"></a><span class="x">        $this-&gt;grademin = 0;</span>
+<a name="l-46"></a><span class="x">        $this-&gt;locked = \time();</span>
+<a name="l-47"></a><span class="x">        $this-&gt;idnumber = &#39;targetgrades_avgcse&#39;;</span>
+<a name="l-48"></a><span class="x">        $this-&gt;itemnumber = 1;</span>
+<a name="l-49"></a>
+<a name="l-50"></a><span class="x">    }</span>
+<a name="l-51"></a><span class="x">    </span>
+<a name="l-52"></a><span class="x">}</span>
+<a name="l-53"></a>
+<a name="l-54"></a><span class="x">/**</span>
+<a name="l-55"></a><span class="x"> * An ALIS number grade item</span>
+<a name="l-56"></a><span class="x"> */</span>
+<a name="l-57"></a><span class="x">class item_alisnum extends item_grade {</span>
+<a name="l-58"></a>
+<a name="l-59"></a><span class="x">    public $decimals;</span>
+<a name="l-60"></a>
+<a name="l-61"></a><span class="x">    /**</span>
+<a name="l-62"></a><span class="x">     * Sets all the attributes to those of an ALIS number item</span>
+<a name="l-63"></a><span class="x">     *</span>
+<a name="l-64"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-65"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-66"></a><span class="x">     */</span>
+<a name="l-67"></a><span class="x">    public function __construct($courseid, $categoryid) {</span>
+<a name="l-68"></a><span class="x">        parent::__construct($courseid, $categoryid);</span>
+<a name="l-69"></a><span class="x">        $this-&gt;itemname = \get_string(&#39;item_alisnum&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-70"></a><span class="x">        $this-&gt;gradetype = GRADE_TYPE_VALUE;</span>
+<a name="l-71"></a><span class="x">        $this-&gt;grademax = 360;</span>
+<a name="l-72"></a><span class="x">        $this-&gt;grademin = 0;</span>
+<a name="l-73"></a><span class="x">        $this-&gt;decimals = 0;</span>
+<a name="l-74"></a><span class="x">        $this-&gt;hidden = 1;</span>
+<a name="l-75"></a><span class="x">        $this-&gt;locked = \time();</span>
+<a name="l-76"></a><span class="x">        $this-&gt;idnumber = &#39;targetgrades_alisnum&#39;;</span>
+<a name="l-77"></a><span class="x">        $this-&gt;itemnumber = 2;</span>
+<a name="l-78"></a><span class="x">    }</span>
+<a name="l-79"></a>
+<a name="l-80"></a><span class="x">}</span>
+<a name="l-81"></a>
+<a name="l-82"></a><span class="x">/**</span>
+<a name="l-83"></a><span class="x"> * An ALIS grade item</span>
+<a name="l-84"></a><span class="x"> */</span>
+<a name="l-85"></a><span class="x">class item_min extends item_grade {</span>
+<a name="l-86"></a>
+<a name="l-87"></a><span class="x">    public   $scaleid;</span>
+<a name="l-88"></a>
+<a name="l-89"></a><span class="x">    /**</span>
+<a name="l-90"></a><span class="x">     * Sets the attributes to those of an ALIS grade item</span>
+<a name="l-91"></a><span class="x">     *</span>
+<a name="l-92"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-93"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-94"></a><span class="x">     */</span>
+<a name="l-95"></a><span class="x">    public function __construct($courseid, $categoryid) {</span>
+<a name="l-96"></a><span class="x">        parent::__construct($courseid, $categoryid);</span>
+<a name="l-97"></a><span class="x">        $this-&gt;itemname = \get_string(&#39;item_alis&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-98"></a><span class="x">        $this-&gt;hidden = 1;</span>
+<a name="l-99"></a><span class="x">        $this-&gt;locked = \time();</span>
+<a name="l-100"></a><span class="x">        $this-&gt;gradetype = GRADE_TYPE_SCALE;</span>
+<a name="l-101"></a><span class="x">        $this-&gt;grademax = 0;</span>
+<a name="l-102"></a><span class="x">        $this-&gt;scaleid = 0;</span>
+<a name="l-103"></a><span class="x">        $this-&gt;idnumber = &#39;targetgrades_min&#39;;</span>
+<a name="l-104"></a><span class="x">        $this-&gt;itemnumber = 3;</span>
+<a name="l-105"></a><span class="x">    }</span>
+<a name="l-106"></a>
+<a name="l-107"></a><span class="x">    /**</span>
+<a name="l-108"></a><span class="x">     * Sets the grade scale based on the qualtype, or the default if none is set</span>
+<a name="l-109"></a><span class="x">     *</span>
+<a name="l-110"></a><span class="x">     * @param string $qualtype Must == one of the qualtype constants</span>
+<a name="l-111"></a><span class="x">     * @param int $default The ID of the default scale to use</span>
+<a name="l-112"></a><span class="x">     */</span>
+<a name="l-113"></a><span class="x">    public function set_scale($qualtype, $default = null) {</span>
+<a name="l-114"></a><span class="x">    	global $DB;</span>
+<a name="l-115"></a><span class="x">        $scale = $DB-&gt;get_record(&#39;scale&#39;, array(&#39;name&#39; =&gt; $qualtype.&#39; MTG&#39;));</span>
+<a name="l-116"></a><span class="x">        if(!$scale) {</span>
+<a name="l-117"></a><span class="x">            if(!empty($default)) {</span>
+<a name="l-118"></a><span class="x">                $scale = $DB-&gt;get_record(&#39;scale&#39;, array(&#39;id&#39; =&gt; $default));</span>
+<a name="l-119"></a><span class="x">            } else {</span>
+<a name="l-120"></a><span class="x">                throw new \Exception($qualtype);</span>
+<a name="l-121"></a><span class="x">            }</span>
+<a name="l-122"></a><span class="x">        }</span>
+<a name="l-123"></a><span class="x">        $this-&gt;gradetype = 2;</span>
+<a name="l-124"></a><span class="x">        $this-&gt;grademax = \count($scale-&gt;scale);</span>
+<a name="l-125"></a><span class="x">        $this-&gt;scaleid = $scale-&gt;id;        </span>
+<a name="l-126"></a><span class="x">    }</span>
+<a name="l-127"></a><span class="x">}</span>
+<a name="l-128"></a>
+<a name="l-129"></a><span class="x">/**</span>
+<a name="l-130"></a><span class="x"> * A Minimum Target Grade item</span>
+<a name="l-131"></a><span class="x"> */</span>
+<a name="l-132"></a><span class="x">class item_target extends item_min {</span>
+<a name="l-133"></a>
+<a name="l-134"></a><span class="x">    /**</span>
+<a name="l-135"></a><span class="x">     * Sets the attributes to those of an MTG grade item</span>
+<a name="l-136"></a><span class="x">     *</span>
+<a name="l-137"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-138"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-139"></a><span class="x">     */</span>
+<a name="l-140"></a><span class="x">    public function __construct($courseid, $categoryid) {</span>
+<a name="l-141"></a><span class="x">        parent::__construct($courseid, $categoryid);</span>
+<a name="l-142"></a><span class="x">        $this-&gt;itemname = \get_string(&#39;item_mtg&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-143"></a><span class="x">        $this-&gt;hidden = 0;</span>
+<a name="l-144"></a><span class="x">        $this-&gt;locked = 0;</span>
+<a name="l-145"></a><span class="x">        $this-&gt;idnumber = &#39;targetgrades_target&#39;;</span>
+<a name="l-146"></a><span class="x">        $this-&gt;itemnumber = 4;</span>
+<a name="l-147"></a><span class="x">    }</span>
+<a name="l-148"></a><span class="x">}</span>
+<a name="l-149"></a>
+<a name="l-150"></a><span class="x">/**</span>
+<a name="l-151"></a><span class="x"> * A Minimum Target Grade item</span>
+<a name="l-152"></a><span class="x"> */</span>
+<a name="l-153"></a><span class="x">class item_cpg extends item_min {</span>
+<a name="l-154"></a>
+<a name="l-155"></a><span class="x">    /**</span>
+<a name="l-156"></a><span class="x">     * Sets the attributes to those of an MTG grade item</span>
+<a name="l-157"></a><span class="x">     *</span>
+<a name="l-158"></a><span class="x">     * @param int $courseid The course the grade item belongs to</span>
+<a name="l-159"></a><span class="x">     * @param int $categoryid The category the grade item belongs to</span>
+<a name="l-160"></a><span class="x">     */</span>
+<a name="l-161"></a><span class="x">    public function __construct($courseid, $categoryid) {</span>
+<a name="l-162"></a><span class="x">        parent::__construct($courseid, $categoryid);</span>
+<a name="l-163"></a><span class="x">        $this-&gt;itemname = \get_string(&#39;item_cpg&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-164"></a><span class="x">        $this-&gt;hidden = 0;</span>
+<a name="l-165"></a><span class="x">        $this-&gt;locked = 0;</span>
+<a name="l-166"></a><span class="x">        $this-&gt;idnumber = &#39;targetgrades_cpg&#39;;</span>
+<a name="l-167"></a><span class="x">        $this-&gt;itemnumber = 5;</span>
+<a name="l-168"></a><span class="x">    }</span>
+<a name="l-169"></a><span class="x">}</span>
+<a name="l-170"></a>
+<a name="l-171"></a><span class="x">/**</span>
+<a name="l-172"></a><span class="x"> * Validates and processes files for the tutorlink block</span>
+<a name="l-173"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class csvhandler {</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    /**</span>
+<a name="l-2"></a><span class="x">     * The ID of the file uploaded through the form</span>
+<a name="l-3"></a><span class="x">     *</span>
+<a name="l-4"></a><span class="x">     * @var string</span>
+<a name="l-5"></a><span class="x">     */</span>
+<a name="l-6"></a><span class="x">    private $filename;</span>
+<a name="l-7"></a>
+<a name="l-8"></a><span class="x">    /**</span>
+<a name="l-9"></a><span class="x">     * Constructor, sets the filename</span>
+<a name="l-10"></a><span class="x">     *</span>
+<a name="l-11"></a><span class="x">     * @param string $filename</span>
+<a name="l-12"></a><span class="x">     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    public function __construct($filename) {</span>
+<a name="l-2"></a><span class="x">        $this-&gt;filename = $filename;</span>
+<a name="l-3"></a><span class="x">    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    /**</span>
+<a name="l-2"></a><span class="x">     * Attempts to open the file</span>
+<a name="l-3"></a><span class="x">     *</span>
+<a name="l-4"></a><span class="x">     * Open the file using the File API.</span>
+<a name="l-5"></a><span class="x">     * Return the file handler.</span>
+<a name="l-6"></a><span class="x">     *</span>
+<a name="l-7"></a><span class="x">     * @throws moodle_exception if the file can&#39;t be opened for reading</span>
+<a name="l-8"></a><span class="x">     * @global object $USER</span>
+<a name="l-9"></a><span class="x">     * @return object File handler</span>
+<a name="l-10"></a><span class="x">     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    private function open_file() {</span>
+<a name="l-2"></a><span class="x">        global $USER;</span>
+<a name="l-3"></a><span class="x">        </span>
+<a name="l-4"></a><span class="x">        $fs = \get_file_storage();</span>
+<a name="l-5"></a><span class="x">        $context = \get_context_instance(CONTEXT_USER, $USER-&gt;id);</span>
+<a name="l-6"></a><span class="x">        if (!$files = $fs-&gt;get_area_files($context-&gt;id, &#39;user&#39;, &#39;draft&#39;, $this-&gt;filename, &#39;id DESC&#39;, false)) {</span>
+<a name="l-7"></a><span class="x">            throw new \moodle_exception(&#39;cantreadcsv&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-8"></a><span class="x">        }</span>
+<a name="l-9"></a><span class="x">        $file = \reset($files);</span>
+<a name="l-10"></a><span class="x">        if (!$file = $file-&gt;get_content_file_handle()) {</span>
+<a name="l-11"></a><span class="x">            throw new \moodle_exception(&#39;cantreadcsv&#39;, &#39;report_targetgrades&#39;);</span>
+<a name="l-12"></a><span class="x">        }</span>
+<a name="l-13"></a><span class="x">        </span>
+<a name="l-14"></a><span class="x">        return $file;</span>
+<a name="l-15"></a><span class="x">    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    </span>
+<a name="l-2"></a><span class="x">    /**</span>
+<a name="l-3"></a><span class="x">     * Checks that the file is valid CSV in the expected format</span>
+<a name="l-4"></a><span class="x">     *</span>
+<a name="l-5"></a><span class="x">     * Opens the file, then checks each row contains 3 either 1 or 6 comma-separated values</span>
+<a name="l-6"></a><span class="x">     *</span>
+<a name="l-7"></a><span class="x">     * @see open_file()</span>
+<a name="l-8"></a><span class="x">     * @throws moodle_exeption if there are the wrong number of columns</span>
+<a name="l-9"></a><span class="x">     * @return true on success</span>
+<a name="l-10"></a><span class="x">     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    public function validate() {</span>
+<a name="l-2"></a><span class="x">        $line = 0;</span>
+<a name="l-3"></a><span class="x">        $file = $this-&gt;open_file();</span>
+<a name="l-4"></a><span class="x">        while ($csvrow = \fgetcsv($file, 0, &#39;|&#39;)) {</span>
+<a name="l-5"></a><span class="x">            $line++;</span>
+<a name="l-6"></a><span class="x">            if (count($csvrow) != 1 &amp;&amp; count($csvrow) != 6) {</span>
+<a name="l-7"></a><span class="x">                throw new \moodle_exception(&#39;wrongcolcsv&#39;, &#39;report_targetgrades&#39;, &#39;&#39;, $line);                </span>
+<a name="l-8"></a><span class="x">            }</span>
+<a name="l-9"></a><span class="x">        }</span>
+<a name="l-10"></a><span class="x">        \fclose($file);</span>
+<a name="l-11"></a><span class="x">        return true;</span>
+<a name="l-12"></a><span class="x">    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    /**</span>
+<a name="l-2"></a><span class="x">     * Processes the file to import the ALIS data</span>
+<a name="l-3"></a><span class="x">     *</span>
+<a name="l-4"></a><span class="x">     * Opens the file, loops through each row. Cleans the values in each column,</span>
+<a name="l-5"></a><span class="x">     * and inserts or updates the statistics for each subject, then loops over </span>
+<a name="l-6"></a><span class="x">     * the records in the table and flags any quality issues.</span>
+<a name="l-7"></a><span class="x">     *</span>
+<a name="l-8"></a><span class="x">     * Returns a report of successess and failures.</span>
+<a name="l-9"></a><span class="x">     *</span>
+<a name="l-10"></a><span class="x">     * @see open_file()</span>
+<a name="l-11"></a><span class="x">     * @global object $DB Database interface</span>
+<a name="l-12"></a><span class="x">     * @return string A report of successes and failures.</span>
+<a name="l-13"></a><span class="x">     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">    public function process() {</span>
+<a name="l-2"></a><span class="x">        global $DB;</span>
+<a name="l-3"></a><span class="x">        </span>
+<a name="l-4"></a><span class="x">        $file = $this-&gt;open_file();</span>
+<a name="l-5"></a><span class="x">        $qualtype = false;</span>
+<a name="l-6"></a><span class="x">        $import-&gt;qualcount = 0;</span>
+<a name="l-7"></a><span class="x">        $import-&gt;subjectcount = 0;</span>
+<a name="l-8"></a><span class="x">        $import-&gt;updatecount = 0;</span>
+<a name="l-9"></a><span class="x">        while ($line = \fgetcsv($file, 0, &#39;|&#39;)) {</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">            // If there&#39;s only one column on this line, then it&#39;s a qualification heading</span>
+<a name="l-2"></a><span class="x">            if (\count($line) == 1) {</span>
+<a name="l-3"></a><span class="x">                $qualname = param_clean($line[0], \PARAM_ALPHANUM);</span>
+<a name="l-4"></a><span class="x">                // Create a new qualtype record if there isn&#39;t one already.</span>
+<a name="l-5"></a><span class="x">                if(!$qualtype = $DB-&gt;get_record_select(&#39;report_targetgrades_qualtype&#39;, $DB-&gt;sql_compare_text(&#39;name&#39;).&#39; = ?&#39;, array($qualname))) {</span>
+<a name="l-6"></a>
+<a name="l-7"></a><span class="x">                    if(!$qualscale = $DB-&gt;get_record(&#39;scale&#39;, array(&#39;name&#39; =&gt; $qualname.&#39; MTG&#39;))) {</span>
+<a name="l-8"></a>
+<a name="l-9"></a><span class="x">                        if($scale = get_scale($qualname)) {</span>
+<a name="l-10"></a><span class="x">                            $qualscale = new \stdClass;</span>
+<a name="l-11"></a><span class="x">                            $qualscale-&gt;name = $qualname.&#39; MTG&#39;;</span>
+<a name="l-12"></a><span class="x">                            $qualscale-&gt;scale = $scale;</span>
+<a name="l-13"></a><span class="x">                            $qualscale-&gt;description = $qualname.&#39; Minimum/Target Grades&#39;;</span>
+<a name="l-14"></a><span class="x">                            $qualscale-&gt;id = $DB-&gt;insert_record(&#39;scale&#39;, $qualscale);</span>
+<a name="l-15"></a><span class="x">                        }</span>
+<a name="l-16"></a>
+<a name="l-17"></a><span class="x">                    }</span>
+<a name="l-18"></a>
+<a name="l-19"></a><span class="x">                    if($qualscale) {</span>
+<a name="l-20"></a><span class="x">                        $qualtype = new \stdClass;</span>
+<a name="l-21"></a><span class="x">                        $qualtype-&gt;name = $qualname;</span>
+<a name="l-22"></a><span class="x">                        $qualtype-&gt;scaleid = $qualscale-&gt;id;</span>
+<a name="l-23"></a><span class="x">                        $qualtype-&gt;id = $DB-&gt;insert_record(&#39;report_targetgrades_qualtype&#39;, $qualtype);</span>
+<a name="l-24"></a><span class="x">                        $import-&gt;qualcount++;</span>
+<a name="l-25"></a><span class="x">                    }</span>
+<a name="l-26"></a><span class="x">                }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">            } else {</span>
+<a name="l-2"></a><span class="x">                // If we have a record for this course&#39;s qualtype</span>
+<a name="l-3"></a><span class="x">                if ($qualtype) {</span>
+<a name="l-4"></a><span class="x">                    $name = \clean_param($line[0], \PARAM_TEXT);</span>
+<a name="l-5"></a><span class="x">                    $samplesize = \clean_param(str_replace(&#39;,&#39;, &#39;&#39;, $line[1]), \PARAM_INT);</span>
+<a name="l-6"></a><span class="x">                    $gradient = \clean_param($line[2], \PARAM_FLOAT);</span>
+<a name="l-7"></a><span class="x">                    $intercept = \clean_param($line[3], \PARAM_FLOAT);</span>
+<a name="l-8"></a><span class="x">                    $correlation = \clean_param($line[4], \PARAM_FLOAT);</span>
+<a name="l-9"></a><span class="x">                    $standarddeviation = \clean_param($line[5], \PARAM_FLOAT);</span>
+<a name="l-10"></a><span class="x">                    if($subject = $DB-&gt;get_record_select(&#39;report_targetgrades_alisdata&#39;, $DB-&gt;sql_compare_text(&#39;name&#39;).&#39; = ? AND qualtypeid = ?&#39;, array($name, $qualtype-&gt;id))) {</span>
+<a name="l-11"></a><span class="x">                        $subject-&gt;samplesize = $samplesize;</span>
+<a name="l-12"></a><span class="x">                        $subject-&gt;gradient = $gradient;</span>
+<a name="l-13"></a><span class="x">                        $subject-&gt;intercept = $intercept;</span>
+<a name="l-14"></a><span class="x">                        $subject-&gt;correlation = $correlation;</span>
+<a name="l-15"></a><span class="x">                        $subject-&gt;standarddeviation = $standarddeviation;</span>
+<a name="l-16"></a><span class="x">                        $DB-&gt;update_record(&#39;report_targetgrades_alisdata&#39;, $subject);</span>
+<a name="l-17"></a><span class="x">                        $import-&gt;updatecount++;</span>
+<a name="l-18"></a><span class="x">                    } else {</span>
+<a name="l-19"></a><span class="x">                        $subject = new \stdClass;</span>
+<a name="l-20"></a><span class="x">                        $subject-&gt;name= $name;</span>
+<a name="l-21"></a><span class="x">                        $subject-&gt;samplesize = $samplesize;</span>
+<a name="l-22"></a><span class="x">                        $subject-&gt;gradient = $gradient;</span>
+<a name="l-23"></a><span class="x">                        $subject-&gt;intercept = $intercept;</span>
+<a name="l-24"></a><span class="x">                        $subject-&gt;correlation = $correlation;</span>
+<a name="l-25"></a><span class="x">                        $subject-&gt;standarddeviation = $standarddeviation;                        </span>
+<a name="l-26"></a><span class="x">                        $subject-&gt;qualtypeid = $qualtype-&gt;id;</span>
+<a name="l-27"></a><span class="x">                        $DB-&gt;insert_record(&#39;report_targetgrades_alisdata&#39;, $subject);</span>
+<a name="l-28"></a><span class="x">                        $import-&gt;subjectcount++;</span>
+<a name="l-29"></a><span class="x">                    }</span>
+<a name="l-30"></a><span class="x">                }</span>
+<a name="l-31"></a><span class="x">            }</span>
+<a name="l-32"></a><span class="x">        }</span>
+<a name="l-33"></a><span class="x">                </span>
+<a name="l-34"></a><span class="x">        \fclose($file);</span>
+<a name="l-35"></a><span class="x">        </span>
+<a name="l-36"></a><span class="x">        // All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	    $averagesize = round($DB-&gt;get_record_sql(&#39;SELECT AVG(samplesize) as avg FROM {report_targetgrades_alisdata}&#39;)-&gt;avg);</span>
+<a name="l-2"></a><span class="x">	    $select = &#39;SELECT ta.*, tq.name as qualification &#39;;</span>
+<a name="l-3"></a><span class="x">	    $from = &#39;FROM {report_targetgrades_alisdata} ta </span>
+<a name="l-4"></a><span class="x">	    	JOIN {report_targetgrades_qualtype} tq ON ta.qualtypeid = tq.id&#39;;</span>
+<a name="l-5"></a><span class="x">        $alisdata = $DB-&gt;get_records_sql($select.$from);</span>
+<a name="l-6"></a><span class="x">        </span>
+<a name="l-7"></a><span class="x">        ### @export &quot;csvhander_process_samplesize&quot;</span>
+<a name="l-8"></a><span class="x">        foreach ($alisdata as $alis) {</span>
+<a name="l-9"></a><span class="x">	        if ($alis-&gt;samplesize &lt; $averagesize) {</span>
+<a name="l-10"></a><span class="x">	            if ($alis-&gt;samplesize &lt; $averagesize/2) {</span>
+<a name="l-11"></a><span class="x">	                if ($alis-&gt;samplesize &lt; $averagesize/4) {</span>
+<a name="l-12"></a><span class="x">	                    $alis-&gt;quality_samplesize = 3;</span>
+<a name="l-13"></a><span class="x">	                } else {</span>
+<a name="l-14"></a><span class="x">	                    $alis-&gt;quality_samplesize = 2;</span>
+<a name="l-15"></a><span class="x">	                }</span>
+<a name="l-16"></a><span class="x">	            } else {</span>
+<a name="l-17"></a><span class="x">	                $alis-&gt;quality_samplesize = 1;</span>
+<a name="l-18"></a><span class="x">	            }</span>
+<a name="l-19"></a><span class="x">	        } else {</span>
+<a name="l-20"></a><span class="x">	            $alis-&gt;quality_samplesize = 0;</span>
+<a name="l-21"></a><span class="x">	        }</span>
+<a name="l-22"></a><span class="x">        </span>
+<a name="l-23"></a><span class="x">	        ### @export &quot;csvhander_process_correlation&quot;</span>
+<a name="l-24"></a><span class="x">            if ($alis-&gt;correlation &lt; CORRELATION_THRESHOLD) {</span>
+<a name="l-25"></a><span class="x">	            $alis-&gt;quality_correlation = 1;</span>
+<a name="l-26"></a><span class="x">	        } else {</span>
+<a name="l-27"></a><span class="x">	            $alis-&gt;quality_correlation = 0;</span>
+<a name="l-28"></a><span class="x">	        }</span>
+<a name="l-29"></a><span class="x">	        </span>
+<a name="l-30"></a><span class="x">	        ### @export &quot;csvhandler_process_deviation&quot;</span>
+<a name="l-31"></a><span class="x">	        switch ($alis-&gt;qualification) {</span>
+<a name="l-32"></a><span class="x">	            case ALIS_GCSE:</span>
+<a name="l-33"></a><span class="x">	            case ALIS_BTEC_FIRST_DIPLOMA:</span>
+<a name="l-34"></a><span class="x">	            case ALIS_IB_STANDARD:</span>
+<a name="l-35"></a><span class="x">	            case ALIS_IB_HIGHER:</span>
+<a name="l-36"></a><span class="x">	            case ALIS_OCR_NATIONAL_CERTIFICATE:</span>
+<a name="l-37"></a><span class="x">	            case ALIS_OCR_NATIONAL_DIPLOMA:</span>
+<a name="l-38"></a><span class="x">	                $boundary = 1;</span>
+<a name="l-39"></a><span class="x">	                break;</span>
+<a name="l-40"></a><span class="x">	                </span>
+<a name="l-41"></a><span class="x">	            case ALIS_ADVANCED_GCE:</span>
+<a name="l-42"></a><span class="x">	            case ALIS_ADVANCED_GCE_DOUBLE:</span>
+<a name="l-43"></a><span class="x">	                $boundary = 20;</span>
+<a name="l-44"></a><span class="x">	                break;</span>
+<a name="l-45"></a><span class="x">	                </span>
+<a name="l-46"></a><span class="x">	            case ALIS_ADVANCED_SUBSIDIARY_GCE:</span>
+<a name="l-47"></a><span class="x">	            case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE:</span>
+<a name="l-48"></a><span class="x">	                $boundary = 10;</span>
+<a name="l-49"></a><span class="x">	                break;</span>
+<a name="l-50"></a><span class="x">	                </span>
+<a name="l-51"></a><span class="x">	            case ALIS_BTEC_NATIONAL_AWARD:</span>
+<a name="l-52"></a><span class="x">	            case ALIS_BTEC_NATIONAL_DIPLOMA:</span>
+<a name="l-53"></a><span class="x">	            case ALIS_BTEC_NATIONAL_CERTIFICATE:</span>
+<a name="l-54"></a><span class="x">	                $boundary = 40;</span>
+<a name="l-55"></a><span class="x">	                break;</span>
+<a name="l-56"></a><span class="x">	                </span>
+<a name="l-57"></a><span class="x">	            case ALIS_CACHE_L3_DIPLOMA:</span>
+<a name="l-58"></a><span class="x">	                $boundary = 60;</span>
+<a name="l-59"></a><span class="x">	                break;                </span>
+<a name="l-60"></a><span class="x">	        }</span>
+<a name="l-61"></a><span class="x">	        </span>
+<a name="l-62"></a><span class="x">	        if ($alis-&gt;standarddeviation &gt; $boundary) {</span>
+<a name="l-63"></a><span class="x">	            if ($alis-&gt;standarddeviation &gt; $boundary*2) {</span>
+<a name="l-64"></a><span class="x">	                $alis-&gt;quality_deviation = 2;</span>
+<a name="l-65"></a><span class="x">	            } else {</span>
+<a name="l-66"></a><span class="x">	                $alis-&gt;quality_deviation = 1;</span>
+<a name="l-67"></a><span class="x">	            }</span>
+<a name="l-68"></a><span class="x">	        } else {</span>
+<a name="l-69"></a><span class="x">	            $alis-&gt;quality_deviation = 0;</span>
+<a name="l-70"></a><span class="x">	        }       </span>
+<a name="l-71"></a><span class="x">	        </span>
+<a name="l-72"></a><span class="x">	        ### @export &quot;csvhandler_process_end&quot;</span>
+<a name="l-73"></a><span class="x">	        $DB-&gt;update_record(&#39;report_targetgrades_alisdata&#39;, $alis);</span>
+<a name="l-74"></a><span class="x">        }</span>
+<a name="l-75"></a><span class="x">        </span>
+<a name="l-76"></a><span class="x">        return $import;</span>
+<a name="l-77"></a><span class="x">    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">}</span>
+<a name="l-2"></a>
+<a name="l-3"></a>
+<a name="l-4"></a><span class="x">// We need these class definitions here so that we can get all the functions we need when doing </span>
+<a name="l-5"></a><span class="x">// AJAX searching in the big select list. However, we don&#39;t want to have \user_selector_base</span>
+<a name="l-6"></a><span class="x">// as a dependency on every page where we include this lib, so only define the select list classes</span>
+<a name="l-7"></a><span class="x">// on pages where the user selector lib has already been included.</span>
+<a name="l-8"></a><span class="x">if (class_exists(&#39;\user_selector_base&#39;)) {</span>
+<a name="l-9"></a><span class="x">    </span>
+<a name="l-10"></a><span class="x">    /**</span>
+<a name="l-11"></a><span class="x">     * Select list for courses without Target Grade items</span>
+<a name="l-12"></a><span class="x">     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	class potential_course_selector extends \user_selector_base {</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	</span>
+<a name="l-2"></a><span class="x">	    /**</span>
+<a name="l-3"></a><span class="x">	     * Add the file name to the $options array to make AJAX searching work</span>
+<a name="l-4"></a><span class="x">	     * @return array</span>
+<a name="l-5"></a><span class="x">	     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	    protected function get_options() {</span>
+<a name="l-2"></a><span class="x">	        $options = parent::get_options();</span>
+<a name="l-3"></a><span class="x">	        $options[&#39;file&#39;] = &#39;admin/report/targetgrades/lib.php&#39;;</span>
+<a name="l-4"></a><span class="x">	        return $options;</span>
+<a name="l-5"></a><span class="x">	    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	            </span>
+<a name="l-2"></a><span class="x">	    /**</span>
+<a name="l-3"></a><span class="x">	     * Get list of courses for potential distribution</span>
+<a name="l-4"></a><span class="x">	     * </span>
+<a name="l-5"></a><span class="x">	     * Get all the courses that are in the categories selected in $config-&gt;categories,</span>
+<a name="l-6"></a><span class="x">	     * and aren&#39;t filtered out by $config-&gt;exclude_regex, and don&#39;t already have the grade</span>
+<a name="l-7"></a><span class="x">	     * items.  This function uses odd names for the fields to avoid having to override </span>
+<a name="l-8"></a><span class="x">	     * additional methods from the parent class.</span>
+<a name="l-9"></a><span class="x">	     * </span>
+<a name="l-10"></a><span class="x">	     * @param $search Optional string to search for in shortname and fullname</span>
+<a name="l-11"></a><span class="x">	     * @return array Matching course records</span>
+<a name="l-12"></a><span class="x">	     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	    public function find_users($search) {</span>
+<a name="l-2"></a><span class="x">		    global $DB;</span>
+<a name="l-3"></a><span class="x">		    $config = get_config();</span>
+<a name="l-4"></a><span class="x">		    </span>
+<a name="l-5"></a><span class="x">		    ### @export &quot;pcs_find_users_categories&quot;</span>
+<a name="l-6"></a><span class="x">		    list($in_sql, $params) = $DB-&gt;get_in_or_equal($config-&gt;categories);</span>
+<a name="l-7"></a><span class="x">		 </span>
+<a name="l-8"></a><span class="x">		    ### @export &quot;pcs_find_users_group&quot;</span>
+<a name="l-9"></a><span class="x">		    $select = &#39;SELECT c.id, c.shortname AS lastname, &quot;&quot; AS firstname, c.fullname AS email, q.name AS qualtype, &#39;;</span>
+<a name="l-10"></a><span class="x">			if(!empty($config-&gt;group_field) &amp;&amp; !empty($config-&gt;group_length)) {</span>
+<a name="l-11"></a><span class="x">		        $args = array($config-&gt;group_field, $config-&gt;group_length);</span>
+<a name="l-12"></a><span class="x">			    $select .= \vsprintf(&#39;LEFT(c.%1$s, %2$d) AS pattern &#39;, $args);</span>
+<a name="l-13"></a><span class="x">		        $from = \vsprintf(&#39;FROM {course} c</span>
+<a name="l-14"></a><span class="x">		                    LEFT JOIN {report_targetgrades_patterns} p</span>
+<a name="l-15"></a><span class="x">		                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)</span>
+<a name="l-16"></a><span class="x">		                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id</span>
+<a name="l-17"></a><span class="x">		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id &#39;, $args);</span>
+<a name="l-18"></a><span class="x">			} else {</span>
+<a name="l-19"></a><span class="x">			    $select .= &#39;shortname AS pattern &#39;;</span>
+<a name="l-20"></a><span class="x">				$from = &#39;FROM {course} c</span>
+<a name="l-21"></a><span class="x">		                    LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern </span>
+<a name="l-22"></a><span class="x">		                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id</span>
+<a name="l-23"></a><span class="x">		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id &#39;;		</span>
+<a name="l-24"></a><span class="x">			}</span>
+<a name="l-25"></a><span class="x">			</span>
+<a name="l-26"></a><span class="x">			$order = &#39;ORDER BY pattern&#39;;</span>
+<a name="l-27"></a><span class="x">			    </span>
+<a name="l-28"></a><span class="x">			### @export &quot;pcs_find_users_regex&quot;</span>
+<a name="l-29"></a><span class="x">		    if ($DB-&gt;sql_regex_supported()) {</span>
+<a name="l-30"></a><span class="x">		        $where = &#39;WHERE category &#39;.$in_sql.&#39; AND &#39;.$config-&gt;exclude_field.&#39; &#39;.$DB-&gt;sql_regex(false).&#39; ? &#39;;</span>
+<a name="l-31"></a><span class="x">		        $params = array_merge($params, array($config-&gt;exclude_regex));        </span>
+<a name="l-32"></a><span class="x">		    } else {</span>
+<a name="l-33"></a><span class="x">			    $courses = $DB-&gt;get_records_select(&#39;course&#39;, &#39;category &#39;.$in_sql, $params);</span>
+<a name="l-34"></a><span class="x">			    </span>
+<a name="l-35"></a><span class="x">			    \array_filter($courses, function($course, $config) {				    </span>
+<a name="l-36"></a><span class="x">				    $field = $config-&gt;exclude_field;</span>
+<a name="l-37"></a><span class="x">				    return !\preg_match(&#39;/&#39;.$config-&gt;exclude_regex.&#39;/&#39;, $course-&gt;$field);</span>
+<a name="l-38"></a><span class="x">				});</span>
+<a name="l-39"></a><span class="x">			    </span>
+<a name="l-40"></a><span class="x">			    list($in_sql, $params) = $DB-&gt;get_in_or_equal(array_keys($courses));</span>
+<a name="l-41"></a><span class="x">			    $where = &#39;WHERE id &#39;.$in_sql.&#39; &#39;;</span>
+<a name="l-42"></a><span class="x">			}</span>
+<a name="l-43"></a><span class="x">			</span>
+<a name="l-44"></a><span class="x">			### @export &quot;pcs_find_users_search&quot;</span>
+<a name="l-45"></a><span class="x">			$optgroupname = get_string(&#39;courseswithoutgrades&#39;, &#39;report_targetgrades&#39;);		</span>
+<a name="l-46"></a><span class="x">			</span>
+<a name="l-47"></a><span class="x">			if (!empty($search)) {</span>
+<a name="l-48"></a><span class="x">			    $shortnamelike = $DB-&gt;sql_like(&#39;shortname&#39;, &#39;?&#39;);</span>
+<a name="l-49"></a><span class="x">			    $fullnamelike = $DB-&gt;sql_like(&#39;fullname&#39;, &#39;?&#39;);		   </span>
+<a name="l-50"></a><span class="x">			    $where .= &#39;AND (&#39;.$shortnamelike.&#39; OR &#39;.$fullnamelike.&#39;) &#39;;</span>
+<a name="l-51"></a><span class="x">				$params = array_merge($params, array(&#39;%&#39;.$search.&#39;%&#39;, &#39;%&#39;.$search.&#39;%&#39;));</span>
+<a name="l-52"></a><span class="x">				$optgroupname .= &#39; - &#39;.get_string(&#39;searchresults&#39;, &#39;report_targetgrades&#39;); </span>
+<a name="l-53"></a><span class="x">			}</span>
+<a name="l-54"></a><span class="x">			</span>
+<a name="l-55"></a><span class="x">			### @export &quot;pcs_find_users_exclude&quot;</span>
+<a name="l-56"></a><span class="x">			if (!empty($this-&gt;exclude)) {</span>
+<a name="l-57"></a><span class="x">			    list($not_in_sql, $not_in_params) = $DB-&gt;get_in_or_equal($this-&gt;exclude, SQL_PARAMS_QM, &#39;&#39;, false);</span>
+<a name="l-58"></a><span class="x">			    $where .= &#39;AND c.id &#39;.$not_in_sql.&#39; &#39;;</span>
+<a name="l-59"></a><span class="x">			    $params = array_merge($params, $not_in_params);</span>
+<a name="l-60"></a><span class="x">			}</span>
+<a name="l-61"></a><span class="x">			</span>
+<a name="l-62"></a><span class="x">			### @export &quot;pcs_find_users_end&quot;</span>
+<a name="l-63"></a><span class="x">			$options = $DB-&gt;get_records_sql($select.$from.$where.$order, $params);</span>
+<a name="l-64"></a><span class="x">		    	    </span>
+<a name="l-65"></a><span class="x">			$options = hasconfig($options);</span>
+<a name="l-66"></a><span class="x">	       </span>
+<a name="l-67"></a><span class="x">		    return array($optgroupname =&gt; $options);</span>
+<a name="l-68"></a><span class="x">	    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	</span>
+<a name="l-2"></a><span class="x">	};</span>
+<a name="l-3"></a><span class="x">	</span>
+<a name="l-4"></a><span class="x">	/**</span>
+<a name="l-5"></a><span class="x">	 * Select list for courses with target grade items.</span>
+<a name="l-6"></a><span class="x">	 */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	class distributed_course_selector extends potential_course_selector {</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	    /**</span>
+<a name="l-2"></a><span class="x">	     * Get a list of courses that have Target Grade grade items on.</span>
+<a name="l-3"></a><span class="x">	     * </span>
+<a name="l-4"></a><span class="x">	     * Gets all the courses with one or more grade items match the ones</span>
+<a name="l-5"></a><span class="x">	     * added by the distribution script.</span>
+<a name="l-6"></a><span class="x">	     * </span>
+<a name="l-7"></a><span class="x">	     * @param $search Compulsory arugment due to abstract parent method. Defaults to empty string, doesn&#39;t do anything</span>
+<a name="l-8"></a><span class="x">	     * @return array All the matching courses</span>
+<a name="l-9"></a><span class="x">	     */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	    function find_users($search = &#39;&#39;) {</span>
+<a name="l-2"></a><span class="x">	        global $DB;</span>
+<a name="l-3"></a><span class="x">	        $config = get_config();</span>
+<a name="l-4"></a><span class="x">	        </span>
+<a name="l-5"></a><span class="x">	        ### @export &quot;dcs_find_users_fields&quot;	        </span>
+<a name="l-6"></a><span class="x">		    $select = &#39;SELECT DISTINCT c.id, c.shortname AS lastname, &quot;&quot; AS firstname, c.fullname AS email, q.name AS qualtype, &#39;;</span>
+<a name="l-7"></a><span class="x">		        </span>
+<a name="l-8"></a><span class="x">		    $from = &#39;FROM {course} c</span>
+<a name="l-9"></a><span class="x">		                JOIN {grade_items} g ON c.id = g.courseid &#39;;</span>
+<a name="l-10"></a><span class="x">		</span>
+<a name="l-11"></a><span class="x">		    ### @export &quot;dcs_find_users_group&quot;</span>
+<a name="l-12"></a><span class="x">			if(!empty($config-&gt;group_field) &amp;&amp; !empty($config-&gt;group_length)) {</span>
+<a name="l-13"></a><span class="x">		        $args = array($config-&gt;group_field, $config-&gt;group_length);</span>
+<a name="l-14"></a><span class="x">			    $select .= \vsprintf(&#39;LEFT(c.%1$s, %2$d) AS pattern &#39;, $args);</span>
+<a name="l-15"></a><span class="x">		        $from .= \vsprintf(&#39;LEFT JOIN {report_targetgrades_patterns} p</span>
+<a name="l-16"></a><span class="x">				                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)</span>
+<a name="l-17"></a><span class="x">				                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id</span>
+<a name="l-18"></a><span class="x">				                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id &#39;, $args);</span>
+<a name="l-19"></a><span class="x">			} else {</span>
+<a name="l-20"></a><span class="x">			    $select .= &#39;shortname AS pattern &#39;;</span>
+<a name="l-21"></a><span class="x">				$from .= &#39;LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern</span>
+<a name="l-22"></a><span class="x">							LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id</span>
+<a name="l-23"></a><span class="x">		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id &#39;;		</span>
+<a name="l-24"></a><span class="x">			}</span>
+<a name="l-25"></a><span class="x">			</span>
+<a name="l-26"></a><span class="x">			### @export &quot;dcs_find_users_items&quot;</span>
+<a name="l-27"></a><span class="x">			$itemnames = array(get_string(&#39;item_avgcse&#39;, &#39;report_targetgrades&#39;),</span>
+<a name="l-28"></a><span class="x">            get_string(&#39;item_alisnum&#39;, &#39;report_targetgrades&#39;),</span>
+<a name="l-29"></a><span class="x">            get_string(&#39;item_alis&#39;, &#39;report_targetgrades&#39;),</span>
+<a name="l-30"></a><span class="x">            get_string(&#39;item_mtg&#39;, &#39;report_targetgrades&#39;));</span>
+<a name="l-31"></a><span class="x">			list($in_sql, $in_params) = $DB-&gt;get_in_or_equal($itemnames);    </span>
+<a name="l-32"></a><span class="x">			</span>
+<a name="l-33"></a><span class="x">		    $where = &#39;WHERE itemname &#39;.$in_sql;</span>
+<a name="l-34"></a><span class="x">			$options = $DB-&gt;get_records_sql($select.$from.$where, $in_params);</span>
+<a name="l-35"></a><span class="x">			</span>
+<a name="l-36"></a><span class="x">			### @export &quot;dcs_find_users_end&quot;</span>
+<a name="l-37"></a><span class="x">			$options = hasconfig($options);</span>
+<a name="l-38"></a><span class="x">			return array(get_string(&#39;courseswithgrades&#39;, &#39;report_targetgrades&#39;) =&gt; $options);</span>
+<a name="l-39"></a><span class="x">	    }</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">	};</span>
+<a name="l-2"></a>
+<a name="l-3"></a><span class="x">}</span>
+<a name="l-4"></a><span class="x">/**</span>
+<a name="l-5"></a><span class="x"> * Used to flag up when a class has no students</span>
+<a name="l-6"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class no_students_exception extends \Exception {}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Used to flag up when a student has no Average GCSE data</span>
+<a name="l-3"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class no_data_for_student_exception extends \Exception {}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Used to flag when a student&#39;s MTG calcucation failed for some reason</span>
+<a name="l-3"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class no_mtg_for_student_exception extends \Exception {}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Used to flag when a course has no ALIS data configured</span>
+<a name="l-3"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class no_config_for_course_exception extends \Exception {}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Used to return the ID of a grade item if one already exists for the given</span>
+<a name="l-3"></a><span class="x"> * criteria.</span>
+<a name="l-4"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class grade_item_exists_exception extends \Exception {</span>
+<a name="l-2"></a><span class="x">    private $id;</span>
+<a name="l-3"></a>
+<a name="l-4"></a><span class="x">    public function __construct($message = &quot;&quot;, $id = 0, $code = 0) {</span>
+<a name="l-5"></a><span class="x">        parent::__construct($message, $code);</span>
+<a name="l-6"></a><span class="x">        $this-&gt;id = $id;</span>
+<a name="l-7"></a><span class="x">    }</span>
+<a name="l-8"></a>
+<a name="l-9"></a><span class="x">    public function getId() {</span>
+<a name="l-10"></a><span class="x">        return $this-&gt;id;</span>
+<a name="l-11"></a><span class="x">    }</span>
+<a name="l-12"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">/**</span>
+<a name="l-2"></a><span class="x"> * Used to flag when an regex with a risk of ReDOS is detected</span>
+<a name="l-3"></a><span class="x"> */</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class unsafe_regex_exception extends \Exception {</span>
+<a name="l-2"></a><span class="x">    public function __construct() {</span>
+<a name="l-3"></a><span class="x">        parent::__construct(&#39;unsaferegex&#39;);</span>
+<a name="l-4"></a><span class="x">    }</span>
+<a name="l-5"></a><span class="x">}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">class needsconfig_exception extends \Exception {}</span>
+</pre></div>
+<div class="highlight"><pre><a name="l-1"></a><span class="x">?&gt;</span>
+</pre></div>

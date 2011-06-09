@@ -1,0 +1,15 @@
+<div class="highlight"><pre><a name="l-1"></a><span class="c">#!/bin/sh</span>
+<a name="l-2"></a>
+<a name="l-3"></a><span class="c"># Read pages 2 to 10 of the PDF into a plain text file, retaining the table layout</span>
+<a name="l-4"></a>pdftotext -f 2 -l 10 -layout Equations.pdf
+<a name="l-5"></a>
+<a name="l-6"></a><span class="c"># Lots of passes through sed to format the file so that it can be parsed as a CSV file:</span>
+<a name="l-7"></a><span class="c"># Passes 1-5: Delimit the table columns with pipes</span>
+<a name="l-8"></a><span class="c"># Pass 6: Remove column headings from the tables</span>
+<a name="l-9"></a><span class="c"># Pass 7: Remove Page footers</span>
+<a name="l-10"></a><span class="c"># Pass 8: Remove Page headers</span>
+<a name="l-11"></a><span class="c"># Pass 9: Remove blank lines and page break lines</span>
+<a name="l-12"></a><span class="c"># Pass 10: Remove document title</span>
+<a name="l-13"></a><span class="c"># Passes 11-12: Fix malformatted Informations and Communications Technology lines</span>
+<a name="l-14"></a>sed <span class="s1">&#39;s/Art   /Art /&#39;</span> Equations.txt | sed <span class="s1">&#39;s/[ ]\{2,\}/|/&#39;</span> | sed <span class="s1">&#39;s/[ ]\{2,\}/|/&#39;</span> | sed <span class="s1">&#39;s/[ ]\{2,\}/|/&#39;</span> | sed <span class="s1">&#39;s/[ ]\{2,\}/|/&#39;</span> | sed <span class="s1">&#39;s/[ ]\{2,\}/|/&#39;</span> | sed <span class="s1">&#39;s/Subject|.*$//&#39;</span> | sed <span class="s1">&#39;s/^.*|Page.*$//&#39;</span> | sed <span class="s1">&#39;s/|Alis - Subject Level Regression Equations [0-9]\{4\}//&#39;</span> | sed <span class="s1">&#39;/^$/d&#39;</span> | sed <span class="s1">&#39;1,2d&#39;</span> | sed <span class="s1">&#39;/^Technolog$/d&#39;</span> | sed <span class="s1">&#39;s/\(Information And Communications\)/\1 Technology/&#39;</span> &gt; Equations.txt
+</pre></div>

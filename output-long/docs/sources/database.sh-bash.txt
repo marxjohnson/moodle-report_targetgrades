@@ -1,0 +1,32 @@
+### @export "alisdata"
++---------------------+-----------------------+------+-----+---------+----------------+
+| Field               | Type                  | Null | Key | Default | Extra          |
++---------------------+-----------------------+------+-----+---------+----------------+
+| id                  | bigint(10) unsigned   | NO   | PRI | NULL    | auto_increment |
+| name                | text                  | YES  |     | NULL    |                |
+| qualtypeid          | bigint(10) unsigned   | NO   |     | NULL    |                |
+| samplesize          | mediumint(6) unsigned | NO   |     | NULL    |                |
+| gradient            | decimal(6,2)          | YES  |     | NULL    |                |
+| intercept           | decimal(6,2)          | YES  |     | NULL    |                |
+| correlation         | decimal(3,2)          | YES  |     | NULL    |                |
+| standarddeviation   | decimal(6,2) unsigned | NO   |     | NULL    |                |
+| quality_samplesize  | tinyint(1) unsigned   | NO   |     | 0       |                |
+| quality_correlation | tinyint(1) unsigned   | NO   |     | 0       |                |
+| quality_deviation   | tinyint(1) unsigned   | NO   |     | 0       |                |
++---------------------+-----------------------+------+-----+---------+----------------+
+### @export "qualtypes"
++------------+---------------------+------+-----+---------+----------------+
+| Field      | Type                | Null | Key | Default | Extra          |
++------------+---------------------+------+-----+---------+----------------+
+| id         | bigint(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| alisdataid | bigint(10) unsigned | YES  |     | NULL    |                |
+| pattern    | text                | YES  |     | NULL    |                |
++------------+---------------------+------+-----+---------+----------------+
+### @export "patterns"
++------------+---------------------+------+-----+---------+----------------+
+| Field      | Type                | Null | Key | Default | Extra          |
++------------+---------------------+------+-----+---------+----------------+
+| id         | bigint(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| alisdataid | bigint(10) unsigned | YES  |     | NULL    |                |
+| pattern    | text                | YES  |     | NULL    |                |
++------------+---------------------+------+-----+---------+----------------+
