@@ -33,19 +33,19 @@
 require_once('../../../config.php');
 require_once($CFG->dirroot.'/admin/report/targetgrades/lib.php');
 
+### @export "alias"
 use report\targetgrades as tg;
+### @end
 
 require_login($SITE);
 
-$config = get_config('report_targetgrades');
-if(empty($config->selected)) {
-    $config->selected = ',';
-}
+### @export "get_config"
+$config = tg\get_config('report_targetgrades');
+### @end
+
 
 try {
-    if(isset($config->roles) && isset($config->categories)) {
-        $roles = unserialize($config->roles);
-        $categories = unserialize($config->categories);
+    if(!empty($config->roles) && !empty($config->categories)) {
         if(!empty($config->gcse_field) && !empty($roles) && !empty($categories)) {
             if(!$DB->get_records('report_targetgrades_alisdata')) {
                 redirect(new moodle_url('/admin/report/targetgrades/alisdata.php'));

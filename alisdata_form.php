@@ -32,6 +32,7 @@ require_once($CFG->libdir.'/formslib.php');
 /**
  * The upload form's class for uploading ALIS data
  */
+### @export "alisdata_form"
 class alisdata_upload_form extends \moodleform {
 
     /**
@@ -44,5 +45,6 @@ class alisdata_upload_form extends \moodleform {
         $mform->addElement('submit', 'upload', get_string('upload'));
     }
 }
+### @end
 
 ?>

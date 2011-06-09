@@ -24,13 +24,16 @@
  * @copyright   2011 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */ 
- 
-namespace report\targetgrades;
 
+### @export "namespace"
+namespace report\targetgrades;
+### @end
 /**
  * These constants store the strings used by ALIS to describe each type of
  * qualification that statistics are available for.
  */
+
+### @export "alisconstants"
 const ALIS_GCSE = 'GCSE';
 const ALIS_ADVANCED_GCE = 'Advanced GCE';
 const ALIS_ADVANCED_GCE_DOUBLE = 'Advanced GCE (Double Award)';
@@ -46,13 +49,14 @@ const ALIS_BTEC_NATIONAL_AWARD = 'BTEC National Award';
 const ALIS_BTEC_NATIONAL_CERTIFICATE = 'BTEC National Certificate';
 const ALIS_BTEC_NATIONAL_DIPLOMA = 'BTEC National Diploma';
 const ALIS_BTEC_FIRST_DIPLOMA = 'BTEC First Diploma';
-
+### @end
 
 /**
  * These constants define the various grade scales required for the above
  * qualifications. Only unique scales are stored here, e.g. the CACHE L3 diploma
  * can use MTG_SCALE_ADVANCED_SUBSIDIARY_GCE as they are the same.
  */
+### @export "scaleconstants"
 const MTG_SCALE_GCSE = 'U,G,F,E,D,C,B,A,A*';
 const MTG_SCALE_ADVANCED_GCE = 'U,E,D,C,B,A,A*';
 const MTG_SCALE_ADVANCED_SUBSIDIARY_GCE = 'U,E,D,C,B,A,A*';
@@ -62,18 +66,22 @@ const MTG_SCALE_BTEC_DIPLOMA = 'Fail,PPP,MPP,MMP,MMM,DMM,DDM,DDD';
 const MTG_SCALE_ADVANCED_GCE_DOUBLE = 'U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*';
 const MTG_SCALE_ADVANCED_SUBSIDIARY_GCE_DOUBLE = 'U,EE,DE,DD,CD,CC,BC,BB,AB,AA,A*A,A*A*';
 const MTG_SCALE_IB = '1,2,3,4,5,6,7';
+### @end
 
 /**
  * The threshold under which to mark stats has having low correlations
  * @var float
  */
+### @export "correlationthreshold"
 const CORRELATION_THRESHOLD = 0.3;
+### @end
 
 /**
  * Returns the grade scale for the provided qualification type.
  * 
  * @param string $qualtype 
  */
+### @export "get_scale"
 function get_scale($qualtype) {
     switch ($qualtype) {
         case ALIS_GCSE:
@@ -138,6 +146,7 @@ function get_scale($qualtype) {
             break;
     }
 }
+### @end
 
 
 /**
@@ -150,6 +159,7 @@ function get_scale($qualtype) {
  * @param $force bool Force a fresh query on the database (defaults to false)
  * @return object The config data.
  */
+### @export "get_config"
 function get_config($force = false) {
     static $config;
     if (empty($config) || $force) {
@@ -159,6 +169,7 @@ function get_config($force = false) {
     }
     return $config;
 }
+### @end
 
 /**
  * Append an asterisk to the course's name if it doesn't have ALIS data
@@ -167,6 +178,7 @@ function get_config($force = false) {
  * @param array $options the courses being used as options for the select list
  * @return array The options with asterisks added where appropriate
  */
+### @export "hasconfig"
 function hasconfig($options){    
      array_walk($options, function ($option){ // Mark all courses that don't have any ALIS data
 	    global $DB;
@@ -183,6 +195,7 @@ function hasconfig($options){
 	});
 	return $options;
 }
+### @end
 
 /**
  * Calculates a minimum target grade for a particular course based on
@@ -193,6 +206,7 @@ function hasconfig($options){
  *
  * @return integer relating to the grade on a scale or false if fails
  */
+### @export "calculate_mtg"
 function calculate_mtg($student, $course){
     global $DB;
     $select = 'SELECT name, gradient, intercept ';
@@ -308,6 +322,7 @@ function calculate_mtg($student, $course){
     }
     
 }
+### @end
 
 /**
  * Builds a set of options to select pattens to apply ALIS stats to
@@ -316,6 +331,7 @@ function calculate_mtg($student, $course){
  * @return array The array of options for the menu
  * @throws Exception if the exclusion regex shows a risk of ReDOS
  */
+### @export "build_pattern_options"
 function build_pattern_options() {
 
     global $DB;
@@ -358,6 +374,7 @@ function build_pattern_options() {
 
     return $options;
 }
+### @end
 
 /**
  * Re-sorts the gradebook to put all MTG grade items first.
@@ -369,6 +386,7 @@ function build_pattern_options() {
  *
  * @param object $course Database record for course, containing the id.
  */
+### @export "sort_gradebook"
 function sort_gradebook($course) {
 
     global $CFG, $DB;
@@ -417,6 +435,7 @@ function sort_gradebook($course) {
 
 
 }
+### @end
 
 /**
  * Prints tabs for navigating the block's pages
@@ -429,6 +448,7 @@ function sort_gradebook($course) {
  * @global $OUTPUT the output renderer.
  * @param int $selected The ID of the tab to select
  */
+### @export "print_tabs"
 function print_tabs($selected) {
     global $DB, $OUTPUT;
 
@@ -447,10 +467,12 @@ function print_tabs($selected) {
     echo $OUTPUT->heading(get_string('mtgdistribute', 'report_targetgrades'));
     \print_tabs(array($tabs), $selected);
 }
+### @end
 
 /**
  * A skeleton grade record
  */
+### @export "item_grade"
 abstract class item_grade {
 
     public   $courseid;
@@ -480,6 +502,7 @@ abstract class item_grade {
         $this->timemodified = \time();
     }
 }
+### @end
 
 /**
  * A course gradeitem
@@ -654,8 +677,9 @@ class item_cpg extends item_min {
 /**
  * Validates and processes files for the tutorlink block
  */
+### @export "csvhandler"
 class csvhandler {
-
+### @end
     /**
      * The ID of the file uploaded through the form
      *
@@ -668,9 +692,11 @@ class csvhandler {
      *
      * @param string $filename
      */
+    ### @export "csvhandler_construct"
     public function __construct($filename) {
         $this->filename = $filename;
     }
+    ### @end
 
     /**
      * Attempts to open the file
@@ -682,6 +708,7 @@ class csvhandler {
      * @global object $USER
      * @return object File handler
      */
+    ### @export "csvhandler_openfile"
     private function open_file() {
         global $USER;
         
@@ -697,7 +724,9 @@ class csvhandler {
         
         return $file;
     }
+    ### @end
 
+    
     /**
      * Checks that the file is valid CSV in the expected format
      *
@@ -707,6 +736,7 @@ class csvhandler {
      * @throws moodle_exeption if there are the wrong number of columns
      * @return true on success
      */
+    ### @export "csvhandler_validate"
     public function validate() {
         $line = 0;
         $file = $this->open_file();
@@ -719,6 +749,7 @@ class csvhandler {
         \fclose($file);
         return true;
     }
+    ### @end
 
     /**
      * Processes the file to import the ALIS data
@@ -733,6 +764,7 @@ class csvhandler {
      * @global object $DB Database interface
      * @return string A report of successes and failures.
      */
+    ### @export "csvhandler_process"
     public function process() {
         global $DB;
         
@@ -742,6 +774,7 @@ class csvhandler {
         $import->subjectcount = 0;
         $import->updatecount = 0;
         while ($line = \fgetcsv($file, 0, '|')) {
+            ### @export "csvhandler_process_heading"
 
             // If there's only one column on this line, then it's a qualification heading
             if (\count($line) == 1) {
@@ -769,7 +802,7 @@ class csvhandler {
                         $import->qualcount++;
                     }
                 }
-                
+            ### @export "csvhandler_process_qualtype"
             } else {
                 // If we have a record for this course's qualtype
                 if ($qualtype) {
@@ -806,13 +839,14 @@ class csvhandler {
         \fclose($file);
         
         // All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data
-        
+        ### @export "csvhander_process_quality"
 	    $averagesize = round($DB->get_record_sql('SELECT AVG(samplesize) as avg FROM {report_targetgrades_alisdata}')->avg);
 	    $select = 'SELECT ta.*, tq.name as qualification ';
 	    $from = 'FROM {report_targetgrades_alisdata} ta 
 	    	JOIN {report_targetgrades_qualtype} tq ON ta.qualtypeid = tq.id';
         $alisdata = $DB->get_records_sql($select.$from);
         
+        ### @export "csvhander_process_samplesize"
         foreach ($alisdata as $alis) {
 	        if ($alis->samplesize < $averagesize) {
 	            if ($alis->samplesize < $averagesize/2) {
@@ -827,13 +861,15 @@ class csvhandler {
 	        } else {
 	            $alis->quality_samplesize = 0;
 	        }
-	        
-	        if ($alis->correlation < CORRELATION_THRESHOLD) {
+        
+	        ### @export "csvhander_process_correlation"
+            if ($alis->correlation < CORRELATION_THRESHOLD) {
 	            $alis->quality_correlation = 1;
 	        } else {
 	            $alis->quality_correlation = 0;
 	        }
 	        
+	        ### @export "csvhandler_process_deviation"
 	        switch ($alis->qualification) {
 	            case ALIS_GCSE:
 	            case ALIS_BTEC_FIRST_DIPLOMA:
@@ -875,11 +911,13 @@ class csvhandler {
 	            $alis->quality_deviation = 0;
 	        }       
 	        
+	        ### @export "csvhandler_process_end"
 	        $DB->update_record('report_targetgrades_alisdata', $alis);
         }
         
         return $import;
     }
+    ### @end
 }
 
 
@@ -892,17 +930,21 @@ if (class_exists('\user_selector_base')) {
     /**
      * Select list for courses without Target Grade items
      */
+    ### @export "pcs"
 	class potential_course_selector extends \user_selector_base {
-	    
+	### @end
+	
 	    /**
 	     * Add the file name to the $options array to make AJAX searching work
 	     * @return array
 	     */
+	    ### @export "pcs_get_options"
 	    protected function get_options() {
 	        $options = parent::get_options();
 	        $options['file'] = 'admin/report/targetgrades/lib.php';
 	        return $options;
 	    }
+	    ### @end
 	            
 	    /**
 	     * Get list of courses for potential distribution
@@ -915,12 +957,15 @@ if (class_exists('\user_selector_base')) {
 	     * @param $search Optional string to search for in shortname and fullname
 	     * @return array Matching course records
 	     */
+	    ### @export "pcs_find_users"
 	    public function find_users($search) {
 		    global $DB;
 		    $config = get_config();
-		   
+		    
+		    ### @export "pcs_find_users_categories"
 		    list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
 		 
+		    ### @export "pcs_find_users_group"
 		    $select = 'SELECT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
 			if(!empty($config->group_field) && !empty($config->group_length)) {
 		        $args = array($config->group_field, $config->group_length);
@@ -940,6 +985,7 @@ if (class_exists('\user_selector_base')) {
 			
 			$order = 'ORDER BY pattern';
 			    
+			### @export "pcs_find_users_regex"
 		    if ($DB->sql_regex_supported()) {
 		        $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
 		        $params = array_merge($params, array($config->exclude_regex));        
@@ -955,6 +1001,7 @@ if (class_exists('\user_selector_base')) {
 			    $where = 'WHERE id '.$in_sql.' ';
 			}
 			
+			### @export "pcs_find_users_search"
 			$optgroupname = get_string('courseswithoutgrades', 'report_targetgrades');		
 			
 			if (!empty($search)) {
@@ -965,25 +1012,30 @@ if (class_exists('\user_selector_base')) {
 				$optgroupname .= ' - '.get_string('searchresults', 'report_targetgrades'); 
 			}
 			
+			### @export "pcs_find_users_exclude"
 			if (!empty($this->exclude)) {
 			    list($not_in_sql, $not_in_params) = $DB->get_in_or_equal($this->exclude, SQL_PARAMS_QM, '', false);
 			    $where .= 'AND c.id '.$not_in_sql.' ';
 			    $params = array_merge($params, $not_in_params);
 			}
 			
+			### @export "pcs_find_users_end"
 			$options = $DB->get_records_sql($select.$from.$where.$order, $params);
 		    	    
 			$options = hasconfig($options);
 	       
 		    return array($optgroupname => $options);
 	    }
+	    ### @end
 	
 	};
 	
 	/**
 	 * Select list for courses with target grade items.
 	 */
+	### @export "dcs"
 	class distributed_course_selector extends potential_course_selector {
+    ### @end
 
 	    /**
 	     * Get a list of courses that have Target Grade grade items on.
@@ -994,14 +1046,18 @@ if (class_exists('\user_selector_base')) {
 	     * @param $search Compulsory arugment due to abstract parent method. Defaults to empty string, doesn't do anything
 	     * @return array All the matching courses
 	     */
+	    ### @export "dcs_find_users"
 	    function find_users($search = '') {
 	        global $DB;
 	        $config = get_config();
+	        
+	        ### @export "dcs_find_users_fields"	        
 		    $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
 		        
 		    $from = 'FROM {course} c
 		                JOIN {grade_items} g ON c.id = g.courseid ';
 		
+		    ### @export "dcs_find_users_group"
 			if(!empty($config->group_field) && !empty($config->group_length)) {
 		        $args = array($config->group_field, $config->group_length);
 			    $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
@@ -1016,6 +1072,7 @@ if (class_exists('\user_selector_base')) {
 		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';		
 			}
 			
+			### @export "dcs_find_users_items"
 			$itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
             get_string('item_alisnum', 'report_targetgrades'),
             get_string('item_alis', 'report_targetgrades'),
@@ -1025,36 +1082,47 @@ if (class_exists('\user_selector_base')) {
 		    $where = 'WHERE itemname '.$in_sql;
 			$options = $DB->get_records_sql($select.$from.$where, $in_params);
 			
+			### @export "dcs_find_users_end"
 			$options = hasconfig($options);
 			return array(get_string('courseswithgrades', 'report_targetgrades') => $options);
 	    }
+	    ### @end
 	};
 
 }
 /**
  * Used to flag up when a class has no students
  */
+### @export "e_nostudents"
 class no_students_exception extends \Exception {}
+### @end
 
 /**
  * Used to flag up when a student has no Average GCSE data
  */
+### @export "e_nodataforstudent"
 class no_data_for_student_exception extends \Exception {}
+### @end
 
 /**
  * Used to flag when a student's MTG calcucation failed for some reason
  */
+### @export "e_nomtgforstudent"
 class no_mtg_for_student_exception extends \Exception {}
+### @end
 
 /**
  * Used to flag when a course has no ALIS data configured
  */
+### @export "e_noconfigforcourse"
 class no_config_for_course_exception extends \Exception {}
+### @end
 
 /**
  * Used to return the ID of a grade item if one already exists for the given
  * criteria.
  */
+### @export "e_gradeitemexists"
 class grade_item_exists_exception extends \Exception {
     private $id;
 
@@ -1067,17 +1135,21 @@ class grade_item_exists_exception extends \Exception {
         return $this->id;
     }
 }
+### @end
 
 /**
  * Used to flag when an regex with a risk of ReDOS is detected
  */
+### @export "e_unsaferegex"
 class unsafe_regex_exception extends \Exception {
     public function __construct() {
         parent::__construct('unsaferegex');
     }
 }
+### @end
 
-
+### @export "e_needsconfig"
 class needsconfig_exception extends \Exception {}
+### @end
 
 ?>
