@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="pastie.css" />
+        <title>Target Grades - Libraries</title>
+    </head>
+    <body>
+        <h1>Target Grades</h1>
+        <h2>Libraries</h2>
+        <p>The Target Grades report contains 2 libraries - <a href="">lib.php</a> and <a href="">alisdata_form.php</a>. These define all the classes, functions and constants used in the system.</p>
+        <p>These libraries define everything within the report\targetgrades namespace:
+        {{ d['lib.php|idio']['namespace'] }}
+        </p>
+        <p>This allows the definitions to be given reasonable concise names without the risk of name collisions with other parts of Moodle.  All files that include these libaraies alias the namespace to <tt>tg</tt> using the following line:
+        {{ d['index.php|idio']['alias'] }}
+        Functions from the library can then be called using the following syntax:
+        {{ d['index.php|idio']['get_config'] }}
+        </p>
+
+    </body>
+</html>
