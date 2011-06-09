@@ -2,7 +2,8 @@
 	"*.html|jinja": {
 		"allinputs": true
 	},
-	"*.sh|bash|idio": {},
+	"*.sh|bash": {},
+	"database.sh|bash|idio": {},
 	"*.php|php": {},
 	"*.css|cp": {}
 }

@@ -21,9 +21,13 @@ cli/alis_pdf2csv.sh|pyg
 
 database.html
 
+database.sh|bash
+
 database.sh|bash|idio
 
 database.sh|pyg
+
+database.txt
 
 db/access.html
 
@@ -39,17 +43,23 @@ docs/sources/database
 
 docs/sources/database.html
 
+docs/sources/database.sh|bash
+
 docs/sources/database.sh|bash|idio
 
 docs/sources/database.sh|pyg
+
+docs/sources/database.txt
 
 docs/sources/filetree
 
 docs/sources/filetree.html
 
-docs/sources/filetree.sh|bash|idio
+docs/sources/filetree.sh|bash
 
 docs/sources/filetree.sh|pyg
+
+docs/sources/filetree.txt
 
 docs/sources/list
 
@@ -67,9 +77,11 @@ docs/sources/pastie.css|cp
 
 filetree.html
 
-filetree.sh|bash|idio
+filetree.sh|bash
 
 filetree.sh|pyg
+
+filetree.txt
 
 index
 
