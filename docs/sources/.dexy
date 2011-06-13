@@ -4,6 +4,6 @@
 	},
 	"*.sh|bash": {},
 	"database.sh|bash|idio": {},
-	"*.php|php": {},
+	"list.php|php|idio": {},
 	"*.css|cp": {}
 }

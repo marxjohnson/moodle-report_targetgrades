@@ -40,7 +40,7 @@ use report\targetgrades as tg;
 require_login($SITE);
 
 ### @export "get_config"
-$config = tg\get_config('report_targetgrades');
+$config = tg\get_config();
 ### @end
 
 

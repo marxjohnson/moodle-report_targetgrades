@@ -181,19 +181,19 @@ function get_config($force = false) {
 ### @export "hasconfig"
 function hasconfig($options){    
      array_walk($options, function ($option){ // Mark all courses that don't have any ALIS data
-	    global $DB;
-	    $select = 'SELECT * ';
-	    $from = 'FROM {report_targetgrades_patterns} p
-	        JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id ';
-	    $where = 'WHERE p.pattern = ?';
-		$params = array($option->pattern);
-	    if($DB->get_record_sql($select.$from.$where, $params)) {
-	        return true;
-	    } else {
-	        $option->firstname = '*';
-	    }    
-	});
-	return $options;
+        global $DB;
+        $select = 'SELECT * ';
+        $from = 'FROM {report_targetgrades_patterns} p
+            JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id ';
+        $where = 'WHERE p.pattern = ?';
+        $params = array($option->pattern);
+        if($DB->get_record_sql($select.$from.$where, $params)) {
+            return true;
+        } else {
+            $option->firstname = '*';
+        }    
+    });
+    return $options;
 }
 ### @end
 
@@ -213,8 +213,8 @@ function calculate_mtg($student, $course){
     $from = 'FROM {report_targetgrades_patterns} AS p
         JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
     $where = 'WHERE p.pattern = ?';
-	$params = array($course->pattern);
-	
+    $params = array($course->pattern);
+    
     if($alis = $DB->get_record_sql($select.$from.$where, $params)) {
         $points = ($student->avgcse * $alis->gradient)+$alis->intercept;
 
@@ -343,33 +343,33 @@ function build_pattern_options() {
     list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
  
     $select = 'SELECT DISTINCT ';
-	if(!empty($config->group_field) && !empty($config->group_length)) {
-	    $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'), LEFT('.$config->group_field.', '.$config->group_length.') as pattern ';
-	} else {
-	    $select .= 'shortname, shortname AS pattern ';
-	}
-	
-	$from = 'FROM {course} ';
-	
-	$order = 'ORDER BY pattern';
-	    
+    if(!empty($config->group_field) && !empty($config->group_length)) {
+        $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'), LEFT('.$config->group_field.', '.$config->group_length.') as pattern ';
+    } else {
+        $select .= 'shortname, shortname AS pattern ';
+    }
+    
+    $from = 'FROM {course} ';
+    
+    $order = 'ORDER BY pattern';
+        
     if ($DB->sql_regex_supported()) {
         $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
         $params = array_merge($params, array($config->exclude_regex));        
     } else {
-	    $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
-	    
-		\array_filter($courses, function($course, $config) {				    
-		    $field = $config->exclude_field;
-		    return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
-		});	    
-		
-		list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));		
-	    $where = 'WHERE id '.$in_sql.' ';
-	}
-	
-	$where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN (SELECT pattern FROM {report_targetgrades_patterns} tp) ';
-	
+        $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
+        
+        \array_filter($courses, function($course, $config) {                    
+            $field = $config->exclude_field;
+            return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
+        });        
+        
+        list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));        
+        $where = 'WHERE id '.$in_sql.' ';
+    }
+    
+    $where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN (SELECT pattern FROM {report_targetgrades_patterns} tp) ';
+    
     $options = $DB->get_records_sql_menu($select.$from.$where.$order, $params);
 
     return $options;
@@ -393,11 +393,11 @@ function sort_gradebook($course) {
     require_once $CFG->dirroot.'/grade/lib.php';
     require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
     $gtree = new \grade_tree($course->id, false, false);
-	
-	$fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');	
-	$params = array($course->id);
-	list($in_sql, $in_params) = $DB->get_in_or_equal($params);
-	$params = \array_merge($params, $in_params);
+    
+    $fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');    
+    $params = array($course->id);
+    list($in_sql, $in_params) = $DB->get_in_or_equal($params);
+    $params = \array_merge($params, $in_params);
     $where = 'courseid = ? AND idnumber '.$in_sql;
     $gradeitems = $DB->get_records_select('grade_items', $where, $params, 'itemnumber DESC');
     $courseitem = $DB->get_record('grade_items', array('courseid' => $course->id, 'itemtype' => 'course'));
@@ -450,7 +450,7 @@ function sort_gradebook($course) {
  */
 ### @export "print_tabs"
 function print_tabs($selected) {
-    global $DB, $OUTPUT;
+    global $DB, $OUTPUT, $CFG;
 
     $tabs = array();
     $tabs[] = new \tabobject(1,
@@ -617,7 +617,7 @@ class item_min extends item_grade {
      * @param int $default The ID of the default scale to use
      */
     public function set_scale($qualtype, $default = null) {
-    	global $DB;
+        global $DB;
         $scale = $DB->get_record('scale', array('name' => $qualtype.' MTG'));
         if(!$scale) {
             if(!empty($default)) {
@@ -704,7 +704,7 @@ class csvhandler {
      * Open the file using the File API.
      * Return the file handler.
      *
-     * @throws moodle_exception if the file can't be opened for reading
+     * @throws moodle_exception if the file cant be opened for reading
      * @global object $USER
      * @return object File handler
      */
@@ -827,7 +827,7 @@ class csvhandler {
                         $subject->gradient = $gradient;
                         $subject->intercept = $intercept;
                         $subject->correlation = $correlation;
-                        $subject->standarddeviation = $standarddeviation;                        
+                        $subject->standarddeviation = $standarddeviation;
                         $subject->qualtypeid = $qualtype->id;
                         $DB->insert_record('report_targetgrades_alisdata', $subject);
                         $import->subjectcount++;
@@ -839,85 +839,85 @@ class csvhandler {
         \fclose($file);
         
         // All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data
-        ### @export "csvhander_process_quality"
-	    $averagesize = round($DB->get_record_sql('SELECT AVG(samplesize) as avg FROM {report_targetgrades_alisdata}')->avg);
-	    $select = 'SELECT ta.*, tq.name as qualification ';
-	    $from = 'FROM {report_targetgrades_alisdata} ta 
-	    	JOIN {report_targetgrades_qualtype} tq ON ta.qualtypeid = tq.id';
+        ### @export "csvhandler_process_quality"
+        $averagesize = round($DB->get_record_sql('SELECT AVG(samplesize) as avg FROM {report_targetgrades_alisdata}')->avg);
+        $select = 'SELECT ta.*, tq.name as qualification ';
+        $from = 'FROM {report_targetgrades_alisdata} ta 
+            JOIN {report_targetgrades_qualtype} tq ON ta.qualtypeid = tq.id';
         $alisdata = $DB->get_records_sql($select.$from);
-        
-        ### @export "csvhander_process_samplesize"
+
         foreach ($alisdata as $alis) {
-	        if ($alis->samplesize < $averagesize) {
-	            if ($alis->samplesize < $averagesize/2) {
-	                if ($alis->samplesize < $averagesize/4) {
-	                    $alis->quality_samplesize = 3;
-	                } else {
-	                    $alis->quality_samplesize = 2;
-	                }
-	            } else {
-	                $alis->quality_samplesize = 1;
-	            }
-	        } else {
-	            $alis->quality_samplesize = 0;
-	        }
-        
-	        ### @export "csvhander_process_correlation"
+            ### @export "csvhandler_process_samplesize"
+            if ($alis->samplesize < $averagesize) {
+                if ($alis->samplesize < $averagesize/2) {
+                    if ($alis->samplesize < $averagesize/4) {
+                        $alis->quality_samplesize = 3;
+                    } else {
+                        $alis->quality_samplesize = 2;
+                    }
+                } else {
+                    $alis->quality_samplesize = 1;
+                }
+            } else {
+                $alis->quality_samplesize = 0;
+            }
+
+            ### @export "csvhandler_process_correlation"
             if ($alis->correlation < CORRELATION_THRESHOLD) {
-	            $alis->quality_correlation = 1;
-	        } else {
-	            $alis->quality_correlation = 0;
-	        }
-	        
-	        ### @export "csvhandler_process_deviation"
-	        switch ($alis->qualification) {
-	            case ALIS_GCSE:
-	            case ALIS_BTEC_FIRST_DIPLOMA:
-	            case ALIS_IB_STANDARD:
-	            case ALIS_IB_HIGHER:
-	            case ALIS_OCR_NATIONAL_CERTIFICATE:
-	            case ALIS_OCR_NATIONAL_DIPLOMA:
-	                $boundary = 1;
-	                break;
-	                
-	            case ALIS_ADVANCED_GCE:
-	            case ALIS_ADVANCED_GCE_DOUBLE:
-	                $boundary = 20;
-	                break;
-	                
-	            case ALIS_ADVANCED_SUBSIDIARY_GCE:
-	            case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE:
-	                $boundary = 10;
-	                break;
-	                
-	            case ALIS_BTEC_NATIONAL_AWARD:
-	            case ALIS_BTEC_NATIONAL_DIPLOMA:
-	            case ALIS_BTEC_NATIONAL_CERTIFICATE:
-	                $boundary = 40;
-	                break;
-	                
-	            case ALIS_CACHE_L3_DIPLOMA:
-	                $boundary = 60;
-	                break;                
-	        }
-	        
-	        if ($alis->standarddeviation > $boundary) {
-	            if ($alis->standarddeviation > $boundary*2) {
-	                $alis->quality_deviation = 2;
-	            } else {
-	                $alis->quality_deviation = 1;
-	            }
-	        } else {
-	            $alis->quality_deviation = 0;
-	        }       
-	        
-	        ### @export "csvhandler_process_end"
-	        $DB->update_record('report_targetgrades_alisdata', $alis);
+                $alis->quality_correlation = 1;
+            } else {
+                $alis->quality_correlation = 0;
+            }
+
+            ### @export "csvhandler_process_deviation"
+            switch ($alis->qualification) {
+                case ALIS_GCSE:
+                case ALIS_BTEC_FIRST_DIPLOMA:
+                case ALIS_IB_STANDARD:
+                case ALIS_IB_HIGHER:
+                case ALIS_OCR_NATIONAL_CERTIFICATE:
+                case ALIS_OCR_NATIONAL_DIPLOMA:
+                    $boundary = 1;
+                    break;
+                    
+                case ALIS_ADVANCED_GCE:
+                case ALIS_ADVANCED_GCE_DOUBLE:
+                    $boundary = 20;
+                    break;
+                    
+                case ALIS_ADVANCED_SUBSIDIARY_GCE:
+                case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE:
+                    $boundary = 10;
+                    break;
+                    
+                case ALIS_BTEC_NATIONAL_AWARD:
+                case ALIS_BTEC_NATIONAL_DIPLOMA:
+                case ALIS_BTEC_NATIONAL_CERTIFICATE:
+                    $boundary = 40;
+                    break;
+                    
+                case ALIS_CACHE_L3_DIPLOMA:
+                    $boundary = 60;
+                    break;                
+            }
+            
+            if ($alis->standarddeviation > $boundary) {
+                if ($alis->standarddeviation > $boundary*2) {
+                    $alis->quality_deviation = 2;
+                } else {
+                    $alis->quality_deviation = 1;
+                }
+            } else {
+                $alis->quality_deviation = 0;
+            }
+
+            ### @export "csvhandler_process_end"
+            $DB->update_record('report_targetgrades_alisdata', $alis);
         }
         
         return $import;
     }
-    ### @end
+### @end
 }
 
 
@@ -931,163 +931,163 @@ if (class_exists('\user_selector_base')) {
      * Select list for courses without Target Grade items
      */
     ### @export "pcs"
-	class potential_course_selector extends \user_selector_base {
-	### @end
-	
-	    /**
-	     * Add the file name to the $options array to make AJAX searching work
-	     * @return array
-	     */
-	    ### @export "pcs_get_options"
-	    protected function get_options() {
-	        $options = parent::get_options();
-	        $options['file'] = 'admin/report/targetgrades/lib.php';
-	        return $options;
-	    }
-	    ### @end
-	            
-	    /**
-	     * Get list of courses for potential distribution
-	     * 
-	     * Get all the courses that are in the categories selected in $config->categories,
-	     * and aren't filtered out by $config->exclude_regex, and don't already have the grade
-	     * items.  This function uses odd names for the fields to avoid having to override 
-	     * additional methods from the parent class.
-	     * 
-	     * @param $search Optional string to search for in shortname and fullname
-	     * @return array Matching course records
-	     */
-	    ### @export "pcs_find_users"
-	    public function find_users($search) {
-		    global $DB;
-		    $config = get_config();
-		    
-		    ### @export "pcs_find_users_categories"
-		    list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
-		 
-		    ### @export "pcs_find_users_group"
-		    $select = 'SELECT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
-			if(!empty($config->group_field) && !empty($config->group_length)) {
-		        $args = array($config->group_field, $config->group_length);
-			    $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
-		        $from = \vsprintf('FROM {course} c
-		                    LEFT JOIN {report_targetgrades_patterns} p
-		                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
-		                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
-		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ', $args);
-			} else {
-			    $select .= 'shortname AS pattern ';
-				$from = 'FROM {course} c
-		                    LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern 
-		                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
-		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';		
-			}
-			
-			$order = 'ORDER BY pattern';
-			    
-			### @export "pcs_find_users_regex"
-		    if ($DB->sql_regex_supported()) {
-		        $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
-		        $params = array_merge($params, array($config->exclude_regex));        
-		    } else {
-			    $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
-			    
-			    \array_filter($courses, function($course, $config) {				    
-				    $field = $config->exclude_field;
-				    return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
-				});
-			    
-			    list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));
-			    $where = 'WHERE id '.$in_sql.' ';
-			}
-			
-			### @export "pcs_find_users_search"
-			$optgroupname = get_string('courseswithoutgrades', 'report_targetgrades');		
-			
-			if (!empty($search)) {
-			    $shortnamelike = $DB->sql_like('shortname', '?');
-			    $fullnamelike = $DB->sql_like('fullname', '?');		   
-			    $where .= 'AND ('.$shortnamelike.' OR '.$fullnamelike.') ';
-				$params = array_merge($params, array('%'.$search.'%', '%'.$search.'%'));
-				$optgroupname .= ' - '.get_string('searchresults', 'report_targetgrades'); 
-			}
-			
-			### @export "pcs_find_users_exclude"
-			if (!empty($this->exclude)) {
-			    list($not_in_sql, $not_in_params) = $DB->get_in_or_equal($this->exclude, SQL_PARAMS_QM, '', false);
-			    $where .= 'AND c.id '.$not_in_sql.' ';
-			    $params = array_merge($params, $not_in_params);
-			}
-			
-			### @export "pcs_find_users_end"
-			$options = $DB->get_records_sql($select.$from.$where.$order, $params);
-		    	    
-			$options = hasconfig($options);
-	       
-		    return array($optgroupname => $options);
-	    }
-	    ### @end
-	
-	};
-	
-	/**
-	 * Select list for courses with target grade items.
-	 */
-	### @export "dcs"
-	class distributed_course_selector extends potential_course_selector {
+    class potential_course_selector extends \user_selector_base {
+    ### @end
+    
+        /**
+         * Add the file name to the $options array to make AJAX searching work
+         * @return array
+         */
+        ### @export "pcs_get_options"
+        protected function get_options() {
+            $options = parent::get_options();
+            $options['file'] = 'admin/report/targetgrades/lib.php';
+            return $options;
+        }
+        ### @end
+                
+        /**
+         * Get list of courses for potential distribution
+         * 
+         * Get all the courses that are in the categories selected in $config->categories,
+         * and aren't filtered out by $config->exclude_regex, and don't already have the grade
+         * items.  This function uses odd names for the fields to avoid having to override 
+         * additional methods from the parent class.
+         * 
+         * @param $search Optional string to search for in shortname and fullname
+         * @return array Matching course records
+         */
+        ### @export "pcs_find_users"
+        public function find_users($search) {
+            global $DB;
+            $config = get_config();
+
+            ### @export "pcs_find_users_categories"
+            list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
+
+            ### @export "pcs_find_users_group"
+            $select = 'SELECT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
+            if(!empty($config->group_field) && !empty($config->group_length)) {
+                $args = array($config->group_field, $config->group_length);
+                $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
+                $from = \vsprintf('FROM {course} c
+                            LEFT JOIN {report_targetgrades_patterns} p
+                                ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
+                            LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ', $args);
+            } else {
+                $select .= 'shortname AS pattern ';
+                $from = 'FROM {course} c
+                            LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern 
+                            LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';        
+            }
+
+            $order = 'ORDER BY pattern';
+
+            ### @export "pcs_find_users_regex"
+            if ($DB->sql_regex_supported()) {
+                $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
+                $params = array_merge($params, array($config->exclude_regex));        
+            } else {
+                $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
+                
+                \array_filter($courses, function($course, $config) {                    
+                    $field = $config->exclude_field;
+                    return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
+                });
+                
+                list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));
+                $where = 'WHERE id '.$in_sql.' ';
+            }
+
+            ### @export "pcs_find_users_search"
+            $optgroupname = get_string('courseswithoutgrades', 'report_targetgrades');        
+            
+            if (!empty($search)) {
+                $shortnamelike = $DB->sql_like('shortname', '?');
+                $fullnamelike = $DB->sql_like('fullname', '?');           
+                $where .= 'AND ('.$shortnamelike.' OR '.$fullnamelike.') ';
+                $params = array_merge($params, array('%'.$search.'%', '%'.$search.'%'));
+                $optgroupname .= ' - '.get_string('searchresults', 'report_targetgrades'); 
+            }
+
+            ### @export "pcs_find_users_exclude"
+            if (!empty($this->exclude)) {
+                list($not_in_sql, $not_in_params) = $DB->get_in_or_equal($this->exclude, SQL_PARAMS_QM, '', false);
+                $where .= 'AND c.id '.$not_in_sql.' ';
+                $params = array_merge($params, $not_in_params);
+            }
+
+            ### @export "pcs_find_users_end"
+            $options = $DB->get_records_sql($select.$from.$where.$order, $params);
+                    
+            $options = hasconfig($options);
+           
+            return array($optgroupname => $options);
+        }
+        ### @end
+
+    };
+
+    /**
+     * Select list for courses with target grade items.
+     */
+    ### @export "dcs"
+    class distributed_course_selector extends potential_course_selector {
     ### @end
 
-	    /**
-	     * Get a list of courses that have Target Grade grade items on.
-	     * 
-	     * Gets all the courses with one or more grade items match the ones
-	     * added by the distribution script.
-	     * 
-	     * @param $search Compulsory arugment due to abstract parent method. Defaults to empty string, doesn't do anything
-	     * @return array All the matching courses
-	     */
-	    ### @export "dcs_find_users"
-	    function find_users($search = '') {
-	        global $DB;
-	        $config = get_config();
-	        
-	        ### @export "dcs_find_users_fields"	        
-		    $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
-		        
-		    $from = 'FROM {course} c
-		                JOIN {grade_items} g ON c.id = g.courseid ';
-		
-		    ### @export "dcs_find_users_group"
-			if(!empty($config->group_field) && !empty($config->group_length)) {
-		        $args = array($config->group_field, $config->group_length);
-			    $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
-		        $from .= \vsprintf('LEFT JOIN {report_targetgrades_patterns} p
-				                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
-				                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
-				                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ', $args);
-			} else {
-			    $select .= 'shortname AS pattern ';
-				$from .= 'LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern
-							LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
-		                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';		
-			}
-			
-			### @export "dcs_find_users_items"
-			$itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
+        /**
+         * Get a list of courses that have Target Grade grade items on.
+         * 
+         * Gets all the courses with one or more grade items match the ones
+         * added by the distribution script.
+         * 
+         * @param $search Compulsory arugment due to abstract parent method. Defaults to empty string, doesn't do anything
+         * @return array All the matching courses
+         */
+        ### @export "dcs_find_users"
+        function find_users($search = null) {
+            global $DB;
+            $config = get_config();
+            
+            ### @export "dcs_find_users_fields"            
+            $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
+                
+            $from = 'FROM {course} c
+                        JOIN {grade_items} g ON c.id = g.courseid ';
+
+            ### @export "dcs_find_users_group"
+            if(!empty($config->group_field) && !empty($config->group_length)) {
+                $args = array($config->group_field, $config->group_length);
+                $select .= \vsprintf('LEFT(c.%1$s, %2$d) AS pattern ', $args);
+                $from .= \vsprintf('LEFT JOIN {report_targetgrades_patterns} p
+                                        ON LEFT(c.%1$s, %2$d) = CAST(p.pattern AS CHAR)
+                                    LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+                                    LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ', $args);
+            } else {
+                $select .= 'shortname AS pattern ';
+                $from .= 'LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern
+                            LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
+                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';        
+            }
+
+            ### @export "dcs_find_users_items"
+            $itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
             get_string('item_alisnum', 'report_targetgrades'),
             get_string('item_alis', 'report_targetgrades'),
             get_string('item_mtg', 'report_targetgrades'));
-			list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);    
-			
-		    $where = 'WHERE itemname '.$in_sql;
-			$options = $DB->get_records_sql($select.$from.$where, $in_params);
-			
-			### @export "dcs_find_users_end"
-			$options = hasconfig($options);
-			return array(get_string('courseswithgrades', 'report_targetgrades') => $options);
-	    }
-	    ### @end
-	};
+            list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);    
+            
+            $where = 'WHERE itemname '.$in_sql;
+            $options = $DB->get_records_sql($select.$from.$where, $in_params);
+
+            ### @export "dcs_find_users_end"
+            $options = hasconfig($options);
+            return array(get_string('courseswithgrades', 'report_targetgrades') => $options);
+        }
+        ### @end
+   };
 
 }
 /**

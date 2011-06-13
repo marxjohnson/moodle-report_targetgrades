@@ -67,7 +67,7 @@ docs/sources/list.html
 
 docs/sources/list.php|idio
 
-docs/sources/list.php|php
+docs/sources/list.php|php|idio
 
 docs/sources/pastie
 
@@ -103,7 +103,7 @@ list.html
 
 list.php|idio
 
-list.php|php
+list.php|php|idio
 
 pastie.css
 
