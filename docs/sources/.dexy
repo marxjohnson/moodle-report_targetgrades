@@ -1,9 +1,10 @@
 {
-	"*.html|jinja": {
+	"*.html|jinja|markdown": {
 		"allinputs": true
 	},
 	"*.sh|bash": {},
 	"database.sh|bash|idio": {},
-	"list.php|php|idio": {},
+	"list.php|fn|php": {},
 	"*.css|cp": {}
+	
 }

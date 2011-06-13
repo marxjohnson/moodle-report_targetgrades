@@ -1,14 +1,14 @@
-<html>
+<p><html>
     <head>
         <link href="pastie.css" type="text/css" rel="stylesheet" />
         <title>Target Grades - Architecture</title>
     </head>
     <body>
-        <h1>Target Grades</h1>
-        
-        <h2>Architecture</h2>
-        <pre><div class="highlight"><pre><a name="l-1"></a><span class="nb">cd</span> /home/mark/public_html/moodle2/admin/report/targetgrades
-<a name="l-2"></a>tree -I docs 
+        <h1>Target Grades</h1></p>
+<pre><code>    &lt;h2&gt;Architecture&lt;/h2&gt;
+    &lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;a name="l-1"&gt;&lt;/a&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /home/mark/public_html/moodle2/admin/report/targetgrades
+</code></pre>
+<p><a name="l-2"></a>tree -I docs 
 </pre></div>
 .
 ├── alisdata_form.php
@@ -26,45 +26,74 @@
 │       └── report_targetgrades.php
 ├── lib.php
 ├── lib.php~
+├── output
+├── output-long
+│   ├── alisdata_form.html
+│   ├── alisdata_form.php-idio.html
+│   ├── alisdata.html
+│   ├── alisdata.php-idio.html
+│   ├── cli
+│   │   ├── alis2009_pdf2csv.html
+│   │   ├── alis2009_pdf2csv.sh-pyg.html
+│   │   ├── alis_pdf2csv.html
+│   │   └── alis_pdf2csv.sh-pyg.html
+│   ├── db
+│   │   ├── access.html
+│   │   └── access.php-idio.html
+│   ├── distribute.html
+│   ├── distribute.php-idio.html
+│   ├── index.html
+│   ├── index.php-idio.html
+│   ├── lang
+│   │   └── en
+│   │       ├── report_targetgrades.html
+│   │       └── report_targetgrades.php-idio.html
+│   ├── lib.html
+│   ├── lib.php-idio.html
+│   ├── settingsform.html
+│   ├── settingsform.php-idio.html
+│   ├── settings.html
+│   ├── settings.php-idio.html
+│   ├── version.html
+│   └── version.php-idio.html
 ├── settingsform.php
 ├── settings.php
 ├── styles.css
-└── version.php
+└── version.php</p>
+<p>10 directories, 39 files
+</pre></p>
+<pre><code>    &lt;h3&gt;/&lt;/h3&gt;
+    &lt;p&gt;This folder lives at $CFG-&gt;dirroot/admin/report/targetgrades, and contains the majority of the plugin files&lt;/p&gt;
+    &lt;h4&gt;alisdata_form.php&lt;/h4&gt;
+    &lt;p&gt;Defines the form used to upload the CSV files contianing the ALIS statistics&lt;/p&gt;
+    &lt;h4&gt;alisdata.php&lt;/h4&gt;
+    &lt;p&gt;Displays the form defined in alisdata_form.php. Once statistics have been uploaded, lists the statistics along with flags relating to data quality issues, and allows them to be linked to courses.&lt;/p&gt;
+    &lt;h4&gt;lib.php&lt;/h4&gt;    
+    &lt;p&gt;This is the plugin's main library. The majority of functions, classes and constants used by this plugin live in here.  Stuff in this file lives under the \report\targetgrades &lt;a href="http://uk.php.net/manual/en/language.namespaces.php"&gt;namespace&lt;/a&gt;.&lt;/p&gt;
+    &lt;h4&gt;settingsform.php&lt;/h4&gt;
+    &lt;p&gt;Defines, displays and processes the settings form.  Most plugin types automatically pick up on fields defined in settings.php and create a form, but report plugins don't seem to do this.  Because this is a bit of a hack, the form is defined and displayed in the same page, rather than the class taking up space in lib.php&lt;/p&gt;
+    &lt;h4&gt;settings.php&lt;/h4&gt;
+    &lt;p&gt;Very simply defines the admin module for this plugin, and adds it to the Settings block under the Grades menu.&lt;/p&gt;
+    &lt;h4&gt;version.php&lt;/h4&gt;
+    &lt;p&gt;Just defines the plugin version number.&lt;/p&gt;
 
-4 directories, 15 files
-</pre>
-        
-        <h3>/</h3>
-        <p>This folder lives at $CFG->dirroot/admin/report/targetgrades, and contains the majority of the plugin files</p>
-        <h4>alisdata_form.php</h4>
-        <p>Defines the form used to upload the CSV files contianing the ALIS statistics</p>
-        <h4>alisdata.php</h4>
-        <p>Displays the form defined in alisdata_form.php. Once statistics have been uploaded, lists the statistics along with flags relating to data quality issues, and allows them to be linked to courses.</p>
-        <h4>lib.php</h4>    
-        <p>This is the plugin's main library. The majority of functions, classes and constants used by this plugin live in here.  Stuff in this file lives under the \report\targetgrades <a href="http://uk.php.net/manual/en/language.namespaces.php">namespace</a>.</p>
-        <h4>settingsform.php</h4>
-        <p>Defines, displays and processes the settings form.  Most plugin types automatically pick up on fields defined in settings.php and create a form, but report plugins don't seem to do this.  Because this is a bit of a hack, the form is defined and displayed in the same page, rather than the class taking up space in lib.php</p>
-        <h4>settings.php</h4>
-        <p>Very simply defines the admin module for this plugin, and adds it to the Settings block under the Grades menu.</p>
-        <h4>version.php</h4>
-        <p>Just defines the plugin version number.</p>
+    &lt;h3&gt;/cli/&lt;/h3&gt;
+    &lt;p&gt;Contains bash scripts used to convert PDFs from ALIS to CSV files that can be uploaded to alisdata.php&lt;/p&gt;
+    &lt;h4&gt;alis2009_pdf2csv.sh&lt;/h4&gt;
+    &lt;p&gt;Legacy script for converting ALIS statistics from 2009 from PDF to CSV.&lt;/p&gt;
+    &lt;h4&gt;alis_pdf2csv.sh&lt;/h4&gt;
+    &lt;p&gt;Converts the current PDF from ALIS to a CSV file containing the statistics required to calculate target grades.  Uses pdf2text to extract the tables to text, then uses sed to clean the file and turn it into a nicely delimited flatfile.&lt;/p&gt;
 
-        <h3>/cli/</h3>
-        <p>Contains bash scripts used to convert PDFs from ALIS to CSV files that can be uploaded to alisdata.php</p>
-        <h4>alis2009_pdf2csv.sh</h4>
-        <p>Legacy script for converting ALIS statistics from 2009 from PDF to CSV.</p>
-        <h4>alis_pdf2csv.sh</h4>
-        <p>Converts the current PDF from ALIS to a CSV file containing the statistics required to calculate target grades.  Uses pdf2text to extract the tables to text, then uses sed to clean the file and turn it into a nicely delimited flatfile.</p>
+    &lt;h3&gt;/db/&lt;/h3&gt;
+    &lt;p&gt;Contains Moodle standard database files&lt;/p&gt;
+    &lt;h4&gt;access.php&lt;/h4&gt;
+    &lt;p&gt;Defines the report/targetgrades:view and report/targetgrades:distribute capabilities&lt;/p&gt;
+    &lt;h4&gt;install.xml&lt;/h4&gt;
+    &lt;p&gt;Defines the &lt;a href="database.html"&gt;database schema&lt;/a&gt;&lt;/p&gt;
 
-        <h3>/db/</h3>
-        <p>Contains Moodle standard database files</p>
-        <h4>access.php</h4>
-        <p>Defines the report/targetgrades:view and report/targetgrades:distribute capabilities</p>
-        <h4>install.xml</h4>
-        <p>Defines the <a href="database.html">database schema</a></p>
+    &lt;h3&gt;/lang/&lt;/h3&gt;
+    &lt;p&gt;Contains Moodle standard language files. Currently only contains English tranlastion.&lt;/p&gt;
 
-        <h3>/lang/</h3>
-        <p>Contains Moodle standard language files. Currently only contains English tranlastion.</p>
-        
-    </body>
+&lt;/body&gt;
+</code></pre>
 </html>
