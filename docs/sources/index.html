@@ -4,8 +4,7 @@
         <title>Target Grades</title>
     </head>
     <body>
-        <ul>
-            {{ d['list.php|fn|php']['index']}}
-        </ul>
-    </body>
+{% for file, text in d['index-links']['index.html'].items() %}
+* [{{ text }}]({{ file }}) {% endfor %}
+    </body>   
 </html>

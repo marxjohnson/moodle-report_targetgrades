@@ -11,6 +11,10 @@ alisdata_form.html
 
 alisdata_form.php|idio
 
+anchor-links
+
+anchor-links.json
+
 cli/alis2009_pdf2csv.html
 
 cli/alis2009_pdf2csv.sh|pyg
@@ -65,9 +69,9 @@ docs/sources/list
 
 docs/sources/list.html
 
-docs/sources/list.php|idio
+docs/sources/list.php|fn|php
 
-docs/sources/list.php|php|fn
+docs/sources/list.php|idio
 
 docs/sources/pastie
 
@@ -85,6 +89,10 @@ filetree.txt
 
 index
 
+index-links
+
+index-links.json
+
 index.html
 
 index.php|idio
@@ -101,9 +109,9 @@ lib.php|idio
 
 list.html
 
-list.php|idio
+list.php|fn|php
 
-list.php|php|fn
+list.php|idio
 
 pastie.css
 
