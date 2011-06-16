@@ -4,6 +4,7 @@
     overflow-y: auto;
     border-left: 1em solid #ccc;
     max-width: 80%;
+    color: #e9e8e8;
 }
 .c { color: #7f7f7f } /* Comment */
 .err { color: #960050; background-color: #1e0010 } /* Error */
