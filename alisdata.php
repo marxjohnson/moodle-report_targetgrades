@@ -47,12 +47,13 @@ $addpattern = optional_param('addpattern', array(), PARAM_CLEAN);
 $config = tg\get_config('report_targetgrades');
 $addfield = optional_param('addfield', null, PARAM_INT);
 
+### @export 'pattern_process'
 if ($savepatterns || !empty($addpattern)) {
     foreach($alispatterns as $alisid => $patterns) {
         foreach($patterns as $id => $pattern) {
-            if ($alisdata = $DB->get_record('report_targetgrades_alisdata', array('id' => $alisid))) {                
+            if ($alisdata = $DB->get_record('report_targetgrades_alisdata', array('id' => $alisid))) {
                 if($patternrecord = $DB->get_record('report_targetgrades_patterns', array('id' => $id))) {
-                    if(empty($pattern)) {                        
+                    if(empty($pattern)) {
                         $DB->delete_records('report_targetgrades_patterns', array('id' => $id));
                     } else {
                         $patternrecord->pattern = $pattern;
@@ -64,15 +65,17 @@ if ($savepatterns || !empty($addpattern)) {
                     $patternrecord->pattern = $pattern;
                     $patternrecord->id = $DB->insert_record('report_targetgrades_patterns', $patternrecord);
                 }
-            }            
+            }
         }
     }
     $output = '<p>'.get_string('changessaved').'</p>';
     if (!empty($addpattern)) {
-        redirect(new moodle_url('/admin/report/targetgrades/alisdata.php#alis'.key($addpattern), array('addfield' => key($addpattern))));
+        $params = array('addfield' => key($addpattern));
+        redirect(new moodle_url('/admin/report/targetgrades/alisdata.php#alis'.key($addpattern), $params));
     }
 }
 
+### @export 'uploadform'
 $uploadform = new tg\alisdata_upload_form();
 
 if ($uploaddata = $uploadform->get_data()) {
@@ -84,6 +87,7 @@ if ($uploaddata = $uploadform->get_data()) {
 
 }
 
+### @export 'table'
 $select = 'SELECT a.*, a.name AS subject, q.name AS qualification ';
 $from = 'FROM {report_targetgrades_alisdata} a
     JOIN {report_targetgrades_qualtype} q ON a.qualtypeid = q.id ';
@@ -93,28 +97,33 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
 
     $table = new html_table();
 
-    //$table->define_columns(array('qualtype', 'name', 'pattern', 'gradient', 'intercept'));
+    $helpicon = $OUTPUT->help_icon('col_quality', 'report_targetgrades');
     $table->head = array(get_string('col_qualtype', 'report_targetgrades'),
             get_string('col_name', 'report_targetgrades'),
             get_string('col_pattern', 'report_targetgrades'),
             get_string('col_gradient', 'report_targetgrades'),
             get_string('col_intercept', 'report_targetgrades'),
-            get_string('col_quality', 'report_targetgrades').$OUTPUT->help_icon('col_quality', 'report_targetgrades'));    
+            get_string('col_quality', 'report_targetgrades').$helpicon);
 
+### @export 'table_patterns'
     try {
         $options = tg\build_pattern_options();
     } catch (unsafe_regex_exception $e) {
         print_error($e->getMessage(), 'report_targetgrades');
     }
+
+### @export 'table_loop'
     foreach($alis_data as $alis) {
         $form = '';
+### @export 'table_patternselector'
         if($patterns = $DB->get_records('report_targetgrades_patterns', array('alisdataid' => $alis->id))) {
             $break = 1;
             
             foreach ($patterns as $pattern) {
                 $optionswithpattern = array_merge($options, array($pattern->pattern => $pattern->pattern));
                 asort($optionswithpattern);
-                $form .= html_writer::select($optionswithpattern, 'alispatterns['.$alis->id.']['.$pattern->id.']', $pattern->pattern);
+                $selectname = 'alispatterns['.$alis->id.']['.$pattern->id.']';
+                $form .= html_writer::select($optionswithpattern, $selectname, $pattern->pattern);
                 if((count($patterns) > 1 && $break < count($patterns)) || $addfield == $alis->id) {
                     $form .= html_writer::empty_tag('br');
                 }
@@ -128,32 +137,52 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
         } else {
             $form .= html_writer::select($options, 'alispatterns['.$alis->id.'][]');
         }
-                
-        $form .= html_writer::empty_tag('input', array('type' => 'submit', 'value' => '+', 'name' => 'addpattern['.$alis->id.']', 'title' => 'Save changes and Add another pattern'));
-        
-        $quality = array();       
+
+        $attrs = array('type' => 'submit', 
+                        'value' => '+', 
+                        'name' => 'addpattern['.$alis->id.']', 
+                        'title' => get_string('saveandadd', 'report_targetgrades'));
+        $form .= html_writer::empty_tag('input', $attrs);
+
+### @export 'table_quality'
+        $quality = array();
+        $quality_samplesize = (object)array('field' => 'samplesize', 'display' => 'S');
         switch ($alis->quality_samplesize) {
             case 1:
-                $quality[] = (object)array('field' => 'samplesize', 'message' => 'oksize', 'class' => 'ok', 'display' => 'S');                   
+                $quality_samplesize->class = 'ok';
+                $quality_samplesize->message = 'oksize';
+                $quality[] = $quality_samplesize;
                 break;
             case 2:
-                $quality[] = (object)array('field' => 'samplesize', 'message' => 'lowsize', 'class' => 'low', 'display' => 'S');                   
+                $quality_samplesize->class = 'low';
+                $quality_samplesize->message = 'lowsize';
+                $quality[] = $quality_samplesize;
                 break;
             case 3:
-		        $quality[] = (object)array('field' => 'samplesize', 'message' => 'vlowsize', 'class' => 'vlow', 'display' => 'S');
+                $quality_samplesize->class = 'vlow';
+                $quality_samplesize->message = 'vlowsize';
+                $quality[] = $quality_samplesize;
                 break;
         }
-        
+
         if($alis->quality_correlation) {
-	            $quality[] = (object)array('field' => 'correlation', 'message' => 'lowcorrelation', 'class' => 'low', 'display' => 'C');                   
+                $quality[] = (object)array('field' => 'correlation', 
+                                            'message' => 'lowcorrelation', 
+                                            'class' => 'low', 
+                                            'display' => 'C');
         }
-        
+
+        $quality_deviation = (object)array('field' => 'standarddeviation', 'display' => 'D');
         switch ($alis->quality_deviation) {
             case 1:
-	            $quality[] = (object)array('field' => 'standarddeviation', 'message' => 'highdeviation', 'class' => 'low', 'display' => 'D');                   
+                $quality_deviation->class = 'low';
+                $quality_deviation->message = 'highdeviation';
+                $quality[] = $quality_deviation;
                 break;
             case 2:
-	            $quality[] = (object)array('field' => 'standarddeviation', 'message' => 'vhighdeviation', 'class' => 'vlow', 'display' => 'D');                   
+                $quality_deviation->class = 'vlow';
+                $quality_deviation->message = 'vhighdeviation';
+                $quality[] = $quality_deviation;
                 break;
         }
         
@@ -161,16 +190,21 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
         if (!empty($quality)) {
             foreach($quality as $status) {
                 $field = $status->field;
-                $quality_html[] = html_writer::tag('abbr', $status->display, array('class' => 'tg_'.$status->class.'quality', 'title' => get_string($status->message, 'report_targetgrades', $alis->$field)));
+                $class = 'tg_'.$status->class.'quality';
+                $title = get_string($status->message, 'report_targetgrades', $alis->$field);
+                $quality_html[] = html_writer::tag('abbr', $status->display, array('class' => $class, 'title' => $title));
             }
         } else {
-            $quality_html[] = html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('i/tick_green_big'), 'title' => get_string('okquality', 'report_targetgrades')));
+            $src = $OUTPUT->pix_url('i/tick_green_big');
+            $title = get_string('okquality', 'report_targetgrades');
+            $quality_html[] = html_writer::empty_tag('img', array('src' => $src, 'title' => $title));
         }
 
+### @export 'table_row'
         $row = new html_table_row;
         $row->cells[] = $alis->qualification;
         $row->cells[] = html_writer::tag('a', $alis->subject, array('name' => 'alis'.$alis->id));
-        
+
         $row->cells[] = $form;
         $row->cells[] = $alis->gradient;
         $row->cells[] = $alis->intercept;
@@ -179,8 +213,7 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
     }
 }
 
-
-
+### @export 'output'
 echo $OUTPUT->header();
 tg\print_tabs(1);
 
@@ -194,9 +227,10 @@ if(isset($table)) {
     echo html_writer::tag('p', get_string('explainpatterns', 'report_targetgrades', $config));
     echo html_writer::start_tag('form', array('action' => $PAGE->url->out(), 'method' => 'post'));
     echo html_writer::table($table);
-    echo html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'savepatterns', 'value' => get_string('savechanges')));
+    $attrs = array('type' => 'submit', 'name' => 'savepatterns', 'value' => get_string('savechanges'));
+    echo html_writer::empty_tag('input', $attrs);
     echo html_writer::end_tag('form');
 }
 echo $OUTPUT->footer();
-
+### @end
 ?>
