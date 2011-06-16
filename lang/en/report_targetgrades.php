@@ -116,6 +116,7 @@ $string['recalculate_help'] = 'Clicking this button will recalulate ALIS points 
 For example, if you\'ve changed the statistics associated with a pattern, this will replace the grades with those calculated using the new statistics.';
 $string['roles'] = 'Use Roles';
 $string['roles_help'] = 'The report will attempt to distribute to users with these roles on each selected course.';
+$string['saveandadd'] = 'Save changes and Add another pattern';
 $string['searchresults'] = 'Search Results';
 $string['settingssaved'] = 'Settings Saved';
 $string['wrongcolcsv'] = 'The CSV file has the wrong number of columns on line {$a} - It should either have 1 column for a subject type heading, or 6 for a set of statistics.';
