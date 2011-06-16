@@ -73,11 +73,11 @@ docs/sources/list.php|fn|php
 
 docs/sources/list.php|idio
 
-docs/sources/pastie
+docs/sources/pyg
 
-docs/sources/pastie.css
+docs/sources/pyg.css
 
-docs/sources/pastie.css|cp
+docs/sources/pyg.css|cp
 
 filetree.html
 
@@ -113,9 +113,9 @@ list.php|fn|php
 
 list.php|idio
 
-pastie.css
+pyg.css
 
-pastie.css|cp
+pyg.css|cp
 
 settings
 

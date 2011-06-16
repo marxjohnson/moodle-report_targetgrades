@@ -1,6 +1,6 @@
 <p><html>
     <head>
-        <link rel="stylesheet" type="text/css" href="pastie.css" />
+        <link rel="stylesheet" type="text/css" href="pyg.css" />
         <title>Target Grades - Libraries</title>
     </head>
     <body></p>
@@ -316,36 +316,38 @@
 <a name="l-10"></a> 
 <a name="l-11"></a>    <span class="nv">$select</span> <span class="o">=</span> <span class="s1">&#39;SELECT DISTINCT &#39;</span><span class="p">;</span>
 <a name="l-12"></a>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="p">))</span> <span class="p">{</span>
-<a name="l-13"></a>        <span class="nv">$select</span> <span class="o">.=</span> <span class="s1">&#39;LEFT(&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="o">.</span><span class="s1">&#39;), LEFT(&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="o">.</span><span class="s1">&#39;) as pattern &#39;</span><span class="p">;</span>
-<a name="l-14"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<a name="l-15"></a>        <span class="nv">$select</span> <span class="o">.=</span> <span class="s1">&#39;shortname, shortname AS pattern &#39;</span><span class="p">;</span>
-<a name="l-16"></a>    <span class="p">}</span>
-<a name="l-17"></a>    
-<a name="l-18"></a>    <span class="nv">$from</span> <span class="o">=</span> <span class="s1">&#39;FROM {course} &#39;</span><span class="p">;</span>
-<a name="l-19"></a>    
-<a name="l-20"></a>    <span class="nv">$order</span> <span class="o">=</span> <span class="s1">&#39;ORDER BY pattern&#39;</span><span class="p">;</span>
-<a name="l-21"></a>        
-<a name="l-22"></a>    <span class="k">if</span> <span class="p">(</span><span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_regex_supported</span><span class="p">())</span> <span class="p">{</span>
-<a name="l-23"></a>        <span class="nv">$where</span> <span class="o">=</span> <span class="s1">&#39;WHERE category &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="o">.</span><span class="s1">&#39; AND &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_field</span><span class="o">.</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_regex</span><span class="p">(</span><span class="k">false</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39; ? &#39;</span><span class="p">;</span>
-<a name="l-24"></a>        <span class="nv">$params</span> <span class="o">=</span> <span class="nb">array_merge</span><span class="p">(</span><span class="nv">$params</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_regex</span><span class="p">));</span>        
-<a name="l-25"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<a name="l-26"></a>        <span class="nv">$courses</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_records_select</span><span class="p">(</span><span class="s1">&#39;course&#39;</span><span class="p">,</span> <span class="s1">&#39;category &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$params</span><span class="p">);</span>
-<a name="l-27"></a>        
-<a name="l-28"></a>        <span class="nx">\array_filter</span><span class="p">(</span><span class="nv">$courses</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$course</span><span class="p">,</span> <span class="nv">$config</span><span class="p">)</span> <span class="p">{</span>                    
-<a name="l-29"></a>            <span class="nv">$field</span> <span class="o">=</span> <span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_field</span><span class="p">;</span>
-<a name="l-30"></a>            <span class="k">return</span> <span class="o">!</span><span class="nx">\preg_match</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_regex</span><span class="o">.</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nv">$course</span><span class="o">-&gt;</span><span class="nv">$field</span><span class="p">);</span>
-<a name="l-31"></a>        <span class="p">});</span>        
-<a name="l-32"></a>        
-<a name="l-33"></a>        <span class="k">list</span><span class="p">(</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_in_or_equal</span><span class="p">(</span><span class="nb">array_keys</span><span class="p">(</span><span class="nv">$courses</span><span class="p">));</span>        
-<a name="l-34"></a>        <span class="nv">$where</span> <span class="o">=</span> <span class="s1">&#39;WHERE id &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="o">.</span><span class="s1">&#39; &#39;</span><span class="p">;</span>
-<a name="l-35"></a>    <span class="p">}</span>
-<a name="l-36"></a>    
-<a name="l-37"></a>    <span class="nv">$where</span> <span class="o">.=</span> <span class="s1">&#39;AND LEFT(&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="o">.</span><span class="s1">&#39;) NOT IN (SELECT pattern FROM {report_targetgrades_patterns} tp) &#39;</span><span class="p">;</span>
-<a name="l-38"></a>    
-<a name="l-39"></a>    <span class="nv">$options</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_records_sql_menu</span><span class="p">(</span><span class="nv">$select</span><span class="o">.</span><span class="nv">$from</span><span class="o">.</span><span class="nv">$where</span><span class="o">.</span><span class="nv">$order</span><span class="p">,</span> <span class="nv">$params</span><span class="p">);</span>
-<a name="l-40"></a>
-<a name="l-41"></a>    <span class="k">return</span> <span class="nv">$options</span><span class="p">;</span>
-<a name="l-42"></a><span class="p">}</span>
+<a name="l-13"></a>        <span class="nv">$select</span> <span class="o">.=</span> <span class="s1">&#39;LEFT(&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="o">.</span><span class="s1">&#39;), </span>
+<a name="l-14"></a><span class="s1">                        LEFT(&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="o">.</span><span class="s1">&#39;) as pattern &#39;</span><span class="p">;</span>
+<a name="l-15"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<a name="l-16"></a>        <span class="nv">$select</span> <span class="o">.=</span> <span class="s1">&#39;shortname, shortname AS pattern &#39;</span><span class="p">;</span>
+<a name="l-17"></a>    <span class="p">}</span>
+<a name="l-18"></a>    
+<a name="l-19"></a>    <span class="nv">$from</span> <span class="o">=</span> <span class="s1">&#39;FROM {course} &#39;</span><span class="p">;</span>
+<a name="l-20"></a>    
+<a name="l-21"></a>    <span class="nv">$order</span> <span class="o">=</span> <span class="s1">&#39;ORDER BY pattern&#39;</span><span class="p">;</span>
+<a name="l-22"></a>        
+<a name="l-23"></a>    <span class="k">if</span> <span class="p">(</span><span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_regex_supported</span><span class="p">())</span> <span class="p">{</span>
+<a name="l-24"></a>        <span class="nv">$where</span> <span class="o">=</span> <span class="s1">&#39;WHERE category &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="o">.</span><span class="s1">&#39; AND &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_field</span><span class="o">.</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_regex</span><span class="p">(</span><span class="k">false</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39; ? &#39;</span><span class="p">;</span>
+<a name="l-25"></a>        <span class="nv">$params</span> <span class="o">=</span> <span class="nb">array_merge</span><span class="p">(</span><span class="nv">$params</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_regex</span><span class="p">));</span>
+<a name="l-26"></a>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<a name="l-27"></a>        <span class="nv">$courses</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_records_select</span><span class="p">(</span><span class="s1">&#39;course&#39;</span><span class="p">,</span> <span class="s1">&#39;category &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$params</span><span class="p">);</span>
+<a name="l-28"></a>        
+<a name="l-29"></a>        <span class="nx">\array_filter</span><span class="p">(</span><span class="nv">$courses</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$course</span><span class="p">,</span> <span class="nv">$config</span><span class="p">)</span> <span class="p">{</span>
+<a name="l-30"></a>            <span class="nv">$field</span> <span class="o">=</span> <span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_field</span><span class="p">;</span>
+<a name="l-31"></a>            <span class="k">return</span> <span class="o">!</span><span class="nx">\preg_match</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">exclude_regex</span><span class="o">.</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nv">$course</span><span class="o">-&gt;</span><span class="nv">$field</span><span class="p">);</span>
+<a name="l-32"></a>        <span class="p">});</span>        
+<a name="l-33"></a>        
+<a name="l-34"></a>        <span class="k">list</span><span class="p">(</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_in_or_equal</span><span class="p">(</span><span class="nb">array_keys</span><span class="p">(</span><span class="nv">$courses</span><span class="p">));</span>
+<a name="l-35"></a>        <span class="nv">$where</span> <span class="o">=</span> <span class="s1">&#39;WHERE id &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="o">.</span><span class="s1">&#39; &#39;</span><span class="p">;</span>
+<a name="l-36"></a>    <span class="p">}</span>
+<a name="l-37"></a>    
+<a name="l-38"></a>    <span class="nv">$where</span> <span class="o">.=</span> <span class="s1">&#39;AND LEFT(&#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="o">.</span><span class="s1">&#39;) NOT IN </span>
+<a name="l-39"></a><span class="s1">                (SELECT pattern FROM {report_targetgrades_patterns} tp) &#39;</span><span class="p">;</span>
+<a name="l-40"></a>    
+<a name="l-41"></a>    <span class="nv">$options</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_records_sql_menu</span><span class="p">(</span><span class="nv">$select</span><span class="o">.</span><span class="nv">$from</span><span class="o">.</span><span class="nv">$where</span><span class="o">.</span><span class="nv">$order</span><span class="p">,</span> <span class="nv">$params</span><span class="p">);</span>
+<a name="l-42"></a>
+<a name="l-43"></a>    <span class="k">return</span> <span class="nv">$options</span><span class="p">;</span>
+<a name="l-44"></a><span class="p">}</span>
 </pre></div>
 
 <p>This creates a list of options for matching patterns to a set of statistics, for use on alisdata.php.  Using the <code>group_field</code> and <code>group_length</code> settings, it creates a set of patterns from all the courses in the categories defined by the <code>categories</code> setting, excluding those matched by the <code>exclude_regex</code>.  It then returns the patterns as an array of options to be used for creating a select box.</p>
@@ -357,7 +359,7 @@
 <a name="l-5"></a>    <span class="k">require_once</span> <span class="nv">$CFG</span><span class="o">-&gt;</span><span class="na">dirroot</span><span class="o">.</span><span class="s1">&#39;/grade/edit/tree/lib.php&#39;</span><span class="p">;</span>
 <a name="l-6"></a>    <span class="nv">$gtree</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\grade_tree</span><span class="p">(</span><span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
 <a name="l-7"></a>    
-<a name="l-8"></a>    <span class="nv">$fields</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;alis_avgcse&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_alisnum&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_alis&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_mtg&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_cpg&#39;</span><span class="p">);</span>    
+<a name="l-8"></a>    <span class="nv">$fields</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;alis_avgcse&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_alisnum&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_alis&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_mtg&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_cpg&#39;</span><span class="p">);</span>
 <a name="l-9"></a>    <span class="nv">$params</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
 <a name="l-10"></a>    <span class="k">list</span><span class="p">(</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$in_params</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_in_or_equal</span><span class="p">(</span><span class="nv">$params</span><span class="p">);</span>
 <a name="l-11"></a>    <span class="nv">$params</span> <span class="o">=</span> <span class="nx">\array_merge</span><span class="p">(</span><span class="nv">$params</span><span class="p">,</span> <span class="nv">$in_params</span><span class="p">);</span>
@@ -525,28 +527,29 @@
 <a name="l-2"></a>            <span class="k">if</span> <span class="p">(</span><span class="nx">\count</span><span class="p">(</span><span class="nv">$line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
 <a name="l-3"></a>                <span class="nv">$qualname</span> <span class="o">=</span> <span class="nx">param_clean</span><span class="p">(</span><span class="nv">$line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">\PARAM_ALPHANUM</span><span class="p">);</span>
 <a name="l-4"></a>                <span class="c1">// Create a new qualtype record if there isn&#39;t one already.</span>
-<a name="l-5"></a>                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$qualtype</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record_select</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_qualtype&#39;</span><span class="p">,</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_compare_text</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39; = ?&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="nv">$qualname</span><span class="p">)))</span> <span class="p">{</span>
-<a name="l-6"></a>
-<a name="l-7"></a>                    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$qualscale</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="nv">$qualname</span><span class="o">.</span><span class="s1">&#39; MTG&#39;</span><span class="p">)))</span> <span class="p">{</span>
-<a name="l-8"></a>
-<a name="l-9"></a>                        <span class="k">if</span><span class="p">(</span><span class="nv">$scale</span> <span class="o">=</span> <span class="nx">get_scale</span><span class="p">(</span><span class="nv">$qualname</span><span class="p">))</span> <span class="p">{</span>
-<a name="l-10"></a>                            <span class="nv">$qualscale</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\stdClass</span><span class="p">;</span>
-<a name="l-11"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$qualname</span><span class="o">.</span><span class="s1">&#39; MTG&#39;</span><span class="p">;</span>
-<a name="l-12"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">scale</span> <span class="o">=</span> <span class="nv">$scale</span><span class="p">;</span>
-<a name="l-13"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">description</span> <span class="o">=</span> <span class="nv">$qualname</span><span class="o">.</span><span class="s1">&#39; Minimum/Target Grades&#39;</span><span class="p">;</span>
-<a name="l-14"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">id</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">insert_record</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="nv">$qualscale</span><span class="p">);</span>
-<a name="l-15"></a>                        <span class="p">}</span>
-<a name="l-16"></a>
-<a name="l-17"></a>                    <span class="p">}</span>
-<a name="l-18"></a>
-<a name="l-19"></a>                    <span class="k">if</span><span class="p">(</span><span class="nv">$qualscale</span><span class="p">)</span> <span class="p">{</span>
-<a name="l-20"></a>                        <span class="nv">$qualtype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\stdClass</span><span class="p">;</span>
-<a name="l-21"></a>                        <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$qualname</span><span class="p">;</span>
-<a name="l-22"></a>                        <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">scaleid</span> <span class="o">=</span> <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
-<a name="l-23"></a>                        <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">id</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">insert_record</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_qualtype&#39;</span><span class="p">,</span> <span class="nv">$qualtype</span><span class="p">);</span>
-<a name="l-24"></a>                        <span class="nv">$import</span><span class="o">-&gt;</span><span class="na">qualcount</span><span class="o">++</span><span class="p">;</span>
-<a name="l-25"></a>                    <span class="p">}</span>
-<a name="l-26"></a>                <span class="p">}</span>
+<a name="l-5"></a>                <span class="nv">$where</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_compare_text</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39; = ?&#39;</span><span class="p">;</span>
+<a name="l-6"></a>                <span class="nv">$params</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$qualname</span><span class="p">);</span>
+<a name="l-7"></a>                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$qualtype</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record_select</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_qualtype&#39;</span><span class="p">,</span> <span class="nv">$where</span><span class="p">,</span> <span class="nv">$params</span><span class="p">))</span> <span class="p">{</span>
+<a name="l-8"></a>                    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$qualscale</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="nv">$qualname</span><span class="o">.</span><span class="s1">&#39; MTG&#39;</span><span class="p">)))</span> <span class="p">{</span>
+<a name="l-9"></a>
+<a name="l-10"></a>                        <span class="k">if</span><span class="p">(</span><span class="nv">$scale</span> <span class="o">=</span> <span class="nx">get_scale</span><span class="p">(</span><span class="nv">$qualname</span><span class="p">))</span> <span class="p">{</span>
+<a name="l-11"></a>                            <span class="nv">$qualscale</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\stdClass</span><span class="p">;</span>
+<a name="l-12"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$qualname</span><span class="o">.</span><span class="s1">&#39; MTG&#39;</span><span class="p">;</span>
+<a name="l-13"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">scale</span> <span class="o">=</span> <span class="nv">$scale</span><span class="p">;</span>
+<a name="l-14"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">description</span> <span class="o">=</span> <span class="nv">$qualname</span><span class="o">.</span><span class="s1">&#39; Minimum/Target Grades&#39;</span><span class="p">;</span>
+<a name="l-15"></a>                            <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">id</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">insert_record</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="nv">$qualscale</span><span class="p">);</span>
+<a name="l-16"></a>                        <span class="p">}</span>
+<a name="l-17"></a>
+<a name="l-18"></a>                    <span class="p">}</span>
+<a name="l-19"></a>
+<a name="l-20"></a>                    <span class="k">if</span><span class="p">(</span><span class="nv">$qualscale</span><span class="p">)</span> <span class="p">{</span>
+<a name="l-21"></a>                        <span class="nv">$qualtype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\stdClass</span><span class="p">;</span>
+<a name="l-22"></a>                        <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">name</span> <span class="o">=</span> <span class="nv">$qualname</span><span class="p">;</span>
+<a name="l-23"></a>                        <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">scaleid</span> <span class="o">=</span> <span class="nv">$qualscale</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
+<a name="l-24"></a>                        <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">id</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">insert_record</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_qualtype&#39;</span><span class="p">,</span> <span class="nv">$qualtype</span><span class="p">);</span>
+<a name="l-25"></a>                        <span class="nv">$import</span><span class="o">-&gt;</span><span class="na">qualcount</span><span class="o">++</span><span class="p">;</span>
+<a name="l-26"></a>                    <span class="p">}</span>
+<a name="l-27"></a>                <span class="p">}</span>
 </pre></div>
 
 <p>Lines only containing a single field will be a heading for a qualification.  If that's the case the value is cleaned, then the record for the qualification is created or updated, and matched with the grade scale.</p>
@@ -559,33 +562,35 @@
 <a name="l-7"></a>                    <span class="nv">$intercept</span> <span class="o">=</span> <span class="nx">\clean_param</span><span class="p">(</span><span class="nv">$line</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">\PARAM_FLOAT</span><span class="p">);</span>
 <a name="l-8"></a>                    <span class="nv">$correlation</span> <span class="o">=</span> <span class="nx">\clean_param</span><span class="p">(</span><span class="nv">$line</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nx">\PARAM_FLOAT</span><span class="p">);</span>
 <a name="l-9"></a>                    <span class="nv">$standarddeviation</span> <span class="o">=</span> <span class="nx">\clean_param</span><span class="p">(</span><span class="nv">$line</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="nx">\PARAM_FLOAT</span><span class="p">);</span>
-<a name="l-10"></a>                    <span class="k">if</span><span class="p">(</span><span class="nv">$subject</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record_select</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_alisdata&#39;</span><span class="p">,</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_compare_text</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39; = ? AND qualtypeid = ?&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span> <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">)))</span> <span class="p">{</span>
-<a name="l-11"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">samplesize</span> <span class="o">=</span> <span class="nv">$samplesize</span><span class="p">;</span>
-<a name="l-12"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">gradient</span> <span class="o">=</span> <span class="nv">$gradient</span><span class="p">;</span>
-<a name="l-13"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">intercept</span> <span class="o">=</span> <span class="nv">$intercept</span><span class="p">;</span>
-<a name="l-14"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">correlation</span> <span class="o">=</span> <span class="nv">$correlation</span><span class="p">;</span>
-<a name="l-15"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">standarddeviation</span> <span class="o">=</span> <span class="nv">$standarddeviation</span><span class="p">;</span>
-<a name="l-16"></a>                        <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">update_record</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_alisdata&#39;</span><span class="p">,</span> <span class="nv">$subject</span><span class="p">);</span>
-<a name="l-17"></a>                        <span class="nv">$import</span><span class="o">-&gt;</span><span class="na">updatecount</span><span class="o">++</span><span class="p">;</span>
-<a name="l-18"></a>                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<a name="l-19"></a>                        <span class="nv">$subject</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\stdClass</span><span class="p">;</span>
-<a name="l-20"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">name</span><span class="o">=</span> <span class="nv">$name</span><span class="p">;</span>
-<a name="l-21"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">samplesize</span> <span class="o">=</span> <span class="nv">$samplesize</span><span class="p">;</span>
-<a name="l-22"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">gradient</span> <span class="o">=</span> <span class="nv">$gradient</span><span class="p">;</span>
-<a name="l-23"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">intercept</span> <span class="o">=</span> <span class="nv">$intercept</span><span class="p">;</span>
-<a name="l-24"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">correlation</span> <span class="o">=</span> <span class="nv">$correlation</span><span class="p">;</span>
-<a name="l-25"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">standarddeviation</span> <span class="o">=</span> <span class="nv">$standarddeviation</span><span class="p">;</span>
-<a name="l-26"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">qualtypeid</span> <span class="o">=</span> <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
-<a name="l-27"></a>                        <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">insert_record</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_alisdata&#39;</span><span class="p">,</span> <span class="nv">$subject</span><span class="p">);</span>
-<a name="l-28"></a>                        <span class="nv">$import</span><span class="o">-&gt;</span><span class="na">subjectcount</span><span class="o">++</span><span class="p">;</span>
-<a name="l-29"></a>                    <span class="p">}</span>
-<a name="l-30"></a>                <span class="p">}</span>
-<a name="l-31"></a>            <span class="p">}</span>
-<a name="l-32"></a>        <span class="p">}</span>
-<a name="l-33"></a>                
-<a name="l-34"></a>        <span class="nx">\fclose</span><span class="p">(</span><span class="nv">$file</span><span class="p">);</span>
-<a name="l-35"></a>        
-<a name="l-36"></a>        <span class="c1">// All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data</span>
+<a name="l-10"></a>                    <span class="nv">$where</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">sql_compare_text</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39; = ? AND qualtypeid = ?&#39;</span><span class="p">;</span>
+<a name="l-11"></a>                    <span class="nv">$params</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span> <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
+<a name="l-12"></a>                    <span class="k">if</span><span class="p">(</span><span class="nv">$subject</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record_select</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_alisdata&#39;</span><span class="p">,</span> <span class="nv">$where</span><span class="p">,</span> <span class="nv">$params</span><span class="p">))</span> <span class="p">{</span>
+<a name="l-13"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">samplesize</span> <span class="o">=</span> <span class="nv">$samplesize</span><span class="p">;</span>
+<a name="l-14"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">gradient</span> <span class="o">=</span> <span class="nv">$gradient</span><span class="p">;</span>
+<a name="l-15"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">intercept</span> <span class="o">=</span> <span class="nv">$intercept</span><span class="p">;</span>
+<a name="l-16"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">correlation</span> <span class="o">=</span> <span class="nv">$correlation</span><span class="p">;</span>
+<a name="l-17"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">standarddeviation</span> <span class="o">=</span> <span class="nv">$standarddeviation</span><span class="p">;</span>
+<a name="l-18"></a>                        <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">update_record</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_alisdata&#39;</span><span class="p">,</span> <span class="nv">$subject</span><span class="p">);</span>
+<a name="l-19"></a>                        <span class="nv">$import</span><span class="o">-&gt;</span><span class="na">updatecount</span><span class="o">++</span><span class="p">;</span>
+<a name="l-20"></a>                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<a name="l-21"></a>                        <span class="nv">$subject</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\stdClass</span><span class="p">;</span>
+<a name="l-22"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">name</span><span class="o">=</span> <span class="nv">$name</span><span class="p">;</span>
+<a name="l-23"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">samplesize</span> <span class="o">=</span> <span class="nv">$samplesize</span><span class="p">;</span>
+<a name="l-24"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">gradient</span> <span class="o">=</span> <span class="nv">$gradient</span><span class="p">;</span>
+<a name="l-25"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">intercept</span> <span class="o">=</span> <span class="nv">$intercept</span><span class="p">;</span>
+<a name="l-26"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">correlation</span> <span class="o">=</span> <span class="nv">$correlation</span><span class="p">;</span>
+<a name="l-27"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">standarddeviation</span> <span class="o">=</span> <span class="nv">$standarddeviation</span><span class="p">;</span>
+<a name="l-28"></a>                        <span class="nv">$subject</span><span class="o">-&gt;</span><span class="na">qualtypeid</span> <span class="o">=</span> <span class="nv">$qualtype</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
+<a name="l-29"></a>                        <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">insert_record</span><span class="p">(</span><span class="s1">&#39;report_targetgrades_alisdata&#39;</span><span class="p">,</span> <span class="nv">$subject</span><span class="p">);</span>
+<a name="l-30"></a>                        <span class="nv">$import</span><span class="o">-&gt;</span><span class="na">subjectcount</span><span class="o">++</span><span class="p">;</span>
+<a name="l-31"></a>                    <span class="p">}</span>
+<a name="l-32"></a>                <span class="p">}</span>
+<a name="l-33"></a>            <span class="p">}</span>
+<a name="l-34"></a>        <span class="p">}</span>
+<a name="l-35"></a>                
+<a name="l-36"></a>        <span class="nx">\fclose</span><span class="p">(</span><span class="nv">$file</span><span class="p">);</span>
+<a name="l-37"></a>        
+<a name="l-38"></a>        <span class="c1">// All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data</span>
 </pre></div>
 
 <p>Lines containing 6 fields will be a qualification with a set of statistics.  In this case we clean the values in each field and either insert or update a record for the qualification.
@@ -773,15 +778,16 @@ When we've done all the lines, we close the file.</p>
 <div class="highlight"><pre><a name="l-1"></a>        <span class="k">function</span> <span class="nf">find_users</span><span class="p">(</span><span class="nv">$search</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span> <span class="p">{</span>
 <a name="l-2"></a>            <span class="k">global</span> <span class="nv">$DB</span><span class="p">;</span>
 <a name="l-3"></a>            <span class="nv">$config</span> <span class="o">=</span> <span class="nx">get_config</span><span class="p">();</span>
-<a name="l-4"></a>            
-<a name="l-5"></a>            <span class="c1">### @export &quot;dcs_find_users_fields&quot;            </span>
-<a name="l-6"></a>            <span class="nv">$select</span> <span class="o">=</span> <span class="s1">&#39;SELECT DISTINCT c.id, c.shortname AS lastname, &quot;&quot; AS firstname, c.fullname AS email, q.name AS qualtype, &#39;</span><span class="p">;</span>
-<a name="l-7"></a>                
-<a name="l-8"></a>            <span class="nv">$from</span> <span class="o">=</span> <span class="s1">&#39;FROM {course} c</span>
-<a name="l-9"></a><span class="s1">                        JOIN {grade_items} g ON c.id = g.courseid &#39;</span><span class="p">;</span>
 </pre></div>
 
 <p><code>find_users()</code> starts by getting the plugin's config.  It's worth noting that while the method accepts an arugment, this argument it not used - it's only there to satisfy the requirements of overriding the abstract ancestor method.</p>
+<div class="highlight"><pre><a name="l-1"></a>            <span class="nv">$select</span> <span class="o">=</span> <span class="s1">&#39;SELECT DISTINCT c.id, c.shortname AS lastname, </span>
+<a name="l-2"></a><span class="s1">                        &quot;&quot; AS firstname, c.fullname AS email, q.name AS qualtype, &#39;</span><span class="p">;</span>
+<a name="l-3"></a>                
+<a name="l-4"></a>            <span class="nv">$from</span> <span class="o">=</span> <span class="s1">&#39;FROM {course} c</span>
+<a name="l-5"></a><span class="s1">                        JOIN {grade_items} g ON c.id = g.courseid &#39;</span><span class="p">;</span>
+</pre></div>
+
 <p>As with <code>potential_course_selector</code>, we use field names as though the course records were use records.</p>
 <div class="highlight"><pre><a name="l-1"></a>            <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="p">))</span> <span class="p">{</span>
 <a name="l-2"></a>                <span class="nv">$args</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_field</span><span class="p">,</span> <span class="nv">$config</span><span class="o">-&gt;</span><span class="na">group_length</span><span class="p">);</span>
