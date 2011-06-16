@@ -36,28 +36,4 @@ foreach ($dir as $d) {
 file_put_contents('dexy--index-links.json', json_encode((object)$indexes));
 file_put_contents('dexy--anchor-links.json', json_encode((object)$anchors));
 
-/*
-echo '### @export "index"'.PHP_EOL;
-foreach ($index_links as $filename => $text) {
-    echo '<li><a href="'.$filename.'">'.$text.'</a></li>'.PHP_EOL;
-}
-
-foreach($anchor_links as $filename => $links) {
-    echo '### @export "'.$filename.'"'.PHP_EOL;
-    $toplinks = array_shift($links);
-    foreach ($toplinks as $anchor => $text) {
-        echo '<li><a href="#'.$anchor.'">'.$text.'</a>'.PHP_EOL;
-    }
-
-    foreach ($links as $header => $ls) {
-        echo '### @export "'.$filename.'_'.$header.'"'.PHP_EOL;
-        foreach($ls as $anchor => $text) {
-            echo '<li><a href="#'.$anchor.'">'.$text.'</a>'.PHP_EOL;
-        }
-    }
-}
-*/
-
-
-
 ?>

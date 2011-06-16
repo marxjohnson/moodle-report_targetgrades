@@ -13,6 +13,8 @@
 </li>
 <li><a href="#exceptions">Exceptions</a><br />
 </li>
+<li><a href="#forms">Forms</a><br />
+</li>
 <li><a href="#functions">Functions</a> </li>
 </ul>
 <p>The Target Grades report contains 2 libraries - <code>lib.php</code> and <code>alisdata_form.php</code>. These define all the constants, functions and classes used in the system.</p>
@@ -881,6 +883,23 @@ When we've done all the lines, we close the file.</p>
 <div class="highlight"><pre><a name="l-1"></a><span class="k">class</span> <span class="nc">needsconfig_exception</span> <span class="k">extends</span> <span class="nx">\Exception</span> <span class="p">{}</span>
 </pre></div>
 
-<p>This exception is thrown by the plugin's pages if the plugin hasn't been configured correctly.
+<p>This exception is thrown by the plugin's pages if the plugin hasn't been configured correctly.</p>
+<h3><a name="forms">Forms</a></h3>
+<h4><a name="alisdata_form">alisdata_upload_form</a></h4>
+<div class="highlight"><pre><a name="l-1"></a><span class="k">class</span> <span class="nc">alisdata_upload_form</span> <span class="k">extends</span> <span class="nx">\moodleform</span> <span class="p">{</span>
+<a name="l-2"></a>
+<a name="l-3"></a>    <span class="sd">/**</span>
+<a name="l-4"></a><span class="sd">     * Define the form for uploading the ALIS data as a CSV file. </span>
+<a name="l-5"></a><span class="sd">     */</span>
+<a name="l-6"></a>    <span class="k">public</span> <span class="k">function</span> <span class="nf">definition</span><span class="p">()</span> <span class="p">{</span>
+<a name="l-7"></a>        <span class="nv">$mform</span>    <span class="o">=&amp;</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_form</span><span class="p">;</span>
+<a name="l-8"></a>        <span class="nv">$mform</span><span class="o">-&gt;</span><span class="na">addElement</span><span class="p">(</span><span class="s1">&#39;filepicker&#39;</span><span class="p">,</span> <span class="s1">&#39;equationsfile&#39;</span><span class="p">,</span> <span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;equationsfile&#39;</span><span class="p">,</span> <span class="s1">&#39;report_targetgrades&#39;</span><span class="p">));</span>
+<a name="l-9"></a>        <span class="nv">$mform</span><span class="o">-&gt;</span><span class="na">addElement</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="s1">&#39;filedesc&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;equationsfiledesc&#39;</span><span class="p">,</span> <span class="s1">&#39;report_targetgrades&#39;</span><span class="p">));</span>
+<a name="l-10"></a>        <span class="nv">$mform</span><span class="o">-&gt;</span><span class="na">addElement</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">,</span> <span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;upload&#39;</span><span class="p">));</span>
+<a name="l-11"></a>    <span class="p">}</span>
+<a name="l-12"></a><span class="p">}</span>
+</pre></div>
+
+<p>This form is displayed and processed by <code>alisdata_form.php</code>. It just displays a filepicker element with some explanation of the correct file format, allowing a CSV file of ALIS statistics to be uploaded.
 </body>
 </html></p>
