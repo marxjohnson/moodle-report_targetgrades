@@ -344,7 +344,8 @@ function build_pattern_options() {
  
     $select = 'SELECT DISTINCT ';
     if(!empty($config->group_field) && !empty($config->group_length)) {
-        $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'), LEFT('.$config->group_field.', '.$config->group_length.') as pattern ';
+        $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'), 
+                        LEFT('.$config->group_field.', '.$config->group_length.') as pattern ';
     } else {
         $select .= 'shortname, shortname AS pattern ';
     }
@@ -355,20 +356,21 @@ function build_pattern_options() {
         
     if ($DB->sql_regex_supported()) {
         $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
-        $params = array_merge($params, array($config->exclude_regex));        
+        $params = array_merge($params, array($config->exclude_regex));
     } else {
         $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
         
-        \array_filter($courses, function($course, $config) {                    
+        \array_filter($courses, function($course, $config) {
             $field = $config->exclude_field;
             return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
         });        
         
-        list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));        
+        list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));
         $where = 'WHERE id '.$in_sql.' ';
     }
     
-    $where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN (SELECT pattern FROM {report_targetgrades_patterns} tp) ';
+    $where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN 
+                (SELECT pattern FROM {report_targetgrades_patterns} tp) ';
     
     $options = $DB->get_records_sql_menu($select.$from.$where.$order, $params);
 
@@ -394,7 +396,7 @@ function sort_gradebook($course) {
     require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
     $gtree = new \grade_tree($course->id, false, false);
     
-    $fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');    
+    $fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');
     $params = array($course->id);
     list($in_sql, $in_params) = $DB->get_in_or_equal($params);
     $params = \array_merge($params, $in_params);
@@ -780,8 +782,9 @@ class csvhandler {
             if (\count($line) == 1) {
                 $qualname = param_clean($line[0], \PARAM_ALPHANUM);
                 // Create a new qualtype record if there isn't one already.
-                if(!$qualtype = $DB->get_record_select('report_targetgrades_qualtype', $DB->sql_compare_text('name').' = ?', array($qualname))) {
-
+                $where = $DB->sql_compare_text('name').' = ?';
+                $params = array($qualname);
+                if(!$qualtype = $DB->get_record_select('report_targetgrades_qualtype', $where, $params)) {
                     if(!$qualscale = $DB->get_record('scale', array('name' => $qualname.' MTG'))) {
 
                         if($scale = get_scale($qualname)) {
@@ -812,7 +815,9 @@ class csvhandler {
                     $intercept = \clean_param($line[3], \PARAM_FLOAT);
                     $correlation = \clean_param($line[4], \PARAM_FLOAT);
                     $standarddeviation = \clean_param($line[5], \PARAM_FLOAT);
-                    if($subject = $DB->get_record_select('report_targetgrades_alisdata', $DB->sql_compare_text('name').' = ? AND qualtypeid = ?', array($name, $qualtype->id))) {
+                    $where = $DB->sql_compare_text('name').' = ? AND qualtypeid = ?';
+                    $params = array($name, $qualtype->id);
+                    if($subject = $DB->get_record_select('report_targetgrades_alisdata', $where, $params)) {
                         $subject->samplesize = $samplesize;
                         $subject->gradient = $gradient;
                         $subject->intercept = $intercept;
@@ -1050,9 +1055,10 @@ if (class_exists('\user_selector_base')) {
         function find_users($search = null) {
             global $DB;
             $config = get_config();
-            
-            ### @export "dcs_find_users_fields"            
-            $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
+
+            ### @export "dcs_find_users_fields"
+            $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, 
+                        "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
                 
             $from = 'FROM {course} c
                         JOIN {grade_items} g ON c.id = g.courseid ';
