@@ -23,7 +23,7 @@
  * @author      Mark Johnson <mark.johnson@tauntons.ac.uk>
  * @copyright   2011 Tauntons College, UK
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */ 
+ */
 
 ### @export "namespace"
 namespace report\targetgrades;
@@ -78,8 +78,8 @@ const CORRELATION_THRESHOLD = 0.3;
 
 /**
  * Returns the grade scale for the provided qualification type.
- * 
- * @param string $qualtype 
+ *
+ * @param string $qualtype
  */
 ### @export "get_scale"
 function get_scale($qualtype) {
@@ -151,11 +151,11 @@ function get_scale($qualtype) {
 
 /**
  * Gets the config data for the plugin with arrays unserialized.
- * 
+ *
  * Will normally only query the database the first time it's run, subsequent requests
  * will just return the static $config. However, this behaviour can be overridden using
- * the $force parameter, to ensure the data is fresh. 
- * 
+ * the $force parameter, to ensure the data is fresh.
+ *
  * @param $force bool Force a fresh query on the database (defaults to false)
  * @return object The config data.
  */
@@ -179,7 +179,7 @@ function get_config($force = false) {
  * @return array The options with asterisks added where appropriate
  */
 ### @export "hasconfig"
-function hasconfig($options){    
+function hasconfig($options){
      array_walk($options, function ($option){ // Mark all courses that don't have any ALIS data
         global $DB;
         $select = 'SELECT * ';
@@ -191,7 +191,7 @@ function hasconfig($options){
             return true;
         } else {
             $option->firstname = '*';
-        }    
+        }
     });
     return $options;
 }
@@ -214,7 +214,7 @@ function calculate_mtg($student, $course){
         JOIN {report_targetgrades_alisdata} AS d ON p.alisdataid = d.id ';
     $where = 'WHERE p.pattern = ?';
     $params = array($course->pattern);
-    
+
     if($alis = $DB->get_record_sql($select.$from.$where, $params)) {
         $points = ($student->avgcse * $alis->gradient)+$alis->intercept;
 
@@ -244,7 +244,7 @@ function calculate_mtg($student, $course){
                 // Round Up
                 $mtg = \ceil($points/10);
 
-                break;           
+                break;
 
             case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE: // AS Double Award
                 // Divide by 10
@@ -265,7 +265,7 @@ function calculate_mtg($student, $course){
                 $mtg = \ceil($points/40);
                 break;
 
-            case ALIS_BTEC_NATIONAL_AWARD: // BTEC Award            
+            case ALIS_BTEC_NATIONAL_AWARD: // BTEC Award
                 // Add 10
                 // Divide by 40
                 // Round up
@@ -283,7 +283,7 @@ function calculate_mtg($student, $course){
              // These all provide a raw number on the scale, rather than UCAS
             // tariff points.
             case ALIS_IB_STANDARD: // IB
-            case ALIS_IB_HIGHER: // IB            
+            case ALIS_IB_HIGHER: // IB
             case ALIS_BTEC_FIRST_DIPLOMA: // BTEC 1st
             case ALIS_OCR_NATIONAL_DIPLOMA: // OCR Diploma
             case ALIS_OCR_NATIONAL_CERTIFICATE: // OCR Certificate
@@ -320,7 +320,7 @@ function calculate_mtg($student, $course){
     } else {
         throw new no_mtg_for_student_exception($student->id);
     }
-    
+
 }
 ### @end
 
@@ -341,37 +341,37 @@ function build_pattern_options() {
     }
 
     list($in_sql, $params) = $DB->get_in_or_equal($config->categories);
- 
+
     $select = 'SELECT DISTINCT ';
     if(!empty($config->group_field) && !empty($config->group_length)) {
-        $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'), 
+        $select .= 'LEFT('.$config->group_field.', '.$config->group_length.'),
                         LEFT('.$config->group_field.', '.$config->group_length.') as pattern ';
     } else {
         $select .= 'shortname, shortname AS pattern ';
     }
-    
+
     $from = 'FROM {course} ';
-    
+
     $order = 'ORDER BY pattern';
-        
+
     if ($DB->sql_regex_supported()) {
         $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
         $params = array_merge($params, array($config->exclude_regex));
     } else {
         $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
-        
+
         \array_filter($courses, function($course, $config) {
             $field = $config->exclude_field;
             return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
-        });        
-        
+        });
+
         list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));
         $where = 'WHERE id '.$in_sql.' ';
     }
-    
-    $where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN 
+
+    $where .= 'AND LEFT('.$config->group_field.', '.$config->group_length.') NOT IN
                 (SELECT pattern FROM {report_targetgrades_patterns} tp) ';
-    
+
     $options = $DB->get_records_sql_menu($select.$from.$where.$order, $params);
 
     return $options;
@@ -395,7 +395,7 @@ function sort_gradebook($course) {
     require_once $CFG->dirroot.'/grade/lib.php';
     require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
     $gtree = new \grade_tree($course->id, false, false);
-    
+
     $fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');
     $params = array($course->id);
     list($in_sql, $in_params) = $DB->get_in_or_equal($params);
@@ -556,7 +556,7 @@ class item_avgcse extends item_grade {
         $this->itemnumber = 1;
 
     }
-    
+
 }
 
 /**
@@ -630,7 +630,7 @@ class item_min extends item_grade {
         }
         $this->gradetype = 2;
         $this->grademax = \count($scale->scale);
-        $this->scaleid = $scale->id;        
+        $this->scaleid = $scale->id;
     }
 }
 
@@ -713,7 +713,7 @@ class csvhandler {
     ### @export "csvhandler_openfile"
     private function open_file() {
         global $USER;
-        
+
         $fs = \get_file_storage();
         $context = \get_context_instance(CONTEXT_USER, $USER->id);
         if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $this->filename, 'id DESC', false)) {
@@ -723,12 +723,12 @@ class csvhandler {
         if (!$file = $file->get_content_file_handle()) {
             throw new \moodle_exception('cantreadcsv', 'report_targetgrades');
         }
-        
+
         return $file;
     }
     ### @end
 
-    
+
     /**
      * Checks that the file is valid CSV in the expected format
      *
@@ -745,7 +745,7 @@ class csvhandler {
         while ($csvrow = \fgetcsv($file, 0, '|')) {
             $line++;
             if (count($csvrow) != 1 && count($csvrow) != 6) {
-                throw new \moodle_exception('wrongcolcsv', 'report_targetgrades', '', $line);                
+                throw new \moodle_exception('wrongcolcsv', 'report_targetgrades', '', $line);
             }
         }
         \fclose($file);
@@ -757,7 +757,7 @@ class csvhandler {
      * Processes the file to import the ALIS data
      *
      * Opens the file, loops through each row. Cleans the values in each column,
-     * and inserts or updates the statistics for each subject, then loops over 
+     * and inserts or updates the statistics for each subject, then loops over
      * the records in the table and flags any quality issues.
      *
      * Returns a report of successess and failures.
@@ -769,7 +769,7 @@ class csvhandler {
     ### @export "csvhandler_process"
     public function process() {
         global $DB;
-        
+
         $file = $this->open_file();
         $qualtype = false;
         $import->qualcount = 0;
@@ -840,14 +840,14 @@ class csvhandler {
                 }
             }
         }
-                
+
         \fclose($file);
-        
+
         // All the stats are now in the DB, so do a pass over the table to flag up any quality issues with the data
         ### @export "csvhandler_process_quality"
         $averagesize = round($DB->get_record_sql('SELECT AVG(samplesize) as avg FROM {report_targetgrades_alisdata}')->avg);
         $select = 'SELECT ta.*, tq.name as qualification ';
-        $from = 'FROM {report_targetgrades_alisdata} ta 
+        $from = 'FROM {report_targetgrades_alisdata} ta
             JOIN {report_targetgrades_qualtype} tq ON ta.qualtypeid = tq.id';
         $alisdata = $DB->get_records_sql($select.$from);
 
@@ -884,28 +884,28 @@ class csvhandler {
                 case ALIS_OCR_NATIONAL_DIPLOMA:
                     $boundary = 1;
                     break;
-                    
+
                 case ALIS_ADVANCED_GCE:
                 case ALIS_ADVANCED_GCE_DOUBLE:
                     $boundary = 20;
                     break;
-                    
+
                 case ALIS_ADVANCED_SUBSIDIARY_GCE:
                 case ALIS_ADVANCED_SUBSIDIARY_GCE_DOUBLE:
                     $boundary = 10;
                     break;
-                    
+
                 case ALIS_BTEC_NATIONAL_AWARD:
                 case ALIS_BTEC_NATIONAL_DIPLOMA:
                 case ALIS_BTEC_NATIONAL_CERTIFICATE:
                     $boundary = 40;
                     break;
-                    
+
                 case ALIS_CACHE_L3_DIPLOMA:
                     $boundary = 60;
-                    break;                
+                    break;
             }
-            
+
             if ($alis->standarddeviation > $boundary) {
                 if ($alis->standarddeviation > $boundary*2) {
                     $alis->quality_deviation = 2;
@@ -919,26 +919,26 @@ class csvhandler {
             ### @export "csvhandler_process_end"
             $DB->update_record('report_targetgrades_alisdata', $alis);
         }
-        
+
         return $import;
     }
 ### @end
 }
 
 
-// We need these class definitions here so that we can get all the functions we need when doing 
+// We need these class definitions here so that we can get all the functions we need when doing
 // AJAX searching in the big select list. However, we don't want to have \user_selector_base
 // as a dependency on every page where we include this lib, so only define the select list classes
 // on pages where the user selector lib has already been included.
 if (class_exists('\user_selector_base')) {
-    
+
     /**
      * Select list for courses without Target Grade items
      */
     ### @export "pcs"
     class potential_course_selector extends \user_selector_base {
     ### @end
-    
+
         /**
          * Add the file name to the $options array to make AJAX searching work
          * @return array
@@ -950,15 +950,15 @@ if (class_exists('\user_selector_base')) {
             return $options;
         }
         ### @end
-                
+
         /**
          * Get list of courses for potential distribution
-         * 
+         *
          * Get all the courses that are in the categories selected in $config->categories,
          * and aren't filtered out by $config->exclude_regex, and don't already have the grade
-         * items.  This function uses odd names for the fields to avoid having to override 
+         * items.  This function uses odd names for the fields to avoid having to override
          * additional methods from the parent class.
-         * 
+         *
          * @param $search Optional string to search for in shortname and fullname
          * @return array Matching course records
          */
@@ -983,9 +983,9 @@ if (class_exists('\user_selector_base')) {
             } else {
                 $select .= 'shortname AS pattern ';
                 $from = 'FROM {course} c
-                            LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern 
+                            LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern
                             LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
-                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';        
+                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';
             }
 
             $order = 'ORDER BY pattern';
@@ -993,28 +993,28 @@ if (class_exists('\user_selector_base')) {
             ### @export "pcs_find_users_regex"
             if ($DB->sql_regex_supported()) {
                 $where = 'WHERE category '.$in_sql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
-                $params = array_merge($params, array($config->exclude_regex));        
+                $params = array_merge($params, array($config->exclude_regex));
             } else {
                 $courses = $DB->get_records_select('course', 'category '.$in_sql, $params);
-                
-                \array_filter($courses, function($course, $config) {                    
+
+                \array_filter($courses, function($course, $config) {
                     $field = $config->exclude_field;
                     return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
                 });
-                
+
                 list($in_sql, $params) = $DB->get_in_or_equal(array_keys($courses));
                 $where = 'WHERE id '.$in_sql.' ';
             }
 
             ### @export "pcs_find_users_search"
-            $optgroupname = get_string('courseswithoutgrades', 'report_targetgrades');        
-            
+            $optgroupname = get_string('courseswithoutgrades', 'report_targetgrades');
+
             if (!empty($search)) {
                 $shortnamelike = $DB->sql_like('shortname', '?');
-                $fullnamelike = $DB->sql_like('fullname', '?');           
+                $fullnamelike = $DB->sql_like('fullname', '?');
                 $where .= 'AND ('.$shortnamelike.' OR '.$fullnamelike.') ';
                 $params = array_merge($params, array('%'.$search.'%', '%'.$search.'%'));
-                $optgroupname .= ' - '.get_string('searchresults', 'report_targetgrades'); 
+                $optgroupname .= ' - '.get_string('searchresults', 'report_targetgrades');
             }
 
             ### @export "pcs_find_users_exclude"
@@ -1026,9 +1026,9 @@ if (class_exists('\user_selector_base')) {
 
             ### @export "pcs_find_users_end"
             $options = $DB->get_records_sql($select.$from.$where.$order, $params);
-                    
+
             $options = hasconfig($options);
-           
+
             return array($optgroupname => $options);
         }
         ### @end
@@ -1044,10 +1044,10 @@ if (class_exists('\user_selector_base')) {
 
         /**
          * Get a list of courses that have Target Grade grade items on.
-         * 
+         *
          * Gets all the courses with one or more grade items match the ones
          * added by the distribution script.
-         * 
+         *
          * @param $search Compulsory arugment due to abstract parent method. Defaults to empty string, doesn't do anything
          * @return array All the matching courses
          */
@@ -1057,9 +1057,9 @@ if (class_exists('\user_selector_base')) {
             $config = get_config();
 
             ### @export "dcs_find_users_fields"
-            $select = 'SELECT DISTINCT c.id, c.shortname AS lastname, 
+            $select = 'SELECT DISTINCT c.id, c.shortname AS lastname,
                         "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
-                
+
             $from = 'FROM {course} c
                         JOIN {grade_items} g ON c.id = g.courseid ';
 
@@ -1075,7 +1075,7 @@ if (class_exists('\user_selector_base')) {
                 $select .= 'shortname AS pattern ';
                 $from .= 'LEFT JOIN {report_targetgrades_patterns} p ON c.shortname = p.pattern
                             LEFT JOIN {report_targetgrades_alisdata} d ON p.alisdataid = d.id
-                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';        
+                            LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';
             }
 
             ### @export "dcs_find_users_items"
@@ -1083,8 +1083,8 @@ if (class_exists('\user_selector_base')) {
             get_string('item_alisnum', 'report_targetgrades'),
             get_string('item_alis', 'report_targetgrades'),
             get_string('item_mtg', 'report_targetgrades'));
-            list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);    
-            
+            list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);
+
             $where = 'WHERE itemname '.$in_sql;
             $options = $DB->get_records_sql($select.$from.$where, $in_params);
 
