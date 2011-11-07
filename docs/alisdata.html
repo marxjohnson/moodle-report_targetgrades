@@ -39,16 +39,17 @@
 
 <p>Here you can see the page outputs the form, and if data has been uploaded, a table wrapped in a second form.  The elements for this second form are defined within the table.</p>
 <h3><a name="uploadform">Upload Form</a></h3>
-<div class="highlight"><pre><a name="l-1"></a><span class="nv">$uploadform</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">tg\alisdata_upload_form</span><span class="p">();</span>
-<a name="l-2"></a>
-<a name="l-3"></a><span class="k">if</span> <span class="p">(</span><span class="nv">$uploaddata</span> <span class="o">=</span> <span class="nv">$uploadform</span><span class="o">-&gt;</span><span class="na">get_data</span><span class="p">())</span> <span class="p">{</span>
-<a name="l-4"></a>    <span class="nv">$handler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">tg\csvhandler</span><span class="p">(</span><span class="nv">$uploaddata</span><span class="o">-&gt;</span><span class="na">equationsfile</span><span class="p">);</span>
-<a name="l-5"></a>    <span class="nv">$handler</span><span class="o">-&gt;</span><span class="na">validate</span><span class="p">();</span>
-<a name="l-6"></a>    <span class="nv">$import</span> <span class="o">=</span> <span class="nv">$handler</span><span class="o">-&gt;</span><span class="na">process</span><span class="p">();</span>
-<a name="l-7"></a>
-<a name="l-8"></a>    <span class="nv">$output</span> <span class="o">=</span> <span class="s1">&#39;&lt;p&gt;&#39;</span><span class="o">.</span><span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;importoutput&#39;</span><span class="p">,</span> <span class="s1">&#39;report_targetgrades&#39;</span><span class="p">,</span> <span class="nv">$import</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">;</span>
-<a name="l-9"></a>
-<a name="l-10"></a><span class="p">}</span>
+<div class="highlight"><pre><a name="l-1"></a><span class="nv">$uploadform</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">alisdata_upload_form</span><span class="p">();</span>
+<a name="l-2"></a><span class="nv">$uploaddata</span> <span class="o">=</span> <span class="nv">$uploadform</span><span class="o">-&gt;</span><span class="na">get_data</span><span class="p">();</span>
+<a name="l-3"></a>
+<a name="l-4"></a><span class="k">if</span> <span class="p">(</span><span class="nv">$uploaddata</span><span class="p">)</span> <span class="p">{</span>
+<a name="l-5"></a>    <span class="nv">$handler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">tg\csvhandler</span><span class="p">(</span><span class="nv">$uploaddata</span><span class="o">-&gt;</span><span class="na">equationsfile</span><span class="p">);</span>
+<a name="l-6"></a>    <span class="nv">$handler</span><span class="o">-&gt;</span><span class="na">validate</span><span class="p">();</span>
+<a name="l-7"></a>    <span class="nv">$import</span> <span class="o">=</span> <span class="nv">$handler</span><span class="o">-&gt;</span><span class="na">process</span><span class="p">();</span>
+<a name="l-8"></a>
+<a name="l-9"></a>    <span class="nv">$output</span> <span class="o">=</span> <span class="s1">&#39;&lt;p&gt;&#39;</span><span class="o">.</span><span class="nx">get_string</span><span class="p">(</span><span class="s1">&#39;importoutput&#39;</span><span class="p">,</span> <span class="s1">&#39;report_targetgrades&#39;</span><span class="p">,</span> <span class="nv">$import</span><span class="p">)</span><span class="o">.</span><span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">;</span>
+<a name="l-10"></a>
+<a name="l-11"></a><span class="p">}</span>
 </pre></div>
 
 <p>Before any output is generated, this is the only other code in this page pertaining to the upload form.  Here we initialise the object, check if a file's been submitted, and if it has pass it off to a <a href="libraries.html#csvhandler"><code>csvhandler</code></a> object for processing.</p>

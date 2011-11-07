@@ -14,6 +14,7 @@
 ├── alisdata.php
 ├── cli
 │   ├── alis2009_pdf2csv.sh
+│   ├── alis2010_pdf2csv.sh
 │   └── alis_pdf2csv.sh
 ├── db
 │   ├── access.php
@@ -28,7 +29,7 @@
 ├── settings.php
 ├── styles.css
 └── version.php</p>
-<p>4 directories, 14 files
+<p>4 directories, 15 files
 </pre></p>
 <h3>/</h3>
 <p>This folder lives at $CFG-&gt;dirroot/admin/report/targetgrades, and contains the majority of the plugin files</p>
@@ -48,6 +49,8 @@
 <p>Contains bash scripts used to convert PDFs from ALIS to CSV files that can be uploaded to alisdata.php</p>
 <h4>alis2009_pdf2csv.sh</h4>
 <p>Legacy script for converting ALIS statistics from 2009 from PDF to CSV.</p>
+<h4>alis2011_pdf2csv.sh</h4>
+<p>Legacy script for converting ALIS statistics from 2010 from PDF to CSV.</p>
 <h4>alis_pdf2csv.sh</h4>
 <p>Converts the current PDF from ALIS to a CSV file containing the statistics required to calculate target grades.  Uses pdf2text to extract the tables to text, then uses sed to clean the file and turn it into a nicely delimited flatfile.</p>
 <h3>/db/</h3>

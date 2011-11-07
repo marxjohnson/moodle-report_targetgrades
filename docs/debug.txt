@@ -19,6 +19,10 @@ cli/alis2009_pdf2csv.html
 
 cli/alis2009_pdf2csv.sh|pyg
 
+cli/alis2010_pdf2csv.html
+
+cli/alis2010_pdf2csv.sh|pyg
+
 cli/alis_pdf2csv.html
 
 cli/alis_pdf2csv.sh|pyg
