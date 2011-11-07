@@ -745,7 +745,7 @@ class csvhandler {
 
             // If there's only one column on this line, then it's a qualification heading
             if (\count($line) == 1) {
-                $qualname = param_clean($line[0], \PARAM_ALPHANUM);
+                $qualname = \clean_param($line[0], \PARAM_TEXT);
                 // Create a new qualtype record if there isn't one already.
                 if(!$qualtype = $DB->get_record_select('report_targetgrades_qualtype', $DB->sql_compare_text('name').' = ?', array($qualname))) {
 
