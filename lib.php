@@ -430,7 +430,7 @@ function sort_gradebook($course) {
  * @param int $selected The ID of the tab to select
  */
 function print_tabs($selected) {
-    global $DB, $OUTPUT;
+    global $DB, $OUTPUT, $CFG;
 
     $tabs = array();
     $tabs[] = new \tabobject(1,
