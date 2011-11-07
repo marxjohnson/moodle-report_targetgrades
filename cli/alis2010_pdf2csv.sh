@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Read pages 3 to 13 of the PDF into a plain text file, retaining the table layout
+# Read pages 2 to 10 of the PDF into a plain text file, retaining the table layout
 ### @export 'pdftotext'
-pdftotext -f 3 -l 13 -layout Equations.pdf
+pdftotext -f 2 -l 10 -layout Equations.pdf
 ### @end
 
 # Lots of passes through sed to format the file so that it can be parsed as a CSV file:
