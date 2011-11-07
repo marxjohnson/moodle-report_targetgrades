@@ -76,9 +76,10 @@ if ($savepatterns || !empty($addpattern)) {
 }
 
 ### @export 'uploadform'
-$uploadform = new tg\alisdata_upload_form();
+$uploadform = new alisdata_upload_form();
+$uploaddata = $uploadform->get_data();
 
-if ($uploaddata = $uploadform->get_data()) {
+if ($uploaddata) {
     $handler = new tg\csvhandler($uploaddata->equationsfile);
     $handler->validate();
     $import = $handler->process();

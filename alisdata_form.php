@@ -25,21 +25,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */ 
  
-namespace report\targetgrades;
-
 require_once($CFG->libdir.'/formslib.php');
 
 /**
  * The upload form's class for uploading ALIS data
  */
 ### @export "alisdata_form"
-class alisdata_upload_form extends \moodleform {
+class alisdata_upload_form extends moodleform {
 
     /**
      * Define the form for uploading the ALIS data as a CSV file. 
      */
     public function definition() {
         $mform    =& $this->_form;
+        $mform->addElement('hidden', 'blah', 'blah');
         $mform->addElement('filepicker', 'equationsfile', get_string('equationsfile', 'report_targetgrades'));
         $mform->addElement('static', 'filedesc', '', get_string('equationsfiledesc', 'report_targetgrades'));
         $mform->addElement('submit', 'upload', get_string('upload'));
