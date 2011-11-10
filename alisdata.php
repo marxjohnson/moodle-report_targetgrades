@@ -71,7 +71,7 @@ if ($savepatterns || !empty($addpattern)) {
     $output = '<p>'.get_string('changessaved').'</p>';
     if (!empty($addpattern)) {
         $params = array('addfield' => key($addpattern));
-        redirect(new moodle_url('/admin/report/targetgrades/alisdata.php#alis'.key($addpattern), $params));
+        redirect(new moodle_url('/admin/report/targetgrades/alisdata.php#alis'.key($addpattern), $params), '', 0);
     }
 }
 
