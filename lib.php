@@ -76,6 +76,8 @@ const MTG_SCALE_IB = '1,2,3,4,5,6,7';
 const CORRELATION_THRESHOLD = 0.3;
 ### @end
 
+const GRADE_ITEM_PREFIX = 'targetgrades_';
+
 /**
  * Returns the grade scale for the provided qualification type.
  *
@@ -381,11 +383,6 @@ function build_pattern_options() {
 /**
  * Re-sorts the gradebook to put all MTG grade items first.
  *
- * Gets all of the grade items for the specifed course. Iterates over the array
- * of items and moves the MTG items to the front of the array. Then does a
- * second pass to renumber all the sortorders to make the items sequential from
- * 2 upwards (1 will be the course item).
- *
  * @param object $course Database record for course, containing the id.
  */
 ### @export "sort_gradebook"
@@ -396,17 +393,20 @@ function sort_gradebook($course) {
     require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
     $gtree = new \grade_tree($course->id, false, false);
 
-    $fields = array('alis_avgcse', 'alis_alisnum', 'alis_alis', 'alis_mtg', 'alis_cpg');
+    $fields = array(
+        GRADE_ITEM_PREFIX.'avgcse',
+        GRADE_ITEM_PREFIX.'alisnum',
+        GRADE_ITEM_PREFIX.'min',
+        GRADE_ITEM_PREFIX.'target',
+        GRADE_ITEM_PREFIX.'cpg'
+    );
     $params = array($course->id);
-    list($in_sql, $in_params) = $DB->get_in_or_equal($params);
+    list($in_sql, $in_params) = $DB->get_in_or_equal($fields);
     $params = \array_merge($params, $in_params);
     $where = 'courseid = ? AND idnumber '.$in_sql;
     $gradeitems = $DB->get_records_select('grade_items', $where, $params, 'itemnumber DESC');
     $courseitem = $DB->get_record('grade_items', array('courseid' => $course->id, 'itemtype' => 'course'));
-    //$mtgitems = count_records_select('grade_items', $where);
 
-    // First, move the MTG grade items to the front
-    $offset = 0;
     foreach($gradeitems as $item) {
 
         if (!$element = $gtree->locate_element('i'.$item->id)) {
@@ -415,7 +415,6 @@ function sort_gradebook($course) {
         $object = $element['object'];
 
         $moveafter = 'c'.$courseitem->iteminstance;
-        $first = 1; // If First is set to 1, it means the target is the first child of the category $moveafter
 
         if(!$after_el = $gtree->locate_element($moveafter)) {
             \print_error('invalidelementid');
@@ -424,12 +423,7 @@ function sort_gradebook($course) {
         $after = $after_el['object'];
         $sortorder = $after->get_sortorder();
 
-        if (!$first) {
-            $parent = $after->get_parent_category();
-            $object->set_parent($parent->id);
-        } else {
-            $object->set_parent($after->id);
-        }
+        $object->set_parent($after->id);
 
         $object->move_after_sortorder($sortorder);
 
@@ -552,7 +546,7 @@ class item_avgcse extends item_grade {
         $this->grademax = 10;
         $this->grademin = 0;
         $this->locked = \time();
-        $this->idnumber = 'targetgrades_avgcse';
+        $this->idnumber = GRADE_ITEM_PREFIX.'avgcse';
         $this->itemnumber = 1;
 
     }
@@ -581,7 +575,7 @@ class item_alisnum extends item_grade {
         $this->decimals = 0;
         $this->hidden = 1;
         $this->locked = \time();
-        $this->idnumber = 'targetgrades_alisnum';
+        $this->idnumber = GRADE_ITEM_PREFIX.'alisnum';
         $this->itemnumber = 2;
     }
 
@@ -608,7 +602,7 @@ class item_min extends item_grade {
         $this->gradetype = GRADE_TYPE_SCALE;
         $this->grademax = 0;
         $this->scaleid = 0;
-        $this->idnumber = 'targetgrades_min';
+        $this->idnumber = GRADE_ITEM_PREFIX.'min';
         $this->itemnumber = 3;
     }
 
@@ -650,7 +644,7 @@ class item_target extends item_min {
         $this->itemname = \get_string('item_mtg', 'report_targetgrades');
         $this->hidden = 0;
         $this->locked = 0;
-        $this->idnumber = 'targetgrades_target';
+        $this->idnumber = GRADE_ITEM_PREFIX.'target';
         $this->itemnumber = 4;
     }
 }
@@ -671,7 +665,7 @@ class item_cpg extends item_min {
         $this->itemname = \get_string('item_cpg', 'report_targetgrades');
         $this->hidden = 0;
         $this->locked = 0;
-        $this->idnumber = 'targetgrades_cpg';
+        $this->idnumber = GRADE_ITEM_PREFIX.'cpg';
         $this->itemnumber = 5;
     }
 }
