@@ -68,6 +68,11 @@
 </pre></div>
 
 <p>This is the threshold used by quality checks to determine whether the correlation of a set of statistics is reliable enough to be used for calculations.  Below this number, the statistics will be flagged as having low correlation.  According the the ALIS equations PDF, a correlation of 0.6-0.7 is considered to be strong.</p>
+<h4>Grade Items</h4>
+<div class="highlight"><pre><a name="l-1"></a><span class="k">const</span> <span class="no">GRADE_ITEM_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;targetgrades_&#39;</span><span class="p">;</span>
+</pre></div>
+
+<p>This string is used to prefix the idnumber of each grade item generated during distribution.  It's then used by <a href="#sort_gradebook">sort_gradebook()</a> to find the items for sorting.</p>
 <h3><a name="functions">Functions</a></h3>
 <ul>
 <li><a href="#build_pattern_options">build_pattern_options()</a><br />
@@ -361,47 +366,44 @@
 <a name="l-5"></a>    <span class="k">require_once</span> <span class="nv">$CFG</span><span class="o">-&gt;</span><span class="na">dirroot</span><span class="o">.</span><span class="s1">&#39;/grade/edit/tree/lib.php&#39;</span><span class="p">;</span>
 <a name="l-6"></a>    <span class="nv">$gtree</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\grade_tree</span><span class="p">(</span><span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
 <a name="l-7"></a>
-<a name="l-8"></a>    <span class="nv">$fields</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;alis_avgcse&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_alisnum&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_alis&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_mtg&#39;</span><span class="p">,</span> <span class="s1">&#39;alis_cpg&#39;</span><span class="p">);</span>
-<a name="l-9"></a>    <span class="nv">$params</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
-<a name="l-10"></a>    <span class="k">list</span><span class="p">(</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$in_params</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_in_or_equal</span><span class="p">(</span><span class="nv">$params</span><span class="p">);</span>
-<a name="l-11"></a>    <span class="nv">$params</span> <span class="o">=</span> <span class="nx">\array_merge</span><span class="p">(</span><span class="nv">$params</span><span class="p">,</span> <span class="nv">$in_params</span><span class="p">);</span>
-<a name="l-12"></a>    <span class="nv">$where</span> <span class="o">=</span> <span class="s1">&#39;courseid = ? AND idnumber &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="p">;</span>
-<a name="l-13"></a>    <span class="nv">$gradeitems</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_records_select</span><span class="p">(</span><span class="s1">&#39;grade_items&#39;</span><span class="p">,</span> <span class="nv">$where</span><span class="p">,</span> <span class="nv">$params</span><span class="p">,</span> <span class="s1">&#39;itemnumber DESC&#39;</span><span class="p">);</span>
-<a name="l-14"></a>    <span class="nv">$courseitem</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record</span><span class="p">(</span><span class="s1">&#39;grade_items&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;courseid&#39;</span> <span class="o">=&gt;</span> <span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">,</span> <span class="s1">&#39;itemtype&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;course&#39;</span><span class="p">));</span>
-<a name="l-15"></a>    <span class="c1">//$mtgitems = count_records_select(&#39;grade_items&#39;, $where);</span>
-<a name="l-16"></a>
-<a name="l-17"></a>    <span class="c1">// First, move the MTG grade items to the front</span>
-<a name="l-18"></a>    <span class="nv">$offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-19"></a>    <span class="k">foreach</span><span class="p">(</span><span class="nv">$gradeitems</span> <span class="k">as</span> <span class="nv">$item</span><span class="p">)</span> <span class="p">{</span>
-<a name="l-20"></a>
-<a name="l-21"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$element</span> <span class="o">=</span> <span class="nv">$gtree</span><span class="o">-&gt;</span><span class="na">locate_element</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="o">.</span><span class="nv">$item</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">))</span> <span class="p">{</span>
-<a name="l-22"></a>            <span class="nx">\print_error</span><span class="p">(</span><span class="s1">&#39;invalidelementid&#39;</span><span class="p">);</span>
-<a name="l-23"></a>        <span class="p">}</span>
-<a name="l-24"></a>        <span class="nv">$object</span> <span class="o">=</span> <span class="nv">$element</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">];</span>
-<a name="l-25"></a>
-<a name="l-26"></a>        <span class="nv">$moveafter</span> <span class="o">=</span> <span class="s1">&#39;c&#39;</span><span class="o">.</span><span class="nv">$courseitem</span><span class="o">-&gt;</span><span class="na">iteminstance</span><span class="p">;</span>
-<a name="l-27"></a>        <span class="nv">$first</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// If First is set to 1, it means the target is the first child of the category $moveafter</span>
+<a name="l-8"></a>    <span class="nv">$fields</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+<a name="l-9"></a>        <span class="nx">GRADE_ITEM_PREFIX</span><span class="o">.</span><span class="s1">&#39;avgcse&#39;</span><span class="p">,</span>
+<a name="l-10"></a>        <span class="nx">GRADE_ITEM_PREFIX</span><span class="o">.</span><span class="s1">&#39;alisnum&#39;</span><span class="p">,</span>
+<a name="l-11"></a>        <span class="nx">GRADE_ITEM_PREFIX</span><span class="o">.</span><span class="s1">&#39;min&#39;</span><span class="p">,</span>
+<a name="l-12"></a>        <span class="nx">GRADE_ITEM_PREFIX</span><span class="o">.</span><span class="s1">&#39;target&#39;</span><span class="p">,</span>
+<a name="l-13"></a>        <span class="nx">GRADE_ITEM_PREFIX</span><span class="o">.</span><span class="s1">&#39;cpg&#39;</span>
+<a name="l-14"></a>    <span class="p">);</span>
+<a name="l-15"></a>    <span class="nv">$params</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
+<a name="l-16"></a>    <span class="k">list</span><span class="p">(</span><span class="nv">$in_sql</span><span class="p">,</span> <span class="nv">$in_params</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_in_or_equal</span><span class="p">(</span><span class="nv">$fields</span><span class="p">);</span>
+<a name="l-17"></a>    <span class="nv">$params</span> <span class="o">=</span> <span class="nx">\array_merge</span><span class="p">(</span><span class="nv">$params</span><span class="p">,</span> <span class="nv">$in_params</span><span class="p">);</span>
+<a name="l-18"></a>    <span class="nv">$where</span> <span class="o">=</span> <span class="s1">&#39;courseid = ? AND idnumber &#39;</span><span class="o">.</span><span class="nv">$in_sql</span><span class="p">;</span>
+<a name="l-19"></a>    <span class="nv">$gradeitems</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_records_select</span><span class="p">(</span><span class="s1">&#39;grade_items&#39;</span><span class="p">,</span> <span class="nv">$where</span><span class="p">,</span> <span class="nv">$params</span><span class="p">,</span> <span class="s1">&#39;itemnumber DESC&#39;</span><span class="p">);</span>
+<a name="l-20"></a>    <span class="nv">$courseitem</span> <span class="o">=</span> <span class="nv">$DB</span><span class="o">-&gt;</span><span class="na">get_record</span><span class="p">(</span><span class="s1">&#39;grade_items&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;courseid&#39;</span> <span class="o">=&gt;</span> <span class="nv">$course</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">,</span> <span class="s1">&#39;itemtype&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;course&#39;</span><span class="p">));</span>
+<a name="l-21"></a>
+<a name="l-22"></a>    <span class="k">foreach</span><span class="p">(</span><span class="nv">$gradeitems</span> <span class="k">as</span> <span class="nv">$item</span><span class="p">)</span> <span class="p">{</span>
+<a name="l-23"></a>
+<a name="l-24"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$element</span> <span class="o">=</span> <span class="nv">$gtree</span><span class="o">-&gt;</span><span class="na">locate_element</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="o">.</span><span class="nv">$item</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">))</span> <span class="p">{</span>
+<a name="l-25"></a>            <span class="nx">\print_error</span><span class="p">(</span><span class="s1">&#39;invalidelementid&#39;</span><span class="p">);</span>
+<a name="l-26"></a>        <span class="p">}</span>
+<a name="l-27"></a>        <span class="nv">$object</span> <span class="o">=</span> <span class="nv">$element</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">];</span>
 <a name="l-28"></a>
-<a name="l-29"></a>        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$after_el</span> <span class="o">=</span> <span class="nv">$gtree</span><span class="o">-&gt;</span><span class="na">locate_element</span><span class="p">(</span><span class="nv">$moveafter</span><span class="p">))</span> <span class="p">{</span>
-<a name="l-30"></a>            <span class="nx">\print_error</span><span class="p">(</span><span class="s1">&#39;invalidelementid&#39;</span><span class="p">);</span>
-<a name="l-31"></a>        <span class="p">}</span>
-<a name="l-32"></a>
-<a name="l-33"></a>        <span class="nv">$after</span> <span class="o">=</span> <span class="nv">$after_el</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">];</span>
-<a name="l-34"></a>        <span class="nv">$sortorder</span> <span class="o">=</span> <span class="nv">$after</span><span class="o">-&gt;</span><span class="na">get_sortorder</span><span class="p">();</span>
-<a name="l-35"></a>
-<a name="l-36"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$first</span><span class="p">)</span> <span class="p">{</span>
-<a name="l-37"></a>            <span class="nv">$parent</span> <span class="o">=</span> <span class="nv">$after</span><span class="o">-&gt;</span><span class="na">get_parent_category</span><span class="p">();</span>
-<a name="l-38"></a>            <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">set_parent</span><span class="p">(</span><span class="nv">$parent</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
-<a name="l-39"></a>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<a name="l-40"></a>            <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">set_parent</span><span class="p">(</span><span class="nv">$after</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
-<a name="l-41"></a>        <span class="p">}</span>
-<a name="l-42"></a>
-<a name="l-43"></a>        <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">move_after_sortorder</span><span class="p">(</span><span class="nv">$sortorder</span><span class="p">);</span>
+<a name="l-29"></a>        <span class="nv">$moveafter</span> <span class="o">=</span> <span class="s1">&#39;c&#39;</span><span class="o">.</span><span class="nv">$courseitem</span><span class="o">-&gt;</span><span class="na">iteminstance</span><span class="p">;</span>
+<a name="l-30"></a>
+<a name="l-31"></a>        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$after_el</span> <span class="o">=</span> <span class="nv">$gtree</span><span class="o">-&gt;</span><span class="na">locate_element</span><span class="p">(</span><span class="nv">$moveafter</span><span class="p">))</span> <span class="p">{</span>
+<a name="l-32"></a>            <span class="nx">\print_error</span><span class="p">(</span><span class="s1">&#39;invalidelementid&#39;</span><span class="p">);</span>
+<a name="l-33"></a>        <span class="p">}</span>
+<a name="l-34"></a>
+<a name="l-35"></a>        <span class="nv">$after</span> <span class="o">=</span> <span class="nv">$after_el</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">];</span>
+<a name="l-36"></a>        <span class="nv">$sortorder</span> <span class="o">=</span> <span class="nv">$after</span><span class="o">-&gt;</span><span class="na">get_sortorder</span><span class="p">();</span>
+<a name="l-37"></a>
+<a name="l-38"></a>        <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">set_parent</span><span class="p">(</span><span class="nv">$after</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">);</span>
+<a name="l-39"></a>
+<a name="l-40"></a>        <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">move_after_sortorder</span><span class="p">(</span><span class="nv">$sortorder</span><span class="p">);</span>
+<a name="l-41"></a>
+<a name="l-42"></a>    <span class="p">}</span>
+<a name="l-43"></a>
 <a name="l-44"></a>
-<a name="l-45"></a>    <span class="p">}</span>
-<a name="l-46"></a>
-<a name="l-47"></a>
-<a name="l-48"></a><span class="p">}</span>
+<a name="l-45"></a><span class="p">}</span>
 </pre></div>
 
 <p><code>sort_gradebook()</code> re-sorts the gradebook for the specified course after the grade items have been added, to place all of the grade items created by this plugin at the far left (and ideally in the correct order).  The complicated bits are achieved using the gradebook APIs included from <code>/grade/lib.php</code> and <code>/grade/edit/tree/lib.php</code>.</p>
