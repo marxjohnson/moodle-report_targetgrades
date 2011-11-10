@@ -41,6 +41,12 @@ These constants are used to define the scales used for each of the qualification
 
 This is the threshold used by quality checks to determine whether the correlation of a set of statistics is reliable enough to be used for calculations.  Below this number, the statistics will be flagged as having low correlation.  According the the ALIS equations PDF, a correlation of 0.6-0.7 is considered to be strong.
 
+#### Grade Items
+
+{{ d['lib.php|idio']['itemprefix'] }}
+
+This string is used to prefix the idnumber of each grade item generated during distribution.  It's then used by [sort_gradebook()](#sort_gradebook) to find the items for sorting.
+
 ### <a name="functions">Functions</a>
 {% for anchor, text in d['anchor-links']['libraries.html']['functions'].items() %} 
 * [{{ text }}](#{{ anchor }}) {% endfor %}

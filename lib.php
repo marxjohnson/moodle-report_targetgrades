@@ -76,7 +76,9 @@ const MTG_SCALE_IB = '1,2,3,4,5,6,7';
 const CORRELATION_THRESHOLD = 0.3;
 ### @end
 
+### @export "itemprefix"
 const GRADE_ITEM_PREFIX = 'targetgrades_';
+### @end
 
 /**
  * Returns the grade scale for the provided qualification type.
