@@ -41,6 +41,8 @@ require_login($SITE);
 admin_externalpage_setup('reporttargetgrades', null, null, '/'.$CFG->admin.'/report/targetgrades/alisdata.php');
 $PAGE->navbar->add(get_string('alisdata', 'report_targetgrades'));
 
+$renderer = $PAGE->get_renderer('report_targetgrades');
+
 $savepatterns = optional_param('savepatterns', false, PARAM_BOOL);
 $alispatterns = optional_param('alispatterns', array(), PARAM_CLEAN);
 $addpattern = optional_param('addpattern', array(), PARAM_CLEAN);
@@ -119,12 +121,11 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
 ### @export 'table_patternselector'
         if($patterns = $DB->get_records('report_targetgrades_patterns', array('alisdataid' => $alis->id))) {
             $break = 1;
-            
             foreach ($patterns as $pattern) {
                 $optionswithpattern = array_merge($options, array($pattern->pattern => $pattern->pattern));
                 asort($optionswithpattern);
                 $selectname = 'alispatterns['.$alis->id.']['.$pattern->id.']';
-                $form .= html_writer::select($optionswithpattern, $selectname, $pattern->pattern);
+                $form .= $renderer->datalist($optionswithpattern, $selectname, $pattern->pattern);
                 if((count($patterns) > 1 && $break < count($patterns)) || $addfield == $alis->id) {
                     $form .= html_writer::empty_tag('br');
                 }
@@ -132,11 +133,10 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
             }
 
             if ($addfield == $alis->id) {
-                $form .= html_writer::select($options, 'alispatterns['.$alis->id.'][]');
+                $form .= $renderer->datalist($options, 'alispatterns['.$alis->id.'][]');
             }
-            
         } else {
-            $form .= html_writer::select($options, 'alispatterns['.$alis->id.'][]');
+            $form .= $renderer->datalist($options, 'alispatterns['.$alis->id.'][]');
         }
 
         $attrs = array('type' => 'submit', 
@@ -213,6 +213,7 @@ if($alis_data = $DB->get_records_sql($select.$from.$order)) {
         $table->data[] = $row;
     }
 }
+$PAGE->requires->js_init_call('M.report_targetgrades.init_datalist');
 
 ### @export 'output'
 echo $OUTPUT->header();
