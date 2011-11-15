@@ -1052,6 +1052,9 @@ if (class_exists('\user_selector_base')) {
             global $DB;
             $config = get_config();
 
+            ### @export "dcs_find_users_categories"
+            list($insql, $inparams) = $DB->get_in_or_equal($config->categories);
+
             ### @export "dcs_find_users_fields"
             $select = 'SELECT DISTINCT c.id, c.shortname AS lastname,
                         "" AS firstname, c.fullname AS email, q.name AS qualtype, ';
@@ -1074,15 +1077,33 @@ if (class_exists('\user_selector_base')) {
                             LEFT JOIN {report_targetgrades_qualtype} q ON d.qualtypeid = q.id ';
             }
 
+            ### @export "dcs_find_users_regex"
+            if ($DB->sql_regex_supported()) {
+                $where = 'WHERE category '.$insql.' AND '.$config->exclude_field.' '.$DB->sql_regex(false).' ? ';
+                $params = array_merge($inparams, array($config->exclude_regex));
+            } else {
+                $courses = $DB->get_records_select('course', 'category '.$insql, $inparams);
+
+                \array_filter($courses, function($course, $config) {
+                    $field = $config->exclude_field;
+                    return !\preg_match('/'.$config->exclude_regex.'/', $course->$field);
+                });
+
+                list($insql, $inparams) = $DB->get_in_or_equal(array_keys($courses));
+                $where = 'WHERE id '.$insql.' ';
+                $params = $inparams;
+            }
+
             ### @export "dcs_find_users_items"
             $itemnames = array(get_string('item_avgcse', 'report_targetgrades'),
             get_string('item_alisnum', 'report_targetgrades'),
             get_string('item_alis', 'report_targetgrades'),
             get_string('item_mtg', 'report_targetgrades'));
-            list($in_sql, $in_params) = $DB->get_in_or_equal($itemnames);
+            list($itemsql, $itemparams) = $DB->get_in_or_equal($itemnames);
 
-            $where = 'WHERE itemname '.$in_sql;
-            $options = $DB->get_records_sql($select.$from.$where, $in_params);
+            $where .= 'AND itemname '.$itemsql;
+            $params = array_merge($params, $itemparams);
+            $options = $DB->get_records_sql($select.$from.$where, $params);
 
             ### @export "dcs_find_users_end"
             $options = hasconfig($options);
